@@ -1,0 +1,23 @@
+"use client";
+
+import React from "react";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import MembersTable from "@/components/Tables/MembersTable"; // Adjust the import path as needed
+
+const MembersTablePage: React.FC = () => {
+  return (
+    <DefaultLayout>
+      <div className="max-w-800 mx-auto px-4 py-8">
+        {/* Adjusted max-w to fit the table size */}
+        <Breadcrumb pageName="समिति तालिका" />
+        <div className="bg-white p-6 shadow sm:rounded-lg">
+          {/* Table component */}
+          <MembersTable />
+        </div>
+      </div>
+    </DefaultLayout>
+  );
+};
+
+export default MembersTablePage;

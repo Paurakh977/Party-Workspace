@@ -18,7 +18,7 @@ export class Members {
   @Column()
   memberName: string;
 
-  @Column()
+  @Column({ unique: true })
   mobileNumber: string;
 
   @Column({ nullable: true })
@@ -39,8 +39,20 @@ export class Members {
   @Column({ nullable: true })
   representative: string;
 
-  @Column({ nullable: true })
+  @Column({ default: 'अन्य', nullable: true })
   address: string;
+
+  @Column({ nullable: true })
+  province: string;
+
+  @Column({ nullable: true })
+  district: string;
+
+  @Column({ nullable: true })
+  municipality: string;
+
+  @Column({ nullable: true })
+  ward: string;
 
   @ManyToOne(() => Levels, (level) => level.members)
   @JoinColumn({ name: 'levelId' })

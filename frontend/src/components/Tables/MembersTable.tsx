@@ -47,6 +47,10 @@ interface Member {
   subCommitteeId?: number;
   positionId?: number;
   address: string;
+  province: string;
+  district: string;
+  municipality: string;
+  ward: string;
 }
 
 const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
@@ -176,7 +180,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     fetchData();
   }, []);
 
-  // Helper function to get the level membernames based on committee and sub-committee
+  // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
     committeeId: number,
     subCommitteeId: number | null,
@@ -194,9 +198,17 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     );
   };
 
-  // Helper function to get position membernames based on member's positionId
+  // Helper function to get position names based on member's positionId
   const getPositionNames = (positionId?: number): string => {
     return positionId ? positions[positionId] || "-" : "-";
+  };
+
+  // Helper function to format address
+  const formatAddress = (member: Member): string => {
+    const { municipality, ward, district, province, address } = member;
+    if (!address)
+      return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश`;
+    return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${address}`;
   };
 
   if (loading) return <p>Loading data...</p>;
@@ -206,94 +218,124 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const membersToDisplay = singleMember ? [singleMember] : members;
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        सदस्य तालिका
-      </h4>
-      <div className="flex flex-col">
-        <div className="grid grid-cols-8 rounded-sm bg-gray-2 dark:bg-meta-4">
-          {[
-            "क्रम संख्या",
-            "सदस्य नाम",
-            "मोबाइल नम्बर",
-            "ईमेल",
-            "समिति",
-            "उपसमिति",
-            "तह",
-            "पदिय जिम्मेवारी",
-            "ठेगाना",
-          ].map((header, idx) => (
-            <div key={idx} className="p-2.5 xl:p-5">
+    <div className="overflow-x-auto">
+      <div className="min-w-[1500px] rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+          सदस्य तालिका
+        </h4>
+        <div className="flex flex-col">
+          <div className="grid min-w-[1500px] grid-cols-9 whitespace-nowrap rounded-sm bg-gray-2 dark:bg-meta-4">
+            {/* Header Columns */}
+            <div className="w-16 p-2.5 xl:p-5">
               <h5 className="text-sm font-medium uppercase xsm:text-base">
-                {header}
+                क्रम संख्या
               </h5>
             </div>
-          ))}
-        </div>
-        {membersToDisplay.map((member, index) => {
-          const committee = committees.find(
-            (c) => c.committeeId === member.committeeId,
-          );
-          const subCommittee = member.subCommitteeId
-            ? subCommittees[member.committeeId]?.find(
-                (sub) => sub.subCommitteeId === member.subCommitteeId,
-              )
-            : null;
-
-          return (
-            <div
-              className={`grid grid-cols-8 ${
-                index === membersToDisplay.length - 1
-                  ? ""
-                  : "border-b border-stroke dark:border-strokedark"
-              }`}
-              key={member.memberId}
-            >
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{index + 1}</p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {member.memberName}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {member.mobileNumber}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{member.email}</p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {committee?.committeeName || "-"}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {subCommittee?.subCommitteeName || "-"}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {getLevelNames(
-                    member.committeeId,
-                    member.subCommitteeId || null,
-                  )}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {getPositionNames(member.positionId)}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{member.address}</p>
-              </div>
+            <div className="w-48 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                सदस्य नाम
+              </h5>
             </div>
-          );
-        })}
+            <div className="w-32 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                मोबाइल नम्बर
+              </h5>
+            </div>
+            <div className="w-64 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                ईमेल
+              </h5>
+            </div>
+            <div className="w-48 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                समिति
+              </h5>
+            </div>
+            <div className="w-48 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                उपसमिति
+              </h5>
+            </div>
+            <div className="w-32 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                तह
+              </h5>
+            </div>
+            <div className="w-64 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                पदिय जिम्मेवारी
+              </h5>
+            </div>
+            <div className="w-64 p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                ठेगाना
+              </h5>
+            </div>
+          </div>
+          {membersToDisplay.map((member, index) => {
+            const committee = committees.find(
+              (c) => c.committeeId === member.committeeId,
+            );
+            const subCommittee = member.subCommitteeId
+              ? subCommittees[member.committeeId]?.find(
+                  (sub) => sub.subCommitteeId === member.subCommitteeId,
+                )
+              : null;
+
+            return (
+              <div
+                className={`grid min-w-[1500px] grid-cols-9 ${
+                  index === membersToDisplay.length - 1
+                    ? ""
+                    : "border-b border-stroke dark:border-strokedark"
+                }`}
+                key={member.memberId}
+              >
+                <div className="w-16 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">{index + 1}</p>
+                </div>
+                <div className="w-48 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">
+                    {member.memberName}
+                  </p>
+                </div>
+                <div className="w-32 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">
+                    {member.mobileNumber || "-"}
+                  </p>
+                </div>
+                <div className="w-64 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">{member.email}</p>
+                </div>
+                <div className="w-48 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">
+                    {committee?.committeeName || "-"}
+                  </p>
+                </div>
+                <div className="w-48 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">
+                    {subCommittee?.subCommitteeName || "-"}
+                  </p>
+                </div>
+                <div className="w-32 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">
+                    {getLevelNames(member.committeeId, member.subCommitteeId)}
+                  </p>
+                </div>
+                <div className="w-64 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">
+                    {getPositionNames(member.positionId)}
+                  </p>
+                </div>
+                <div className="w-64 p-2.5 xl:p-5">
+                  <p className="text-black dark:text-white">
+                    {formatAddress(member)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

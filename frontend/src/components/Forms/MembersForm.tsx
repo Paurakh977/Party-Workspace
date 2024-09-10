@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
+import AddressInput from "../Address/address";
 
 // Define interfaces for the data types
 interface Committee {
@@ -44,7 +45,27 @@ const MembersForm: React.FC = () => {
   const [mobileNumber, setMobileNumber] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [representative, setRepresentative] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+
+  // New state for address
+  const [address, setAddress] = useState("");
+
+  const [province, setProvince] = useState<string>("");
+  const [district, setDistrict] = useState<string>("");
+  const [municipality, setMunicipality] = useState<string>("");
+  const [ward, setWard] = useState<string>("");
+
+  // Handle address changes from AddressInput component
+  const handleAddressChange = (newAddress: {
+    province: string;
+    district: string;
+    municipality: string;
+    ward: string;
+  }) => {
+    setProvince(newAddress.province);
+    setDistrict(newAddress.district);
+    setMunicipality(newAddress.municipality);
+    setWard(newAddress.ward);
+  };
 
   // Fetch committees data from API on component mount
   useEffect(() => {
@@ -95,9 +116,9 @@ const MembersForm: React.FC = () => {
           let endpoint = "";
 
           if (selectedSubCommittee) {
-            endpoint = `http://localhost:3000/sub-levels/sub-committee/${selectedSubCommittee}`;
+            endpoint = `http://localhost:3000/sub-level/sub-committee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = `http://localhost:3000/sub-levels/committee/${selectedCommittee}`;
+            endpoint = `http://localhost:3000/sub-level/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -105,7 +126,6 @@ const MembersForm: React.FC = () => {
             const levelIds = response.data.map((level) => level.levelId);
 
             if (levelIds.length > 0) {
-              // Fetch all levels and filter based on IDs
               const levelsResponse = await axios.get<Level[]>(
                 "http://localhost:3000/levels",
               );
@@ -158,7 +178,6 @@ const MembersForm: React.FC = () => {
             );
 
             if (positionIds.length > 0) {
-              // Fetch all positions and filter based on IDs
               const positionsPromises = positionIds.map((id) =>
                 axios.get<Position>(`http://localhost:3000/positions/${id}`),
               );
@@ -204,6 +223,10 @@ const MembersForm: React.FC = () => {
       positionId: selectedPosition !== "" ? selectedPosition : null,
       representative: representative || null,
       address: address || null,
+      province: province || null,
+      district: district || null,
+      municipality: municipality || null,
+      ward: ward || null,
     };
 
     try {
@@ -315,7 +338,7 @@ const MembersForm: React.FC = () => {
             />
           </div>
 
-          {/* Address Field */}
+          {/* Address Field (Updated AddressInput Component) */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
@@ -323,15 +346,7 @@ const MembersForm: React.FC = () => {
             >
               ठेगाना:
             </label>
-            <input
-              type="text"
-              id="address"
-              value={address}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setAddress(e.target.value)
-              }
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
-            />
+            <AddressInput onAddressChange={handleAddressChange} />
           </div>
 
           {/* Committee Dropdown */}

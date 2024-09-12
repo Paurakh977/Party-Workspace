@@ -1,5 +1,8 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent, use } from "react";
 import axios from "axios";
+import AddressInput from "../Address/address";
+import { NepaliDatePicker } from "nepali-datepicker-reactjs";
+import "nepali-datepicker-reactjs/dist/index.css";
 
 // Define interfaces for the data types
 interface Committee {
@@ -17,7 +20,12 @@ interface Level {
   levelName: string;
 }
 
-const MembersForm: React.FC = () => {
+interface Position {
+  positionId: number;
+  positionName: string;
+}
+
+const EventsForm: React.FC = () => {
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [subCommittees, setSubCommittees] = useState<SubCommittee[]>([]);
   const [levels, setLevels] = useState<Level[]>([]);
@@ -33,7 +41,41 @@ const MembersForm: React.FC = () => {
 
   // New state variables for the additional fields
   const [eventName, setEventName] = useState<string>("");
-  const [eventDate, setEventDate] = useState<string>("");
+
+  // New state for address
+  const [address, setAddress] = useState("");
+
+  const [province, setProvince] = useState<string>("");
+  const [district, setDistrict] = useState<string>("");
+  const [municipality, setMunicipality] = useState<string>("");
+  const [ward, setWard] = useState<string>("");
+
+  const [venue, setVenue] = useState<string>("");
+  const [eventStartDate, setEventStartDate] = useState<string>("");
+  const [eventEndDate, setEventEndDate] = useState<string>("");
+  const [eventType, setEventType] = useState<string>("");
+
+  const [remarks, setRemarks] = useState<string>("");
+
+  const handleStartDateChange = (value: string) => {
+    setEventStartDate(value);
+  };
+
+  const handleEndDateChange = (value: string) => {
+    setEventEndDate(value);
+  };
+  // Handle address changes from AddressInput component
+  const handleAddressChange = (newAddress: {
+    province: string;
+    district: string;
+    municipality: string;
+    ward: string;
+  }) => {
+    setProvince(newAddress.province);
+    setDistrict(newAddress.district);
+    setMunicipality(newAddress.municipality);
+    setWard(newAddress.ward);
+  };
 
   // Fetch committees data from API on component mount
   useEffect(() => {
@@ -84,9 +126,9 @@ const MembersForm: React.FC = () => {
           let endpoint = "";
 
           if (selectedSubCommittee) {
-            endpoint = `http://localhost:3000/sub-levels/sub-committee/${selectedSubCommittee}`;
+            endpoint = `http://localhost:3000/sub-level/sub-committee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = `http://localhost:3000/sub-levels/committee/${selectedCommittee}`;
+            endpoint = `http://localhost:3000/sub-level/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -94,7 +136,6 @@ const MembersForm: React.FC = () => {
             const levelIds = response.data.map((level) => level.levelId);
 
             if (levelIds.length > 0) {
-              // Fetch all levels and filter based on IDs
               const levelsResponse = await axios.get<Level[]>(
                 "http://localhost:3000/levels",
               );
@@ -126,180 +167,129 @@ const MembersForm: React.FC = () => {
     fetchLevels();
   }, [selectedCommittee, selectedSubCommittee]);
 
-  // Fetch positions based on selected committee or sub-committee
-  useEffect(() => {
-    const fetchPositions = async () => {
-      if (selectedCommittee || selectedSubCommittee) {
-        try {
-          let endpoint = "";
-
-          if (selectedSubCommittee) {
-            endpoint = `http://localhost:3000/structures/subcommittee/${selectedSubCommittee}`;
-          } else if (selectedCommittee) {
-            endpoint = `http://localhost:3000/structures/committee/${selectedCommittee}`;
-          }
-
-          if (endpoint) {
-            const response =
-              await axios.get<{ positionId: number }[]>(endpoint);
-            const positionIds = response.data.map(
-              (position) => position.positionId,
-            );
-
-            if (positionIds.length > 0) {
-              // Fetch all positions and filter based on IDs
-              const positionsPromises = positionIds.map((id) =>
-                axios.get<Position>(`http://localhost:3000/positions/${id}`),
-              );
-              const positionsResponses = await Promise.all(positionsPromises);
-              const filteredPositions = positionsResponses.map(
-                (res) => res.data,
-              );
-
-              setPositions(filteredPositions);
-              setIsPositionDisabled(filteredPositions.length === 0); // Disable dropdown if no positions
-            } else {
-              setPositions([]);
-              setIsPositionDisabled(true); // Disable if no positions
-            }
-          } else {
-            setPositions([]);
-            setIsPositionDisabled(true); // Disable if no endpoint
-          }
-        } catch (error) {
-          console.error("Error fetching positions:", error);
-          setPositions([]);
-          setIsPositionDisabled(true); // Disable on error
-        }
-      } else {
-        setPositions([]);
-        setIsPositionDisabled(true); // Disable if no committee or sub-committee selected
-      }
-    };
-
-    fetchPositions();
-  }, [selectedCommittee, selectedSubCommittee]);
-
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     const payload = {
-      memberName,
-      mobileNumber,
-      email: email || null,
+      eventName,
+      eventStartDate, // Add event start date
+      eventEndDate, // Add event end date
+      eventType, // Add event type
+      address: address || "अन्य", // Default to 'अन्य' if not provided
+      province: province || null,
+      district: district || null,
+      municipality: municipality || null,
+      ward: ward || null,
+      venue: venue || null, // Add venue if applicable
       committeeId: selectedCommittee !== "" ? selectedCommittee : null,
       subCommitteeId: selectedSubCommittee !== "" ? selectedSubCommittee : null,
       levelId: selectedLevel !== "" ? selectedLevel : null,
-      positionId: selectedPosition !== "" ? selectedPosition : null,
-      representative: representative || null,
-      address: address || null,
+      remarks: remarks || null,
     };
 
     try {
-      await axios.post("http://localhost:3000/members", payload);
+      await axios.post("http://localhost:3000/events", payload);
       console.log("Form submitted successfully");
 
       // Reset form state
-      setMemberName("");
-      setMobileNumber("");
-      setEmail("");
-      setRepresentative("");
-      setAddress("");
+      setEventName("");
+      setEventStartDate("");
+      setEventEndDate("");
+      setEventType("");
+      setAddress("अन्य"); // Reset to default value
+      setProvince("");
+      setDistrict("");
+      setMunicipality("");
+      setWard("");
+      setVenue("");
       setSelectedCommittee("");
       setSelectedSubCommittee("");
       setSelectedLevel("");
-      setSelectedPosition("");
       setSubCommittees([]);
       setLevels([]);
-      setPositions([]);
+      setRemarks("");
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+    <div className="w-fit rounded-sm border border-stroke bg-rose-100 shadow dark:border-strokedark dark:bg-boxdark sm:rounded-lg">
+      <div className="border-b border-stroke bg-rose-200 px-7 py-4 dark:border-strokedark sm:rounded-lg">
         <h3 className="font-medium text-black dark:text-white">
-          सदस्यहरु चयन फारम
+          कार्यक्रम विवरण प्रविष्टि फारम
         </h3>
       </div>
       <div className="p-7">
         <form onSubmit={handleSubmit}>
-          {/* Name Field */}
+          {/* Event Name Field */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
-              htmlFor="memberName"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="eventName"
             >
-              नाम:
+              कार्यक्रमको नाम:
             </label>
             <input
               type="text"
-              id="memberName"
-              value={memberName}
+              id="eventName"
+              value={eventName}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setMemberName(e.target.value)
+                setEventName(e.target.value)
               }
               required
               className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             />
           </div>
 
-          {/* Phone Field */}
+          {/* Event Start Date Field */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
-              htmlFor="mobileNumber"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="eventStartDate"
             >
-              फोन नम्बर:
+              कार्यक्रमको प्रारम्भ मिति:
             </label>
-            <input
-              type="tel"
-              id="mobileNumber"
-              value={mobileNumber}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setMobileNumber(e.target.value)
-              }
-              required
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+            <NepaliDatePicker
+              inputClassName="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              value={eventStartDate}
+              onChange={handleStartDateChange}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
             />
           </div>
 
-          {/* Email Field */}
+          {/* Event End Date Field */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
-              htmlFor="email"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="eventEndDate"
             >
-              इमेल:
+              कार्यक्रमको समाप्ति मिति:
             </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+            <NepaliDatePicker
+              inputClassName="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              value={eventEndDate}
+              onChange={handleEndDateChange}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
             />
           </div>
 
-          {/* Representative Field */}
+          {/* Event Type Field */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
-              htmlFor="representative"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="eventType"
             >
-              प्रतिनिधि:
+              कार्यक्रमको प्रकार:
             </label>
             <input
               type="text"
-              id="representative"
-              value={representative}
+              id="eventType"
+              value={eventType}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setRepresentative(e.target.value)
+                setEventType(e.target.value)
               }
+              required
               className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             />
           </div>
@@ -307,17 +297,28 @@ const MembersForm: React.FC = () => {
           {/* Address Field */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
               htmlFor="address"
             >
               ठेगाना:
             </label>
+            <AddressInput onAddressChange={handleAddressChange} />
+          </div>
+
+          {/* Venue Field */}
+          <div className="mb-5.5">
+            <label
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="venue"
+            >
+              कार्यक्रम स्थल:
+            </label>
             <input
               type="text"
-              id="address"
-              value={address}
+              id="venue"
+              value={venue}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setAddress(e.target.value)
+                setVenue(e.target.value)
               }
               className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             />
@@ -326,7 +327,7 @@ const MembersForm: React.FC = () => {
           {/* Committee Dropdown */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
               htmlFor="committee"
             >
               समिति:
@@ -355,7 +356,7 @@ const MembersForm: React.FC = () => {
           {/* Sub-Committee Dropdown */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
               htmlFor="subCommittee"
             >
               उपसमिति:
@@ -381,10 +382,10 @@ const MembersForm: React.FC = () => {
             </select>
           </div>
 
-          {/* Levels Dropdown */}
+          {/* Level Dropdown */}
           <div className="mb-5.5">
             <label
-              className="mb-3 block text-sm font-medium text-black dark:text-white"
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
               htmlFor="level"
             >
               स्तर:
@@ -406,53 +407,37 @@ const MembersForm: React.FC = () => {
               ))}
             </select>
           </div>
-
-          {/* Positions Checkboxes */}
+          {/* Remarks Field */}
           <div className="mb-5.5">
-            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-              स्थिति:
+            <label
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="representative"
+            >
+              कैफियत:
             </label>
-            <div className="space-y-2">
-              {positions.map((position) => (
-                <div key={position.positionId} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`position-${position.positionId}`}
-                    value={position.positionId}
-                    checked={selectedPosition === position.positionId}
-                    onChange={() =>
-                      setSelectedPosition((prev) =>
-                        prev === position.positionId ? "" : position.positionId,
-                      )
-                    }
-                    disabled={isPositionDisabled}
-                    className="mr-2"
-                  />
-                  <label
-                    htmlFor={`position-${position.positionId}`}
-                    className="text-sm text-black dark:text-white"
-                  >
-                    {position.positionName}
-                  </label>
-                </div>
-              ))}
-            </div>
+            <input
+              type="text"
+              id="remarks"
+              value={remarks}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setRemarks(e.target.value)
+              }
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              placeholder="कैफियत उल्लेख गर्नुहोस्"
+            />
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
-            <button
-              type="submit"
-              disabled={isFormDisabled}
-              className="rounded bg-primary px-4 py-2 text-white"
-            >
-              सबमिट
-            </button>
-          </div>
+          {/* Save Button */}
+          <button
+            type="submit"
+            className="inline-flex items-center rounded bg-primary px-5 py-2 text-base font-medium text-white transition hover:bg-opacity-90"
+          >
+            सुरक्षित गर्नुहोस्
+          </button>
         </form>
       </div>
     </div>
   );
 };
 
-export default MembersForm;
+export default EventsForm;

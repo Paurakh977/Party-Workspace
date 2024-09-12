@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Members } from 'src/members/members.entity';
+import { Events } from 'src/events/events.entity';
 
 @Entity()
 export class Levels {
@@ -19,4 +20,7 @@ export class Levels {
 
   @OneToMany(() => Members, (members) => members.level)
   members: Members;
+
+  @OneToMany(() => Events, (events) => events.level)
+  events: Events;
 }

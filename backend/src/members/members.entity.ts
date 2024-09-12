@@ -54,6 +54,9 @@ export class Members {
   @Column({ nullable: true })
   ward: string;
 
+  @Column({ nullable: true })
+  remarks: string;
+
   @ManyToOne(() => Levels, (level) => level.members)
   @JoinColumn({ name: 'levelId' })
   level: Levels;

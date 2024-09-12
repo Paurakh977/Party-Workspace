@@ -54,6 +54,8 @@ const MembersForm: React.FC = () => {
   const [municipality, setMunicipality] = useState<string>("");
   const [ward, setWard] = useState<string>("");
 
+  const [remarks, setRemarks] = useState<string>("");
+
   // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
     province: string;
@@ -227,6 +229,7 @@ const MembersForm: React.FC = () => {
       district: district || null,
       municipality: municipality || null,
       ward: ward || null,
+      remarks: remarks || null,
     };
 
     try {
@@ -246,14 +249,15 @@ const MembersForm: React.FC = () => {
       setSubCommittees([]);
       setLevels([]);
       setPositions([]);
+      setRemarks("");
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+    <div className="w-fit rounded-sm border border-stroke  bg-rose-100 shadow dark:border-strokedark dark:bg-boxdark sm:rounded-lg">
+      <div className="border-b border-stroke bg-rose-200 px-7 py-4 shadow dark:border-strokedark sm:rounded-lg">
         <h3 className="font-medium text-black dark:text-white">
           सदस्यहरु चयन फारम
         </h3>
@@ -276,7 +280,7 @@ const MembersForm: React.FC = () => {
                 setMemberName(e.target.value)
               }
               required
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             />
           </div>
 
@@ -286,7 +290,7 @@ const MembersForm: React.FC = () => {
               className="mb-3 block text-sm font-medium text-black dark:text-white"
               htmlFor="mobileNumber"
             >
-              फोन नम्बर:
+              मोबाइल नम्बर:
             </label>
             <input
               type="tel"
@@ -296,7 +300,7 @@ const MembersForm: React.FC = () => {
                 setMobileNumber(e.target.value)
               }
               required
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             />
           </div>
 
@@ -315,7 +319,7 @@ const MembersForm: React.FC = () => {
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setEmail(e.target.value)
               }
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             />
           </div>
 
@@ -334,7 +338,7 @@ const MembersForm: React.FC = () => {
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setRepresentative(e.target.value)
               }
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             />
           </div>
 
@@ -364,7 +368,7 @@ const MembersForm: React.FC = () => {
                 setSelectedCommittee(Number(e.target.value))
               }
               disabled={isFormDisabled}
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             >
               <option value="">-- चयन गर्नुहोस् --</option>
               {committees.map((committee) => (
@@ -393,7 +397,7 @@ const MembersForm: React.FC = () => {
                 setSelectedSubCommittee(Number(e.target.value))
               }
               disabled={isSubCommitteeDisabled}
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             >
               <option value="">-- चयन गर्नुहोस् --</option>
               {subCommittees.map((subCommittee) => (
@@ -422,7 +426,7 @@ const MembersForm: React.FC = () => {
                 setSelectedLevel(Number(e.target.value))
               }
               disabled={isLevelDisabled}
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
             >
               <option value="">-- चयन गर्नुहोस् --</option>
               {levels.map((level) => (
@@ -463,6 +467,25 @@ const MembersForm: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+          {/* Remarks Field */}
+          <div className="mb-5.5">
+            <label
+              className="mb-3 block text-sm font-medium text-black dark:text-white"
+              htmlFor="representative"
+            >
+              कैफियत:
+            </label>
+            <input
+              type="text"
+              id="remarks"
+              value={remarks}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setRemarks(e.target.value)
+              }
+              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              placeholder="कैफियत उल्लेख गर्नुहोस्"
+            />
           </div>
 
           {/* Submit Button */}

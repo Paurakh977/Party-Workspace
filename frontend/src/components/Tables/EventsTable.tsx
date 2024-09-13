@@ -2,96 +2,36 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
-interface Committee {
-  committeeId: number;
-  committeeName: string;
-}
-
-interface SubCommittee {
-  subCommitteeId: number;
-  subCommitteeName: string;
-  committeeId: number;
-}
-
-interface Level {
-  levelId: number;
-  levelName: string;
-}
+import { useRouter } from "next/navigation";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 interface Event {
   eventId: number;
-  eventName: string;
-  eventStartDate: string;
-  eventEndDate: string;
-  eventType: string;
+  eventHeading: string;
+  eventDetails: string;
+  eventDate: string;
+  eventTime: string;
   address: string;
   province?: string;
   district?: string;
   municipality?: string;
   ward?: string;
   venue?: string;
-  committeeId: number;
-  subCommitteeId?: number;
-  levelId?: number;
+  eventOrganizer: string;
   remarks: string;
 }
 
-interface Position {
-  positionId: number;
-  positionName: string;
-}
-
 const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
-  const [committees, setCommittees] = useState<Committee[]>([]);
-  const [subCommittees, setSubCommittees] = useState<
-    Record<number, SubCommittee[]>
-  >({});
-  const [levels, setLevels] = useState<Record<number, string>>({});
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Fetch committees
-        const committeesResponse = await axios.get<Committee[]>(
-          "http://localhost:3000/committees",
-        );
-        setCommittees(committeesResponse.data);
-
-        // Fetch levels data
-        const levelsResponse = await axios.get<Level[]>(
-          "http://localhost:3000/levels",
-        );
-        const levelsData = levelsResponse.data.reduce(
-          (acc, level) => ({ ...acc, [level.levelId]: level.levelName }),
-          {} as Record<number, string>,
-        );
-        setLevels(levelsData);
-
-        // Fetch sub-committees for each committee
-        const subCommitteesData = await Promise.all(
-          committeesResponse.data.map(async (committee) => {
-            try {
-              const subResponse = await axios.get<SubCommittee[]>(
-                `http://localhost:3000/sub-committees/committee/${committee.committeeId}`,
-              );
-              return { [committee.committeeId]: subResponse.data };
-            } catch {
-              return { [committee.committeeId]: [] };
-            }
-          }),
-        );
-        const mergedSubCommittees = subCommitteesData.reduce(
-          (acc, curr) => ({ ...acc, ...curr }),
-          {} as Record<number, SubCommittee[]>,
-        );
-        setSubCommittees(mergedSubCommittees);
 
         // Fetch events data
         const eventsResponse = await axios.get<Event[]>(
@@ -116,6 +56,22 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
     return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${address}`;
   };
 
+  const handleDeleteEvent = async (eventId: number) => {
+    try {
+      await axios.delete(`http://localhost:3000/events/${eventId}`);
+      setEvents((prevEvents) =>
+        prevEvents.filter((event) => event.eventId !== eventId),
+      );
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
+  const handleUpdateEvent = (eventId: number) => {
+    console.log("Updating member with ID:", eventId);
+    router.push(`/forms/updateEventsForm/${eventId}`);
+  };
+
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -135,16 +91,16 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
                 क्रम संख्या
               </th>
               <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                कार्यक्रम नाम
+                कार्यक्रमको शिर्षक
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                सुरु मिति
+                कार्यक्रमको विवरण
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                अन्त्य मिति
+                कार्यक्रमको मिति
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                कार्यक्रम प्रकार
+                कार्यक्रमको समय
               </th>
               <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
                 ठेगाना
@@ -152,32 +108,20 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
                 स्थान
               </th>
-              <th className="border-gray-700 w-25 border-2 px-4 py-2 font-bold text-black">
-                समिति
-              </th>
               <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
-                उपसमिति
-              </th>
-              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
-                तह
+                कार्यक्रमको आयोजक
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
                 कैफियत
+              </th>
+              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
+                सुधार
               </th>
             </tr>
           </thead>
 
           <tbody>
             {eventsToDisplay.map((event, index) => {
-              const committee = committees.find(
-                (c) => c.committeeId === event.committeeId,
-              );
-              const subCommittee = event.subCommitteeId
-                ? subCommittees[event.committeeId]?.find(
-                    (sub) => sub.subCommitteeId === event.subCommitteeId,
-                  )
-                : null;
-
               return (
                 <tr
                   key={event.eventId}
@@ -191,16 +135,16 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
                     {index + 1}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {event.eventName}
+                    {event.eventHeading}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {event.eventStartDate}
+                    {event.eventDetails}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {event.eventEndDate}
+                    {event.eventDate}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {event.eventType}
+                    {event.eventTime}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
                     {formatAddress(event)}
@@ -209,16 +153,24 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
                     {event.venue || "-"}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {committee?.committeeName || "-"}
-                  </td>
-                  <td className="border-2 px-4 py-2 text-center text-black">
-                    {subCommittee?.subCommitteeName || "-"}
-                  </td>
-                  <td className="border-2 px-4 py-2 text-center text-black">
-                    {levels[event.levelId || 0] || "-"}
+                    {event.eventOrganizer}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
                     {event.remarks}
+                  </td>
+                  <td className="border-gray-700 border-2 px-4 py-2 text-center">
+                    <button
+                      onClick={() => handleUpdateEvent(event.eventId)}
+                      className="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteEvent(event.eventId)}
+                      className="mr-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
+                    >
+                      <FaTrash />
+                    </button>
                   </td>
                 </tr>
               );

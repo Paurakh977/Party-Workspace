@@ -20,7 +20,4 @@ export class Levels {
 
   @OneToMany(() => Members, (members) => members.level)
   members: Members;
-
-  @OneToMany(() => Events, (events) => events.level)
-  events: Events;
 }

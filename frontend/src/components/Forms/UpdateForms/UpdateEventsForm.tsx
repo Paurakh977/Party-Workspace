@@ -1,27 +1,49 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent, use } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import AddressInput from "../Address/address";
+import AddressInput from "@/components/Address/address";
 import { NepaliDatePicker } from "nepali-datepicker-reactjs";
 import "nepali-datepicker-reactjs/dist/index.css";
 import { useRouter } from "next/navigation";
 
-const EventsForm: React.FC = () => {
+interface UpdateEventsFormProps {
+  eventId: number;
+}
+
+interface Event {
+  eventId: number;
+  eventHeading: string;
+  eventDetails: string;
+  eventDate: string;
+  eventTime: string;
+  address: string;
+  province?: string;
+  district?: string;
+  municipality?: string;
+  ward?: string;
+  venue?: string;
+  eventOrganizer: string;
+  remarks: string;
+}
+
+const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
   const router = useRouter();
-  // New state variables for the additional fields
+  const [event, setEvent] = useState<Event | null>(null);
+
+  // State for form fields
   const [eventHeading, setEventHeading] = useState<string>("");
   const [eventDetails, setEventDetails] = useState<string>("");
   const [eventDate, setEventDate] = useState<string>("");
   const [eventTime, setEventTime] = useState<string>("");
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState<string>("");
   const [province, setProvince] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
   const [municipality, setMunicipality] = useState<string>("");
   const [ward, setWard] = useState<string>("");
   const [venue, setVenue] = useState<string>("");
   const [eventOrganizer, setEventOrganizer] = useState<string>("");
-
   const [remarks, setRemarks] = useState<string>("");
 
+  // Handle date change from the Nepali Date Picker
   const handleDateChange = (value: string) => {
     setEventDate(value);
   };
@@ -39,6 +61,39 @@ const EventsForm: React.FC = () => {
     setWard(newAddress.ward);
   };
 
+  // Fetch the event data when the component mounts or when the eventId changes
+  useEffect(() => {
+    if (eventId) {
+      const fetchEvent = async () => {
+        try {
+          const response = await axios.get<Event>(
+            `http://localhost:3000/events/${eventId}`,
+          );
+          const eventData = response.data;
+          setEvent(eventData);
+
+          // Set all the state variables with fetched data
+          setEventHeading(eventData.eventHeading || "");
+          setEventDetails(eventData.eventDetails || "");
+          setEventDate(eventData.eventDate || "");
+          setEventTime(eventData.eventTime || "");
+          setAddress(eventData.address || "");
+          setProvince(eventData.province || "");
+          setDistrict(eventData.district || "");
+          setMunicipality(eventData.municipality || "");
+          setWard(eventData.ward || "");
+          setVenue(eventData.venue || "");
+          setEventOrganizer(eventData.eventOrganizer || "");
+          setRemarks(eventData.remarks || "");
+        } catch (error) {
+          console.error("Error fetching event:", error);
+        }
+      };
+      fetchEvent();
+    }
+  }, [eventId]);
+
+  // Handle form submission
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -47,7 +102,7 @@ const EventsForm: React.FC = () => {
       eventDetails,
       eventDate,
       eventTime,
-      address: address || "अन्य", // Default to 'अन्य' if not provided
+      address: address || "अन्य",
       province: province || null,
       district: district || null,
       municipality: municipality || null,
@@ -58,9 +113,8 @@ const EventsForm: React.FC = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/events", payload);
+      await axios.put(`http://localhost:3000/events/${eventId}`, payload);
       console.log("Form submitted successfully");
-
       router.push("/events/list");
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -68,8 +122,8 @@ const EventsForm: React.FC = () => {
   };
 
   return (
-    <div className="w-fit rounded border  bg-rose-100 shadow dark:bg-boxdark">
-      <div className="rounded border-b bg-rose-200 px-7 py-4">
+    <div className="w-fit rounded border  bg-rose-100 shadow  dark:bg-boxdark ">
+      <div className="rounded border-b bg-rose-200 px-7 py-4  shadow">
         <h3 className="font-medium text-black dark:text-white">
           कार्यक्रम विवरण प्रविष्टि फारम
         </h3>
@@ -88,11 +142,9 @@ const EventsForm: React.FC = () => {
               type="text"
               id="eventHeading"
               value={eventHeading}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEventHeading(e.target.value)
-              }
+              onChange={(e) => setEventHeading(e.target.value)}
               required
-              className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none  dark:bg-meta-4 dark:text-white"
             />
           </div>
 
@@ -108,11 +160,9 @@ const EventsForm: React.FC = () => {
               type="text"
               id="eventDetails"
               value={eventDetails}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEventDetails(e.target.value)
-              }
+              onChange={(e) => setEventDetails(e.target.value)}
               required
-              className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white"
             />
           </div>
 
@@ -125,7 +175,7 @@ const EventsForm: React.FC = () => {
               कार्यक्रमको मिति:
             </label>
             <NepaliDatePicker
-              inputClassName="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white shadow"
+              inputClassName="bg-gray-50 w-full rounded border shadow px-4.5 py-3 text-black focus:border-primary focus:outline-none  dark:bg-meta-4 dark:text-white"
               value={eventDate}
               onChange={handleDateChange}
               options={{ calenderLocale: "ne", valueLocale: "en" }}
@@ -144,7 +194,7 @@ const EventsForm: React.FC = () => {
               type="time"
               id="eventTime"
               name="eventTime"
-              className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
               value={eventTime}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setEventTime(e.target.value)
@@ -160,7 +210,15 @@ const EventsForm: React.FC = () => {
             >
               ठेगाना:
             </label>
-            <AddressInput onAddressChange={handleAddressChange} />
+            {event && (
+              <AddressInput
+                initialProvince={event.province}
+                initialDistrict={event.district}
+                initialMunicipality={event.municipality}
+                initialWard={event.ward}
+                onAddressChange={handleAddressChange}
+              />
+            )}
           </div>
 
           {/* Venue Field */}
@@ -178,24 +236,26 @@ const EventsForm: React.FC = () => {
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setVenue(e.target.value)
               }
-              className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
+              className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white"
             />
           </div>
 
-          {/* Remarks Field */}
+          {/* Event Organizer Field */}
           <div className="mb-5.5">
             <label
               className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
               htmlFor="eventOrganizer"
             >
-              कार्यक्रम आयोजक:
+              कार्यक्रमको आयोजक संस्था:
             </label>
-            <textarea
+            <input
+              type="text"
               id="eventOrganizer"
               value={eventOrganizer}
-              onChange={(e) => setEventOrganizer(e.target.value)}
-              className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
-              placeholder="कार्यक्रमको आयोजकउल्लेख गर्नुहोस्"
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setEventOrganizer(e.target.value)
+              }
+              className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none  dark:bg-meta-4 dark:text-white"
             />
           </div>
 
@@ -203,30 +263,34 @@ const EventsForm: React.FC = () => {
           <div className="mb-5.5">
             <label
               className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
-              htmlFor="representative"
+              htmlFor="remarks"
             >
               कैफियत:
             </label>
-            <textarea
+            <input
+              type="text"
               id="remarks"
               value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white"
-              placeholder="कैफियत उल्लेख गर्नुहोस्"
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setRemarks(e.target.value)
+              }
+              className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none  dark:bg-meta-4 dark:text-white"
             />
           </div>
 
-          {/* Save Button */}
-          <button
-            type="submit"
-            className="inline-flex items-center rounded border bg-primary px-5 py-2 text-base font-medium text-white transition hover:bg-opacity-90"
-          >
-            सुरक्षित गर्नुहोस्
-          </button>
+          {/* Submit Button */}
+          <div className="flex justify-end gap-4.5">
+            <button
+              type="submit"
+              className="inline-flex items-center rounded border bg-primary px-5 py-2 text-base font-medium text-white transition hover:bg-opacity-90"
+            >
+              अपडेट गर्नुहोस्
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
 
-export default EventsForm;
+export default UpdateEventsForm;

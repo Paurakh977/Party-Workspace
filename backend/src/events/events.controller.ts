@@ -30,8 +30,11 @@ export class EventsController {
   }
 
   @Put(':eventId')
-  update(@Param('eventId') eventId: number, @Body() event: Events) {
-    return this.eventsService.update(event);
+  update(
+    @Param('eventId') eventId: number,
+    @Body() updateData: Partial<Events>,
+  ) {
+    return this.eventsService.update(eventId, updateData);
   }
 
   @Delete(':eventId')

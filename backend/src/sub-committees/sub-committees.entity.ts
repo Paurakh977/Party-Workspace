@@ -30,7 +30,4 @@ export class SubCommittees {
 
   @ManyToOne(() => Members, (members) => members.subCommittee)
   members: Members;
-
-  @OneToMany(() => Events, (events) => events.subCommittee)
-  events: Events;
 }

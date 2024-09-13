@@ -20,9 +20,4 @@ export class Committees {
     onDelete: 'CASCADE',
   })
   members: Members[];
-
-  @OneToMany(() => Events, (events) => events.committee, {
-    onDelete: 'CASCADE',
-  })
-  events: Events[];
 }

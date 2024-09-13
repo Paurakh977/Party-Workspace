@@ -15,16 +15,16 @@ export class Events {
   eventId: number;
 
   @Column()
-  eventName: string;
+  eventHeading: string;
 
   @Column()
-  eventStartDate: string;
+  eventDetails: string;
 
   @Column()
-  eventEndDate: string;
+  eventDate: string;
 
   @Column()
-  eventType: string;
+  eventTime: string;
 
   @Column({ default: 'अन्य', nullable: true })
   address: string;
@@ -45,26 +45,8 @@ export class Events {
   venue: string;
 
   @Column()
-  committeeId: number;
-
-  @Column({ nullable: true })
-  subCommitteeId: number;
-
-  @Column({ nullable: true })
-  levelId: number;
+  eventOrganizer: string;
 
   @Column({ nullable: true })
   remarks: string;
-
-  @ManyToOne(() => Committees, (committee) => committee.events)
-  @JoinColumn({ name: 'committeeId' })
-  committee: Committees;
-
-  @ManyToOne(() => SubCommittees, (subCommittee) => subCommittee.events)
-  @JoinColumn({ name: 'subCommitteeId' })
-  subCommittee: SubCommittees;
-
-  @ManyToOne(() => Levels, (level) => level.members)
-  @JoinColumn({ name: 'levelId' })
-  level: Levels;
 }

@@ -1,8 +1,12 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import AddressInput from "../Address/address";
+import AddressInput from "@/components/Address/address";
+import { useRouter } from "next/navigation";
 
-// Define interfaces for the data types
+interface UpdateMembersFormProps {
+  memberId: number;
+}
+
 interface Committee {
   committeeId: number;
   committeeName: string;
@@ -23,31 +27,37 @@ interface Position {
   positionName: string;
 }
 
-const MembersForm: React.FC = () => {
+interface Member {
+  memberId: number;
+  memberName: string;
+  mobileNumber: string;
+  email: string;
+  committeeId: number | null;
+  subCommitteeId: number | null;
+  levelId: number | null;
+  positionId: number | null;
+  address: string;
+  province: string;
+  district: string;
+  municipality: string;
+  ward: string;
+  remarks: string;
+}
+
+const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
+  const router = useRouter();
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [subCommittees, setSubCommittees] = useState<SubCommittee[]>([]);
   const [levels, setLevels] = useState<Level[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
+  const [member, setMember] = useState<Member | null>(null);
+
   const [selectedCommittee, setSelectedCommittee] = useState<number | "">("");
   const [selectedSubCommittee, setSelectedSubCommittee] = useState<number | "">(
     "",
   );
   const [selectedLevel, setSelectedLevel] = useState<number | "">("");
   const [selectedPosition, setSelectedPosition] = useState<number | "">("");
-  const [isFormDisabled, setIsFormDisabled] = useState<boolean>(true);
-  const [isSubCommitteeDisabled, setIsSubCommitteeDisabled] =
-    useState<boolean>(true);
-  const [isLevelDisabled, setIsLevelDisabled] = useState<boolean>(true);
-  const [isPositionDisabled, setIsPositionDisabled] = useState<boolean>(true);
-
-  // New state variables for the additional fields
-  const [memberName, setMemberName] = useState<string>("");
-  const [mobileNumber, setMobileNumber] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [representative, setRepresentative] = useState<string>("");
-
-  // New state for address
-  const [address, setAddress] = useState("");
 
   const [province, setProvince] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
@@ -56,38 +66,68 @@ const MembersForm: React.FC = () => {
 
   const [remarks, setRemarks] = useState<string>("");
 
-  // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
     province: string;
     district: string;
     municipality: string;
     ward: string;
   }) => {
+    console.log("Address change detected:", newAddress);
     setProvince(newAddress.province);
     setDistrict(newAddress.district);
     setMunicipality(newAddress.municipality);
     setWard(newAddress.ward);
   };
 
-  // Fetch committees data from API on component mount
+  // Fetch committees
   useEffect(() => {
     const fetchCommittees = async () => {
       try {
         const response = await axios.get<Committee[]>(
           "http://localhost:3000/committees",
         );
+        console.log("Fetched committees:", response.data);
         setCommittees(response.data);
-        setIsFormDisabled(response.data.length === 0); // Disable form if no committees
+        console.log("memberId:", memberId);
       } catch (error) {
         console.error("Error fetching committees:", error);
-        setIsFormDisabled(true); // Disable form on error
       }
     };
-
     fetchCommittees();
   }, []);
 
-  // Fetch sub-committees data when a committee is selected
+  // Fetch member data by memberId
+  useEffect(() => {
+    console.log(memberId);
+    if (memberId) {
+      const fetchMember = async () => {
+        try {
+          const response = await axios.get<Member>(
+            `http://localhost:3000/members/${memberId}`,
+          );
+          const memberData = response.data;
+          console.log("Fetched member:", memberData);
+          setMember(memberData);
+
+          setSelectedCommittee(memberData.committeeId || "");
+          setSelectedSubCommittee(memberData.subCommitteeId || "");
+          setSelectedLevel(memberData.levelId || "");
+          setSelectedPosition(memberData.positionId || "");
+
+          setProvince(memberData.province || "");
+          setDistrict(memberData.district || "");
+          setMunicipality(memberData.municipality || "");
+          setWard(memberData.ward || "");
+          setRemarks(memberData.remarks || "");
+        } catch (error) {
+          console.error("Error fetching member data:", error);
+        }
+      };
+      fetchMember();
+    }
+  }, [memberId]);
+
+  // Fetch sub-committees when committee changes
   useEffect(() => {
     const fetchSubCommittees = async () => {
       if (selectedCommittee) {
@@ -95,28 +135,22 @@ const MembersForm: React.FC = () => {
           const response = await axios.get<SubCommittee[]>(
             `http://localhost:3000/sub-committees/committee/${selectedCommittee}`,
           );
+          console.log("Fetched sub-committees:", response.data);
           setSubCommittees(response.data);
-          setIsSubCommitteeDisabled(response.data.length === 0); // Disable if no sub-committees
         } catch (error) {
           console.error("Error fetching sub-committees:", error);
-          setIsSubCommitteeDisabled(true); // Disable on error
         }
-      } else {
-        setSubCommittees([]);
-        setIsSubCommitteeDisabled(true); // Disable if no committee selected
       }
     };
-
     fetchSubCommittees();
   }, [selectedCommittee]);
 
-  // Fetch levels based on selected committee and sub-committee
+  // Fetch levels when sub-committee or committee changes
   useEffect(() => {
     const fetchLevels = async () => {
       if (selectedCommittee || selectedSubCommittee) {
         try {
           let endpoint = "";
-
           if (selectedSubCommittee) {
             endpoint = `http://localhost:3000/sub-level/sub-committee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
@@ -126,6 +160,7 @@ const MembersForm: React.FC = () => {
           if (endpoint) {
             const response = await axios.get<{ levelId: number }[]>(endpoint);
             const levelIds = response.data.map((level) => level.levelId);
+            console.log("Fetched level IDs:", levelIds);
 
             if (levelIds.length > 0) {
               const levelsResponse = await axios.get<Level[]>(
@@ -134,38 +169,30 @@ const MembersForm: React.FC = () => {
               const filteredLevels = levelsResponse.data.filter((level) =>
                 levelIds.includes(level.levelId),
               );
-
+              console.log("Filtered levels:", filteredLevels);
               setLevels(filteredLevels);
-              setIsLevelDisabled(filteredLevels.length === 0); // Disable dropdown if no levels
             } else {
               setLevels([]);
-              setIsLevelDisabled(true); // Disable the levels dropdown
             }
           } else {
             setLevels([]);
-            setIsLevelDisabled(true); // Disable if no endpoint
           }
         } catch (error) {
           console.error("Error fetching levels:", error);
-          setLevels([]);
-          setIsLevelDisabled(true); // Disable on error
         }
       } else {
         setLevels([]);
-        setIsLevelDisabled(true); // Disable if no committee or sub-committee selected
       }
     };
-
     fetchLevels();
-  }, [selectedCommittee, selectedSubCommittee]);
+  }, [selectedSubCommittee, selectedCommittee]);
 
-  // Fetch positions based on selected committee or sub-committee
+  // Fetch positions when level changes
   useEffect(() => {
     const fetchPositions = async () => {
       if (selectedCommittee || selectedSubCommittee) {
         try {
           let endpoint = "";
-
           if (selectedSubCommittee) {
             endpoint = `http://localhost:3000/structures/subcommittee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
@@ -178,6 +205,7 @@ const MembersForm: React.FC = () => {
             const positionIds = response.data.map(
               (position) => position.positionId,
             );
+            console.log("Fetched position IDs:", positionIds);
 
             if (positionIds.length > 0) {
               const positionsPromises = positionIds.map((id) =>
@@ -187,84 +215,69 @@ const MembersForm: React.FC = () => {
               const filteredPositions = positionsResponses.map(
                 (res) => res.data,
               );
-
+              console.log("Filtered positions:", filteredPositions);
               setPositions(filteredPositions);
-              setIsPositionDisabled(filteredPositions.length === 0); // Disable dropdown if no positions
             } else {
               setPositions([]);
-              setIsPositionDisabled(true); // Disable if no positions
             }
           } else {
             setPositions([]);
-            setIsPositionDisabled(true); // Disable if no endpoint
           }
         } catch (error) {
           console.error("Error fetching positions:", error);
-          setPositions([]);
-          setIsPositionDisabled(true); // Disable on error
         }
       } else {
         setPositions([]);
-        setIsPositionDisabled(true); // Disable if no committee or sub-committee selected
       }
     };
-
     fetchPositions();
-  }, [selectedCommittee, selectedSubCommittee]);
+  }, [selectedLevel]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
+    if (!member) return;
+
     const payload = {
-      memberName,
-      mobileNumber,
-      email: email || null,
+      memberName: member.memberName,
+      mobileNumber: member.mobileNumber,
+      email: member.email,
       committeeId: selectedCommittee !== "" ? selectedCommittee : null,
       subCommitteeId: selectedSubCommittee !== "" ? selectedSubCommittee : null,
       levelId: selectedLevel !== "" ? selectedLevel : null,
       positionId: selectedPosition !== "" ? selectedPosition : null,
-      representative: representative || null,
-      address: address || null,
-      province: province || null,
-      district: district || null,
-      municipality: municipality || null,
-      ward: ward || null,
-      remarks: remarks || null,
+      province,
+      district,
+      municipality,
+      ward,
+      remarks,
     };
 
-    try {
-      await axios.post("http://localhost:3000/members", payload);
-      console.log("Form submitted successfully");
+    console.log("Submitting payload:", payload);
 
-      // Reset form state
-      setMemberName("");
-      setMobileNumber("");
-      setEmail("");
-      setRepresentative("");
-      setAddress("");
-      setSelectedCommittee("");
-      setSelectedSubCommittee("");
-      setSelectedLevel("");
-      setSelectedPosition("");
-      setSubCommittees([]);
-      setLevels([]);
-      setPositions([]);
-      setRemarks("");
+    try {
+      await axios.put(`http://localhost:3000/members/${memberId}`, payload);
+      console.log("Member updated successfully");
+      router.push("/tables/membersTable");
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error updating member:", error);
     }
   };
 
+  if (!memberId || !member) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="w-fit rounded-sm border border-stroke  bg-rose-100 shadow dark:border-strokedark dark:bg-boxdark sm:rounded-lg">
-      <div className="border-b border-stroke bg-rose-200 px-7 py-4 shadow dark:border-strokedark sm:rounded-lg">
+    <div className="w-fit rounded border  bg-rose-100 shadow  dark:bg-boxdark">
+      <div className="rounded border-b bg-rose-200 px-7 py-4 shadow ">
         <h3 className="font-medium text-black dark:text-white">
-          सदस्यहरु चयन फारम
+          सदस्य विवरण अद्यावधिक गर्नुहोस्
         </h3>
       </div>
       <div className="p-7">
         <form onSubmit={handleSubmit}>
-          {/* Name Field */}
+          {/* Member Fields */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
@@ -275,16 +288,17 @@ const MembersForm: React.FC = () => {
             <input
               type="text"
               id="memberName"
-              value={memberName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setMemberName(e.target.value)
+              value={member.memberName}
+              onChange={(e) =>
+                setMember((prev) =>
+                  prev ? { ...prev, memberName: e.target.value } : null,
+                )
               }
-              required
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="border-gray-300 w-full rounded border px-4 py-2 text-black"
             />
           </div>
 
-          {/* Phone Field */}
+          {/* Mobile Number Field */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
@@ -293,14 +307,16 @@ const MembersForm: React.FC = () => {
               मोबाइल नम्बर:
             </label>
             <input
-              type="tel"
+              type="text"
               id="mobileNumber"
-              value={mobileNumber}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setMobileNumber(e.target.value)
+              value={member.mobileNumber}
+              onChange={(e) =>
+                setMember((prev) =>
+                  prev ? { ...prev, mobileNumber: e.target.value } : null,
+                )
               }
-              required
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              required={true}
+              className="border-gray-300 w-full rounded border px-4 py-2 text-black"
             />
           </div>
 
@@ -310,16 +326,18 @@ const MembersForm: React.FC = () => {
               className="mb-3 block text-sm font-medium text-black dark:text-white"
               htmlFor="email"
             >
-              इमेल:
+              ईमेल:
             </label>
             <input
-              type="email"
+              type="text"
               id="email"
-              value={email}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
+              value={member.email}
+              onChange={(e) =>
+                setMember((prev) =>
+                  prev ? { ...prev, email: e.target.value } : null,
+                )
               }
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="border-gray-300 w-full rounded border px-4 py-2 text-black"
             />
           </div>
 
@@ -327,33 +345,42 @@ const MembersForm: React.FC = () => {
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
-              htmlFor="representative"
+              htmlFor="email"
             >
               प्रतिनिधि:
             </label>
             <input
               type="text"
-              id="representative"
-              value={representative}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setRepresentative(e.target.value)
+              id="email"
+              value={member.email}
+              onChange={(e) =>
+                setMember((prev) =>
+                  prev ? { ...prev, email: e.target.value } : null,
+                )
               }
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              className="border-gray-300 w-full rounded border px-4 py-2 text-black"
             />
           </div>
 
-          {/* Address Field (Updated AddressInput Component) */}
+          {/* Address Input */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
-              htmlFor="address"
+              htmlFor="subCommittee"
             >
               ठेगाना:
             </label>
-            <AddressInput onAddressChange={handleAddressChange} />
+
+            <AddressInput
+              initialProvince={member.province}
+              initialDistrict={member.district}
+              initialMunicipality={member.municipality}
+              initialWard={member.ward}
+              onAddressChange={handleAddressChange}
+            />
           </div>
 
-          {/* Committee Dropdown */}
+          {/* Committee dropdown */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
@@ -364,13 +391,12 @@ const MembersForm: React.FC = () => {
             <select
               id="committee"
               value={selectedCommittee}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setSelectedCommittee(Number(e.target.value))
-              }
-              disabled={isFormDisabled}
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              onChange={(e) => setSelectedCommittee(Number(e.target.value))}
+              className={`w-full rounded border bg-white px-4 py-2 ${
+                selectedCommittee === "" ? "text-gray-500" : "text-black"
+              }`}
             >
-              <option value="">-- चयन गर्नुहोस् --</option>
+              <option value="">समिति चयन गर्नुहोस्</option>
               {committees.map((committee) => (
                 <option
                   key={committee.committeeId}
@@ -382,7 +408,7 @@ const MembersForm: React.FC = () => {
             </select>
           </div>
 
-          {/* Sub-Committee Dropdown */}
+          {/* Sub-committee dropdown */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
@@ -393,13 +419,13 @@ const MembersForm: React.FC = () => {
             <select
               id="subCommittee"
               value={selectedSubCommittee}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setSelectedSubCommittee(Number(e.target.value))
-              }
-              disabled={isSubCommitteeDisabled}
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              disabled={!selectedCommittee}
+              onChange={(e) => setSelectedSubCommittee(Number(e.target.value))}
+              className={`w-full rounded border bg-white px-4 py-2 ${
+                selectedSubCommittee === "" ? "text-gray-500" : "text-black"
+              }${!selectedCommittee ? "bg-gray-50 cursor-not-allowed" : "bg-white"}`}
             >
-              <option value="">-- चयन गर्नुहोस् --</option>
+              <option value="">उपसमिति चयन गर्नुहोस्</option>
               {subCommittees.map((subCommittee) => (
                 <option
                   key={subCommittee.subCommitteeId}
@@ -411,24 +437,21 @@ const MembersForm: React.FC = () => {
             </select>
           </div>
 
-          {/* Levels Dropdown */}
+          {/* Level Dropdown */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
               htmlFor="level"
             >
-              स्तर:
+              स्तर चयन गर्नुहोस्:
             </label>
             <select
               id="level"
               value={selectedLevel}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setSelectedLevel(Number(e.target.value))
-              }
-              disabled={isLevelDisabled}
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+              onChange={(e) => setSelectedLevel(Number(e.target.value))}
+              className="border-gray-300 w-full rounded border px-4 py-2 text-black"
             >
-              <option value="">-- चयन गर्नुहोस् --</option>
+              <option value="">स्तर चयन गर्नुहोस्</option>
               {levels.map((level) => (
                 <option key={level.levelId} value={level.levelId}>
                   {level.levelName}
@@ -438,70 +461,69 @@ const MembersForm: React.FC = () => {
           </div>
 
           {/* Positions Checkboxes */}
-          <div className="mb-5.5">
-            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-              स्थिति:
-            </label>
-            <div className="space-y-2">
-              {positions.map((position) => (
-                <div key={position.positionId} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`position-${position.positionId}`}
-                    value={position.positionId}
-                    checked={selectedPosition === position.positionId}
-                    onChange={() =>
-                      setSelectedPosition((prev) =>
-                        prev === position.positionId ? "" : position.positionId,
-                      )
-                    }
-                    disabled={isPositionDisabled}
-                    className="mr-2"
-                  />
-                  <label
-                    htmlFor={`position-${position.positionId}`}
-                    className="text-sm text-black dark:text-white"
-                  >
-                    {position.positionName}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Remarks Field */}
+          {/* Positions Checkboxes */}
           <div className="mb-5.5">
             <label
               className="mb-3 block text-sm font-medium text-black dark:text-white"
-              htmlFor="representative"
+              htmlFor="positions"
             >
-              कैफियत:
+              स्थिति चयन गर्नुहोस्:
             </label>
-            <input
-              type="text"
+            <div className="flex flex-wrap">
+              {positions.length > 0 ? (
+                positions.map((position) => (
+                  <div key={position.positionId} className="mr-4">
+                    <input
+                      type="checkbox"
+                      id={`position-${position.positionId}`}
+                      value={position.positionId}
+                      checked={selectedPosition === position.positionId}
+                      onChange={(e) => {
+                        const positionId = Number(e.target.value);
+                        setSelectedPosition(positionId);
+                      }}
+                    />
+                    <label
+                      htmlFor={`position-${position.positionId}`}
+                      className="ml-2 text-sm text-black dark:text-white"
+                    >
+                      {position.positionName}
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <div>Positions not available</div>
+              )}
+            </div>
+          </div>
+
+          {/* Remarks */}
+          <div className="mb-5.5">
+            <label
+              className="mb-3 block text-sm font-medium text-black dark:text-white"
+              htmlFor="remarks"
+            >
+              टिप्पणी:
+            </label>
+            <textarea
               id="remarks"
               value={remarks}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setRemarks(e.target.value)
-              }
-              className="bg-gray-50 w-full rounded border border-stroke px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
-              placeholder="कैफियत उल्लेख गर्नुहोस्"
+              onChange={(e) => setRemarks(e.target.value)}
+              className="border-gray-300 w-full rounded border px-4 py-2 text-black"
             />
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
-            <button
-              type="submit"
-              disabled={isFormDisabled}
-              className="rounded bg-primary px-4 py-2 text-white"
-            >
-              सबमिट
-            </button>
-          </div>
+          {/* Submit button */}
+          <button
+            type="submit"
+            className="w-full rounded bg-blue-500 py-2 text-white"
+          >
+            अद्यावधिक गर्नुहोस्
+          </button>
         </form>
       </div>
     </div>
   );
 };
 
-export default MembersForm;
+export default UpdateMemberPage;

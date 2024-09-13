@@ -26,8 +26,22 @@ export class MembersService {
     return this.membersRepository.save(members);
   }
 
-  async update(members: Members): Promise<Members> {
-    return this.membersRepository.save(members);
+  async update(
+    memberId: number,
+    updatedData: Partial<Members>,
+  ): Promise<Members> {
+    const member = await this.membersRepository.findOne({
+      where: { memberId },
+    });
+
+    if (!member) {
+      throw new Error('Member not found'); // Handle this as per your error strategy
+    }
+
+    // Merge new data into the existing member object
+    const updatedMember = Object.assign(member, updatedData);
+
+    return this.membersRepository.save(updatedMember);
   }
 
   async remove(memberId: number): Promise<void> {

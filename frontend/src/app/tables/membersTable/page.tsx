@@ -8,10 +8,9 @@ import MembersTable from "@/components/Tables/MembersTable"; // Adjust the impor
 const MembersTablePage: React.FC = () => {
   return (
     <DefaultLayout>
-      <div className="max-w-800 mx-auto px-4 py-8">
-        {/* Adjusted max-w to fit the table size */}
+      <div className="mx-auto px-4 py-8">
         <Breadcrumb pageName="समिति तालिका" />
-        <div className="bg-white p-6 shadow sm:rounded-lg">
+        <div>
           {/* Table component */}
           <MembersTable />
         </div>

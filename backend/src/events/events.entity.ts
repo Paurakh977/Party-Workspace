@@ -7,32 +7,46 @@ import {
 } from 'typeorm';
 import { Committees } from 'src/committees/committees.entity';
 import { SubCommittees } from 'src/sub-committees/sub-committees.entity';
+import { Levels } from 'src/levels/levels.entity';
 
 @Entity()
 export class Events {
   @PrimaryGeneratedColumn()
-  id: number;
+  eventId: number;
 
   @Column()
-  eventName: string;
+  eventHeading: string;
 
   @Column()
-  eventDate: Date;
+  eventDetails: string;
 
   @Column()
-  eventType: string;
+  eventDate: string;
 
   @Column()
-  committeeId: number;
+  eventTime: string;
+
+  @Column({ default: 'अन्य', nullable: true })
+  address: string;
+
+  @Column({ nullable: true })
+  province: string;
+
+  @Column({ nullable: true })
+  district: string;
+
+  @Column({ nullable: true })
+  municipality: string;
+
+  @Column({ nullable: true })
+  ward: string;
+
+  @Column({ nullable: true })
+  venue: string;
 
   @Column()
-  subCommitteeId: number;
+  eventOrganizer: string;
 
-  @ManyToOne(() => Committees, (committee) => committee.events)
-  @JoinColumn({ name: 'committeeId' })
-  committee: Committees;
-
-  @ManyToOne(() => SubCommittees, (subCommittee) => subCommittee.events)
-  @JoinColumn({ name: 'subCommitteeId' })
-  subCommittee: SubCommittees;
+  @Column({ nullable: true })
+  remarks: string;
 }

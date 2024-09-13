@@ -10,6 +10,7 @@ import { PositionsModule } from './positions/positions.module';
 import { StructuresModule } from './structures/structures.module';
 import { RepresentativesModule } from './representatives/representatives.module';
 import { MembersModule } from './members/members.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MembersModule } from './members/members.module';
     StructuresModule,
     RepresentativesModule,
     MembersModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

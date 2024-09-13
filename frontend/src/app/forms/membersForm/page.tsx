@@ -9,7 +9,7 @@ const LevelsFormPage: React.FC = () => {
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* Adjusted max-w to fit the form size */}
         <Breadcrumb pageName="संरचना व्यवस्थापन" />
-        <div className="bg-white p-6 shadow sm:rounded-lg">
+        <div>
           {/* Adjusted padding */}
           <MembersForm />
         </div>

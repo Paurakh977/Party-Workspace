@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Members } from 'src/members/members.entity';
+import { Events } from 'src/events/events.entity';
 
 @Entity()
 export class Levels {

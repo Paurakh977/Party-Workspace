@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 interface Committee {
   committeeId: number;
@@ -47,6 +49,11 @@ interface Member {
   subCommitteeId?: number;
   positionId?: number;
   address: string;
+  province: string;
+  district: string;
+  municipality: string;
+  ward: string;
+  remarks: string;
 }
 
 const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
@@ -61,6 +68,8 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -176,7 +185,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     fetchData();
   }, []);
 
-  // Helper function to get the level membernames based on committee and sub-committee
+  // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
     committeeId: number,
     subCommitteeId: number | null,
@@ -194,9 +203,33 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     );
   };
 
-  // Helper function to get position membernames based on member's positionId
+  // Helper function to get position names based on member's positionId
   const getPositionNames = (positionId?: number): string => {
     return positionId ? positions[positionId] || "-" : "-";
+  };
+
+  // Helper function to format address
+  const formatAddress = (member: Member): string => {
+    const { municipality, ward, district, province, address } = member;
+    if (!address) return `${municipality} - ${ward}, ${district}`;
+    return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${address}`;
+  };
+
+  const handleDeleteMember = async (memberId: number) => {
+    try {
+      await axios.delete(`http://localhost:3000/members/${memberId}`);
+      setMembers((prevMembers) =>
+        prevMembers.filter((member) => member.memberId !== memberId),
+      );
+    } catch (error) {
+      console.error("Error deleting member:", error);
+    }
+  };
+
+  const handleUpdateMember = (memberId: number) => {
+    console.log("Updating member with ID:", memberId);
+    router.push(`/forms/updateMembersForm/${memberId}`);
+    // router.push()
   };
 
   if (loading) return <p>Loading data...</p>;
@@ -206,94 +239,109 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const membersToDisplay = singleMember ? [singleMember] : members;
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        सदस्य तालिका
-      </h4>
-      <div className="flex flex-col">
-        <div className="grid grid-cols-8 rounded-sm bg-gray-2 dark:bg-meta-4">
-          {[
-            "क्रम संख्या",
-            "सदस्य नाम",
-            "मोबाइल नम्बर",
-            "ईमेल",
-            "समिति",
-            "उपसमिति",
-            "तह",
-            "पदिय जिम्मेवारी",
-            "ठेगाना",
-          ].map((header, idx) => (
-            <div key={idx} className="p-2.5 xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                {header}
-              </h5>
-            </div>
-          ))}
-        </div>
-        {membersToDisplay.map((member, index) => {
-          const committee = committees.find(
-            (c) => c.committeeId === member.committeeId,
-          );
-          const subCommittee = member.subCommitteeId
-            ? subCommittees[member.committeeId]?.find(
-                (sub) => sub.subCommitteeId === member.subCommitteeId,
-              )
-            : null;
-
-          return (
-            <div
-              className={`grid grid-cols-8 ${
-                index === membersToDisplay.length - 1
-                  ? ""
-                  : "border-b border-stroke dark:border-strokedark"
-              }`}
-              key={member.memberId}
-            >
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{index + 1}</p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
+    <div className="overflow-x-auto">
+      <div className="border-gray-700 dark:border-gray-700 min-w-[1500px] rounded-sm border bg-rose-100 p-6 px-5 pb-2.5 pt-6 shadow dark:bg-boxdark sm:rounded-lg sm:px-7.5 xl:pb-1">
+        <h4 className="mb-6  text-xl font-semibold text-black dark:text-white">
+          <span className="bg-lime-600">सदस्य तालिका</span>
+        </h4>
+        <table className="min-w-full table-auto">
+          <thead className="dark:bg-gray-700">
+            <tr className="bg-slate-400">
+              <th className="border-gray-700 w-2 border-2 px-4 py-2 font-bold text-black">
+                क्रम संख्या
+              </th>
+              <th className="border-gray-700 w-45 border-2 px-4 py-2 font-bold text-black">
+                नामथर
+              </th>
+              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
+                ठेगाना
+              </th>
+              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
+                मोबाइल नम्बर
+              </th>
+              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
+                ईमेल
+              </th>
+              <th className="border-gray-700 w-25 border-2 px-4 py-2 font-bold text-black">
+                समिति
+              </th>
+              <th className="border-gray-700 w-35 border-2 px-4 py-2 font-bold text-black">
+                उप-समिति
+              </th>
+              <th className="border-gray-700 w-45 border-2 px-4 py-2 font-bold text-black">
+                तह
+              </th>
+              <th className="border-gray-700 w-35 border-2 px-4 py-2 font-bold text-black">
+                पद
+              </th>
+              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
+                कैफियत
+              </th>
+              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
+                सुधार
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {membersToDisplay.map((member, index) => (
+              <tr key={member.memberId}>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
+                  {index + 1}
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
                   {member.memberName}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
+                  {formatAddress(member)}
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
                   {member.mobileNumber}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{member.email}</p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {committee?.committeeName || "-"}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {subCommittee?.subCommitteeName || "-"}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
+                  {member.email}
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
+                  {committees.find(
+                    (committee) => committee.committeeId === member.committeeId,
+                  )?.committeeName || "-"}
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
+                  {member.subCommitteeId
+                    ? subCommittees[member.committeeId]?.find(
+                        (sub) => sub.subCommitteeId === member.subCommitteeId,
+                      )?.subCommitteeName || "-"
+                    : "-"}
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
                   {getLevelNames(
                     member.committeeId,
                     member.subCommitteeId || null,
                   )}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
                   {getPositionNames(member.positionId)}
-                </p>
-              </div>
-              <div className="p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{member.address}</p>
-              </div>
-            </div>
-          );
-        })}
+                </td>
+                <td className="border-2 px-4 py-2 text-center text-black">
+                  {member.remarks}
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center">
+                  <button
+                    onClick={() => handleUpdateMember(member.memberId)}
+                    className="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteMember(member.memberId)}
+                    className="mr-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

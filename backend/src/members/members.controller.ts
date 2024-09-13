@@ -30,11 +30,11 @@ export class MembersController {
   }
 
   @Put(':memberId')
-  update(
+  async update(
     @Param('memberId') memberId: number,
-    @Body() members: Members,
+    @Body() updatedData: Partial<Members>,
   ): Promise<Members> {
-    return this.membersService.update(members);
+    return this.membersService.update(memberId, updatedData);
   }
 
   @Delete(':memberId')

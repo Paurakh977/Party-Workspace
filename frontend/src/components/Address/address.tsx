@@ -14,9 +14,12 @@ interface AddressInputProps {
     municipality: string;
     ward: string;
   }) => void;
+  initialProvince?: string;
+  initialDistrict?: string;
+  initialMunicipality?: string;
+  initialWard?: string;
 }
 
-// The fetchAddress function to retrieve address data from JSON files
 const fetchAddress = async (): Promise<FetchAddressResponse> => {
   try {
     const [ptdResponse, dtmResponse, mtwResponse, allProvincesResponse] =
@@ -49,11 +52,17 @@ const fetchAddress = async (): Promise<FetchAddressResponse> => {
   }
 };
 
-const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
-  const [province, setProvince] = useState<string>("");
-  const [district, setDistrict] = useState<string>("");
-  const [municipality, setMunicipality] = useState<string>("");
-  const [ward, setWard] = useState<string>("");
+const AddressInput: React.FC<AddressInputProps> = ({
+  onAddressChange,
+  initialProvince = "",
+  initialDistrict = "",
+  initialMunicipality = "",
+  initialWard = "",
+}) => {
+  const [province, setProvince] = useState<string>(initialProvince);
+  const [district, setDistrict] = useState<string>(initialDistrict);
+  const [municipality, setMunicipality] = useState<string>(initialMunicipality);
+  const [ward, setWard] = useState<string>(initialWard);
 
   const [provinceToDistrictsMap, setProvinceToDistrictsMap] = useState<{
     [key: string]: string[];
@@ -75,20 +84,45 @@ const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
       setDistrictToMunicipalitiesMap(addressData.districtsToMunicipalitiesMap);
       setMunicipalitiesToWardsMap(addressData.municipalitiesToWardsMap);
       setAllProvinces(addressData.allProvinces);
+
+      if (
+        initialProvince &&
+        addressData.provinceToDistrictsMap[initialProvince]
+      ) {
+        setLocalDistricts(addressData.provinceToDistrictsMap[initialProvince]);
+      }
+      if (
+        initialDistrict &&
+        addressData.districtsToMunicipalitiesMap[initialDistrict]
+      ) {
+        setLocalMunicipalities(
+          addressData.districtsToMunicipalitiesMap[initialDistrict],
+        );
+      }
+      if (
+        initialMunicipality &&
+        addressData.municipalitiesToWardsMap[initialMunicipality]
+      ) {
+        setLocalWards(
+          addressData.municipalitiesToWardsMap[initialMunicipality],
+        );
+      }
     };
     initializeAddressData();
-  }, []);
+  }, [initialProvince, initialDistrict, initialMunicipality]);
 
   // Province change
   useEffect(() => {
     if (province) {
       const districts = provinceToDistrictsMap[province] || [];
       setLocalDistricts(districts);
-      setDistrict("");
-      setMunicipality("");
-      setWard("");
-      setLocalMunicipalities([]);
-      setLocalWards([]);
+      if (!initialDistrict) {
+        setDistrict("");
+        setMunicipality("");
+        setWard("");
+        setLocalMunicipalities([]);
+        setLocalWards([]);
+      }
     } else {
       setLocalDistricts([]);
       setLocalMunicipalities([]);
@@ -102,9 +136,11 @@ const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
     if (district) {
       const municipalities = districtsToMunicipalitiesMap[district] || [];
       setLocalMunicipalities(municipalities);
-      setMunicipality("");
-      setWard("");
-      setLocalWards([]);
+      if (!initialMunicipality) {
+        setMunicipality("");
+        setWard("");
+        setLocalWards([]);
+      }
     } else {
       setLocalMunicipalities([]);
       setLocalWards([]);
@@ -117,7 +153,9 @@ const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
     if (municipality) {
       const wards = municipalitiesToWardsMap[municipality] || [];
       setLocalWards(wards);
-      setWard("");
+      if (!initialWard) {
+        setWard("");
+      }
     } else {
       setLocalWards([]);
     }
@@ -134,13 +172,13 @@ const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
       <div className="flex space-x-4">
         {/* Province Select */}
         <div className="flex-1">
-          <label className="text-small mb-1 block bg-slate-400 text-center font-medium text-black dark:text-white">
+          <label className="text-small mb-1 block rounded border border-black bg-slate-400 text-center font-medium text-black dark:text-white">
             प्रदेश:
           </label>
           <select
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className={`bg-gray-50 w-fit rounded border border-stroke px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white ${
+            className={`w-fit rounded border bg-white px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white ${
               province === "" ? "text-gray-500" : "text-black"
             }`}
           >
@@ -157,16 +195,16 @@ const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
 
         {/* District Select */}
         <div className="flex-1">
-          <label className="text-small mb-1 block bg-slate-400 text-center font-medium text-black dark:text-white">
+          <label className="text-small mb-1 block rounded border bg-slate-400 text-center font-medium text-black dark:text-white">
             जिल्ला:
           </label>
           <select
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
             disabled={!province}
-            className={`bg-gray-50 w-fit rounded border border-stroke px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white ${
+            className={`w-fit rounded border px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white ${
               district === "" ? "text-gray-500" : "text-black"
-            }`}
+            } ${!province ? "bg-gray-50 cursor-not-allowed" : "bg-white"}`}
           >
             <option value="" className="text-gray-500">
               जिल्ला छान्नुहोस्
@@ -181,16 +219,16 @@ const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
 
         {/* Municipality Select */}
         <div className="flex-1">
-          <label className="text-small mb-1 block bg-slate-400 text-center font-medium text-black dark:text-white">
+          <label className="text-small mb-1 block rounded border bg-slate-400 text-center font-medium text-black dark:text-white">
             पालिका:
           </label>
           <select
             value={municipality}
             onChange={(e) => setMunicipality(e.target.value)}
             disabled={!district}
-            className={`bg-gray-50 w-fit rounded border border-stroke px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white ${
+            className={`w-fit rounded border px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none  dark:bg-meta-4 dark:text-white ${
               municipality === "" ? "text-gray-500" : "text-black"
-            }`}
+            } ${!district ? "bg-gray-50 cursor-not-allowed" : "bg-white"}`}
           >
             <option value="" className="text-gray-500">
               पालिका छान्नुहोस्
@@ -205,23 +243,23 @@ const AddressInput: React.FC<AddressInputProps> = ({ onAddressChange }) => {
 
         {/* Ward Select */}
         <div className="flex-1">
-          <label className="text-small mb-1 block bg-slate-400 text-center font-medium text-black dark:text-white">
+          <label className="text-small mb-1 block rounded border bg-slate-400 text-center font-medium text-black dark:text-white">
             वडा:
           </label>
           <select
             value={ward}
             onChange={(e) => setWard(e.target.value)}
             disabled={!municipality}
-            className={`bg-gray-50 w-fit rounded border border-stroke px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white ${
+            className={`w-fit rounded border px-4.5 py-3 text-sm shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white ${
               ward === "" ? "text-gray-500" : "text-black"
-            }`}
+            } ${!municipality ? "bg-gray-50 cursor-not-allowed" : "bg-white"}`}
           >
             <option value="" className="text-gray-500">
               वडा छान्नुहोस्
             </option>
-            {localWards.map((wardOption) => (
-              <option key={wardOption} value={wardOption}>
-                {wardOption}
+            {localWards.map((wardNum) => (
+              <option key={wardNum} value={wardNum}>
+                {wardNum}
               </option>
             ))}
           </select>

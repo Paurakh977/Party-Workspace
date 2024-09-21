@@ -58,15 +58,17 @@ const MembersForm: React.FC = () => {
 
   // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
-    province: string;
-    district: string;
-    municipality: string;
-    ward: string;
+    address: string;
+    province?: string;
+    district?: string;
+    municipality?: string;
+    ward?: string;
   }) => {
-    setProvince(newAddress.province);
-    setDistrict(newAddress.district);
-    setMunicipality(newAddress.municipality);
-    setWard(newAddress.ward);
+    setAddress(newAddress.address);
+    setProvince(newAddress.province || "");
+    setDistrict(newAddress.district || "");
+    setMunicipality(newAddress.municipality || "");
+    setWard(newAddress.ward || "");
   };
 
   // Fetch committees data from API on component mount
@@ -256,7 +258,7 @@ const MembersForm: React.FC = () => {
   };
 
   return (
-    <div className="w-fit rounded-sm border border-stroke  bg-rose-100 shadow dark:border-strokedark dark:bg-boxdark sm:rounded-lg">
+    <div className="w-full rounded-sm border border-stroke  bg-rose-100 shadow dark:border-strokedark dark:bg-boxdark sm:rounded-lg">
       <div className="border-b border-stroke bg-rose-200 px-7 py-4 shadow dark:border-strokedark sm:rounded-lg">
         <h3 className="font-medium text-black dark:text-white">
           सदस्यहरु चयन फारम

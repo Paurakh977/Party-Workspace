@@ -6,6 +6,7 @@ import {
   Body,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { Members } from './members.entity';
 import { MembersService } from './members.service';
@@ -43,7 +44,9 @@ export class MembersController {
   }
 
   @Get('mobileNumber/:mobileNumber')
-  findByMobileNumber(@Param('mobileNumber') mobileNumber: string) {
+  findByMobileNumber(
+    @Param('mobileNumber') mobileNumber: string,
+  ): Promise<Members> {
     return this.membersService.findByMobileNumber(mobileNumber);
   }
 }

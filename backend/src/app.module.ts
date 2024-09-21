@@ -12,6 +12,7 @@ import { RepresentativesModule } from './representatives/representatives.module'
 import { MembersModule } from './members/members.module';
 import { EventsModule } from './events/events.module';
 import { MessagesModule } from './messages/messages.module';
+import { MembersFinderModule } from './members-finder/members-finder.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MessagesModule } from './messages/messages.module';
     MembersModule,
     EventsModule,
     MessagesModule,
+    MembersFinderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

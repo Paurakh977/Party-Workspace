@@ -10,31 +10,38 @@ export class MembersFinderService {
     private membersRepository: Repository<Members>,
   ) {}
 
-  findAll(): Promise<Members[]> {
-    return this.membersRepository.find();
+  async findAll(): Promise<string> {
+    const members = await this.membersRepository.find();
+    return members.map(member => member.mobileNumber).join(',');
   }
 
-  findByCommittee(committeeId: number): Promise<Members[]> {
-    return this.membersRepository.findBy({ committeeId });
+  async findByCommittee(committeeId: number): Promise<string> {
+    const members = await this.membersRepository.findBy({ committeeId });
+    return members.map(member => member.mobileNumber).join(',');
   }
 
-  findBySubCommittee(subCommitteeId: number): Promise<Members[]> {
-    return this.membersRepository.findBy({ subCommitteeId });
+  async findBySubCommittee(subCommitteeId: number): Promise<string> {
+    const members = await this.membersRepository.findBy({ subCommitteeId });
+    return members.map(member => member.mobileNumber).join(',');
   }
 
-  findByAddress(address: string): Promise<Members[]> {
-    return this.membersRepository.findBy({ address });
+  async findByAddress(address: string): Promise<string> {
+    const members = await this.membersRepository.findBy({ address });
+    return members.map(member => member.mobileNumber).join(',');
   }
 
-  findByProvince(province: string): Promise<Members[]> {
-    return this.membersRepository.findBy({ province });
+  async findByProvince(province: string): Promise<string> {
+    const members = await this.membersRepository.findBy({ province });
+    return members.map(member => member.mobileNumber).join(',');
   }
 
-  findByDistrict(district: string): Promise<Members[]> {
-    return this.membersRepository.findBy({ district });
+  async findByDistrict(district: string): Promise<string> {
+    const members = await this.membersRepository.findBy({ district });
+    return members.map(member => member.mobileNumber).join(',');
   }
 
-  findByMunicipality(municipality: string): Promise<Members[]> {
-    return this.membersRepository.findBy({ municipality });
+  async findByMunicipality(municipality: string): Promise<string> {
+    const members = await this.membersRepository.findBy({ municipality });
+    return members.map(member => member.mobileNumber).join(',');
   }
 }

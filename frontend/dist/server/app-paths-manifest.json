@@ -1,8 +1,8 @@
 {
-  "/tables/committeesTable/page": "app/tables/committeesTable/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/forms/membersForm/page": "app/forms/membersForm/page.js",
-  "/forms/updateMembersForm/[memberId]/page": "app/forms/updateMembersForm/[memberId]/page.js",
-  "/events/input/page": "app/events/input/page.js",
   "/tables/membersTable/page": "app/tables/membersTable/page.js",
+  "/events/list/page": "app/events/list/page.js",
+  "/events/input/page": "app/events/input/page.js",
   "/messages/input/page": "app/messages/input/page.js"
 }

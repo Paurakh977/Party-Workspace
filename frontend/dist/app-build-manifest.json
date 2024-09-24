@@ -1,15 +1,31 @@
 {
   "pages": {
-    "/tables/membersTable/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/tables/membersTable/page.js"
+      "static/chunks/app/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/home/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/home/page.js"
+    ],
+    "/events/input/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/events/input/page.css",
+      "static/chunks/app/events/input/page.js"
+    ],
+    "/events/list/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/events/list/page.js"
     ],
     "/messages/input/page": [
       "static/chunks/webpack.js",
@@ -46,16 +62,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/forms/membersForm/page.js"
     ],
-    "/forms/updateMembersForm/[memberId]/page": [
+    "/tables/membersTable/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/forms/updateMembersForm/[memberId]/page.js"
+      "static/chunks/app/tables/membersTable/page.js"
     ],
-    "/events/input/page": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/events/input/page.css",
-      "static/chunks/app/events/input/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

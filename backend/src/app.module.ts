@@ -11,6 +11,10 @@ import { StructuresModule } from './structures/structures.module';
 import { RepresentativesModule } from './representatives/representatives.module';
 import { MembersModule } from './members/members.module';
 import { EventsModule } from './events/events.module';
+import { MessagesModule } from './messages/messages.module';
+import { MembersFinderModule } from './members-finder/members-finder.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -33,6 +37,10 @@ import { EventsModule } from './events/events.module';
     RepresentativesModule,
     MembersModule,
     EventsModule,
+    MessagesModule,
+    MembersFinderModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

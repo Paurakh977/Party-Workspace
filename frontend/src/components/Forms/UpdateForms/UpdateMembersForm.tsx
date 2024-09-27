@@ -59,6 +59,7 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
   const [selectedLevel, setSelectedLevel] = useState<number | "">("");
   const [selectedPosition, setSelectedPosition] = useState<number | "">("");
 
+  const [address, setAddress] = useState<string>("");
   const [province, setProvince] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
   const [municipality, setMunicipality] = useState<string>("");
@@ -67,16 +68,17 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
   const [remarks, setRemarks] = useState<string>("");
 
   const handleAddressChange = (newAddress: {
-    province: string;
-    district: string;
-    municipality: string;
-    ward: string;
+    address: string;
+    province?: string;
+    district?: string;
+    municipality?: string;
+    ward?: string;
   }) => {
-    console.log("Address change detected:", newAddress);
-    setProvince(newAddress.province);
-    setDistrict(newAddress.district);
-    setMunicipality(newAddress.municipality);
-    setWard(newAddress.ward);
+    setAddress(newAddress.address);
+    setProvince(newAddress.province || "");
+    setDistrict(newAddress.district || "");
+    setMunicipality(newAddress.municipality || "");
+    setWard(newAddress.ward || "");
   };
 
   // Fetch committees
@@ -269,7 +271,7 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
   }
 
   return (
-    <div className="w-fit rounded border  bg-rose-100 shadow  dark:bg-boxdark">
+    <div className="w-full rounded border  bg-rose-100 shadow  dark:bg-boxdark">
       <div className="rounded border-b bg-rose-200 px-7 py-4 shadow ">
         <h3 className="font-medium text-black dark:text-white">
           सदस्य विवरण अद्यावधिक गर्नुहोस्
@@ -372,6 +374,7 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
             </label>
 
             <AddressInput
+              initialAddress={member.address}
               initialProvince={member.province}
               initialDistrict={member.district}
               initialMunicipality={member.municipality}

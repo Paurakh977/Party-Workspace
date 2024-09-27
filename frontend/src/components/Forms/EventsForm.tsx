@@ -12,7 +12,7 @@ const EventsForm: React.FC = () => {
   const [eventDetails, setEventDetails] = useState<string>("");
   const [eventDate, setEventDate] = useState<string>("");
   const [eventTime, setEventTime] = useState<string>("");
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState<string>("");
   const [province, setProvince] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
   const [municipality, setMunicipality] = useState<string>("");
@@ -22,21 +22,24 @@ const EventsForm: React.FC = () => {
 
   const [remarks, setRemarks] = useState<string>("");
 
+  const [showMessageForm, setShowMessageForm] = useState<boolean>(false);
   const handleDateChange = (value: string) => {
     setEventDate(value);
   };
 
   // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
-    province: string;
-    district: string;
-    municipality: string;
-    ward: string;
+    address: string;
+    province?: string;
+    district?: string;
+    municipality?: string;
+    ward?: string;
   }) => {
-    setProvince(newAddress.province);
-    setDistrict(newAddress.district);
-    setMunicipality(newAddress.municipality);
-    setWard(newAddress.ward);
+    setAddress(newAddress.address);
+    setProvince(newAddress.province || "");
+    setDistrict(newAddress.district || "");
+    setMunicipality(newAddress.municipality || "");
+    setWard(newAddress.ward || "");
   };
 
   const handleSubmit = async (event: FormEvent) => {
@@ -61,14 +64,26 @@ const EventsForm: React.FC = () => {
       await axios.post("http://localhost:3000/events", payload);
       console.log("Form submitted successfully");
 
-      router.push("/events/list");
+      const shouldSendSMS = window.confirm(
+        "के तपाईंँ सन्देश पठाउन चहानुहुन्छ?",
+      );
+      console.log(shouldSendSMS);
+      if (shouldSendSMS) {
+        console.log("Event Details:", payload.eventDetails);
+        console.log("Event Organizer:", payload.eventOrganizer);
+        router.push(
+          `/messages/input?eventDetails=${eventDetails}&eventOrganizer=${eventOrganizer}`,
+        );
+      } else {
+        router.push("/events/list");
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
 
   return (
-    <div className="w-fit rounded border  bg-rose-100 shadow dark:bg-boxdark">
+    <div className="w-full rounded border  bg-rose-100 shadow dark:bg-boxdark">
       <div className="rounded border-b bg-rose-200 px-7 py-4">
         <h3 className="font-medium text-black dark:text-white">
           कार्यक्रम विवरण प्रविष्टि फारम

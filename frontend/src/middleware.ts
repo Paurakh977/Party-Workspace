@@ -1,0 +1,76 @@
+import { NextRequest, NextResponse } from "next/server";
+import { jwtDecode } from "jwt-decode";
+
+interface DecodedToken {
+  userId: number;
+  username: string;
+  role: string;
+  credits: number;
+}
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const url = request.nextUrl.clone();
+
+  const adminRoutes = ["/home"];
+
+  const superAdminRoutes = [
+    "/forms/committeeForm",
+    "/forms/subCommitteeForm",
+    "/forms/levelsForm",
+    "/forms/structuresForm",
+    "/forms/representativesForm",
+  ];
+
+  const publicRoutes = ["/", "/auth/signin"];
+
+  const token = request.cookies.get("token")?.value;
+  const isLoggedIn = !!token;
+  if (isLoggedIn && pathname === "/") {
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
+  if (
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/static/") ||
+    pathname.startsWith("/public/") ||
+    pathname.startsWith("/node_modules/") ||
+    pathname.startsWith("/images/")
+  ) {
+    return NextResponse.next();
+  }
+
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (!token) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+  try {
+    const userData: DecodedToken = await verifyToken(token);
+
+    // Role-based access control
+    if (userData.role === "admin") {
+      if (!adminRoutes.includes(pathname)) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    } else if (userData.role === "superAdmin") {
+      if (
+        !adminRoutes.includes(pathname) &&
+        !superAdminRoutes.includes(pathname)
+      ) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    } else {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  } catch (error) {
+    console.error("Error verifying token:", error);
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+}
+
+async function verifyToken(token: string): Promise<DecodedToken> {
+  const decoded = jwtDecode(token);
+  return decoded as DecodedToken;
+}

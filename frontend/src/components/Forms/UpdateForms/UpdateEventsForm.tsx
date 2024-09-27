@@ -50,15 +50,17 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
 
   // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
-    province: string;
-    district: string;
-    municipality: string;
-    ward: string;
+    address: string;
+    province?: string;
+    district?: string;
+    municipality?: string;
+    ward?: string;
   }) => {
-    setProvince(newAddress.province);
-    setDistrict(newAddress.district);
-    setMunicipality(newAddress.municipality);
-    setWard(newAddress.ward);
+    setAddress(newAddress.address);
+    setProvince(newAddress.province || "");
+    setDistrict(newAddress.district || "");
+    setMunicipality(newAddress.municipality || "");
+    setWard(newAddress.ward || "");
   };
 
   // Fetch the event data when the component mounts or when the eventId changes
@@ -122,7 +124,7 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
   };
 
   return (
-    <div className="w-fit rounded border  bg-rose-100 shadow  dark:bg-boxdark ">
+    <div className="w-full rounded border  bg-rose-100 shadow  dark:bg-boxdark ">
       <div className="rounded border-b bg-rose-200 px-7 py-4  shadow">
         <h3 className="font-medium text-black dark:text-white">
           कार्यक्रम विवरण प्रविष्टि फारम
@@ -212,6 +214,7 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
             </label>
             {event && (
               <AddressInput
+                initialAddress={event.address}
                 initialProvince={event.province}
                 initialDistrict={event.district}
                 initialMunicipality={event.municipality}

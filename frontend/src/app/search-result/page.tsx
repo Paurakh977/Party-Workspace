@@ -6,6 +6,22 @@ import axios from "axios";
 import MembersTable from "@/components/Tables/MembersTable"; // Adjust the import if needed
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
+interface Member {
+  memberId: number;
+  memberName: string;
+  mobileNumber: string;
+  email: string;
+  committeeId: number;
+  subCommitteeId?: number;
+  positionId?: number;
+  address: string;
+  province: string;
+  district: string;
+  municipality: string;
+  ward: string;
+  remarks: string;
+}
+
 const SearchResultPage = () => {
   const searchParams = useSearchParams();
   const mobileNumber = searchParams.get("mobileNumber"); // Get mobile number from URL query

@@ -1167,10 +1167,6 @@ body {
 .w-\[300\%\] {
   width: 300%;
 }
-.w-fit {
-  width: -moz-fit-content;
-  width: fit-content;
-}
 .w-full {
   width: 100%;
 }

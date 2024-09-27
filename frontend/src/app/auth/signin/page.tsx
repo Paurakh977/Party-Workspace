@@ -2,14 +2,18 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Metadata } from "next";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
-
+interface DecodedToken {
+  userId: number;
+  username: string;
+  role: string;
+  credits: number;
+}
 
 const SignIn: React.FC = () => {
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,10 +31,17 @@ const SignIn: React.FC = () => {
     };
 
     try {
-      const response = await axios.post("http://localhost:3000/auth/login", payload);
+      const response = await axios.post(
+        "http://localhost:3000/auth/login",
+        payload,
+      );
 
       if (response.data.access_token) {
-        localStorage.setItem("token", response.data.access_token);
+        Cookies.set("token", response.data.access_token, {
+          expires: 7,
+          secure: true,
+          sameSite: "Strict",
+        });
         router.push("/home");
       }
     } catch (error) {
@@ -38,34 +49,31 @@ const SignIn: React.FC = () => {
     } finally {
       setLoading(false);
     }
-
   };
 
   return (
-    <main className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <main className="bg-gray-50 dark:bg-gray-900 flex min-h-screen items-center justify-center">
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="flex flex-wrap items-center">
-        <div className="hidden w-full xl:block xl:w-1/2">
-  <div className="flex flex-col items-center justify-center px-26 py-17.5 text-center space-y-4">
-    <span className="text-3xl font-bold text-black dark:text-white whitespace-nowrap">
-      राष्ट्रियता, लोकतन्त्र, समाजवाद
-    </span>
-    <div className="flex justify-center">
-      <Image
-        className="dark:block"
-        src={"/images/logo/logo.svg"}
-        alt="Logo"
-        width={200}
-        height={60}
-      />
-    </div>
-    <h1 className="text-5xl font-bold text-black dark:text-white">
-      नेपाली काँग्रेस
-    </h1>
-  </div>
-</div>
-
-
+          <div className="hidden w-full xl:block xl:w-1/2">
+            <div className="flex flex-col items-center justify-center space-y-4 px-26 py-17.5 text-center">
+              <span className="whitespace-nowrap text-3xl font-bold text-black dark:text-white">
+                राष्ट्रियता, लोकतन्त्र, समाजवाद
+              </span>
+              <div className="flex justify-center">
+                <Image
+                  className="dark:block"
+                  src={"/images/logo/logo.svg"}
+                  alt="Logo"
+                  width={200}
+                  height={60}
+                />
+              </div>
+              <h1 className="text-5xl font-bold text-black dark:text-white">
+                नेपाली काँग्रेस
+              </h1>
+            </div>
+          </div>
 
           <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
@@ -156,7 +164,7 @@ const SignIn: React.FC = () => {
           </div>
         </div>
       </div>
-      </main>
+    </main>
   );
 };
 

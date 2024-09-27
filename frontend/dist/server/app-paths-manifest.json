@@ -1,8 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/forms/membersForm/page": "app/forms/membersForm/page.js",
-  "/tables/membersTable/page": "app/tables/membersTable/page.js",
-  "/events/list/page": "app/events/list/page.js",
-  "/events/input/page": "app/events/input/page.js",
-  "/messages/input/page": "app/messages/input/page.js"
+  "/home/page": "app/home/page.js",
+  "/page": "app/page.js"
 }

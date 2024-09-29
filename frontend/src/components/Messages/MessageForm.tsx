@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { FormEvent, useState, useEffect, ChangeEvent } from "react";
 import AddressInput from "../Address/address";
+import CreditsChecker from "../Credits/credits-checker";
+import CreditsDeduct from "../Credits/credits-deduct";
 
 interface MessageFormProps {
   eventDetails: string;
@@ -28,7 +30,9 @@ const MessageForm: React.FC<MessageFormProps> = ({
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [subCommittees, setSubCommittees] = useState<SubCommittee[]>([]);
   const [selectedCommittee, setSelectedCommittee] = useState<number | "">("");
-  const [selectedSubCommittee, setSelectedSubCommittee] = useState<number | "">("");
+  const [selectedSubCommittee, setSelectedSubCommittee] = useState<number | "">(
+    "",
+  );
   const [address, setAddress] = useState<string>("");
   const [province, setProvince] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
@@ -36,7 +40,8 @@ const MessageForm: React.FC<MessageFormProps> = ({
   const [ward, setWard] = useState<string>("");
 
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false);
-  const [isSubCommitteeDisabled, setIsSubCommitteeDisabled] = useState<boolean>(false);
+  const [isSubCommitteeDisabled, setIsSubCommitteeDisabled] =
+    useState<boolean>(false);
 
   const [recipientType, setRecipientType] = useState<string>("समिति/उप‍-समिति");
 
@@ -58,8 +63,6 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
   // Fetch committees data from API on component mount
   useEffect(() => {
-    console.log(selectedCommittee);
-    console.log(selectedSubCommittee);
     const fetchCommittees = async () => {
       try {
         const response = await axios.get<Committee[]>(
@@ -74,7 +77,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
     };
 
     fetchCommittees();
-  }, []);
+  }, [selectedCommittee, selectedSubCommittee]);
 
   // Fetch sub-committees data when a committee is selected
   useEffect(() => {
@@ -99,59 +102,91 @@ const MessageForm: React.FC<MessageFormProps> = ({
     fetchSubCommittees();
   }, [selectedCommittee]);
 
+  const isEnglishText = (text: string): boolean => {
+    return /^[\x00-\x7F]*$/.test(text); // Check if all characters are ASCII (English)
+  };
+
+  // Function to calculate message count
+  const calculateMessageCount = (text: string): number => {
+    let messageCount = 1;
+
+    if (isEnglishText(text)) {
+      // English characters
+      if (text.length <= 120) {
+        messageCount = 1;
+      } else {
+        messageCount = 1 + Math.ceil((text.length - 120) / 90);
+      }
+    } else {
+      // Nepali/Unicode characters
+      if (text.length <= 60) {
+        messageCount = 1;
+      } else {
+        messageCount = 1 + Math.ceil((text.length - 60) / 40);
+      }
+    }
+
+    return messageCount;
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+
+    const messageCount = calculateMessageCount(text);
 
     if (text.length > 60) {
       alert("सन्देश ६० अक्षर भन्दा बढी छ । कृपया छोट्याउनुहोस् ।");
       return;
     }
-  
-      if (recipientType === "समिति/उप‍-समिति") {
-        if (selectedSubCommittee) {
-          const response = String(await axios.get(
-            `http://localhost:3000/members-finder/subcommittee/${selectedSubCommittee}`,
-          ));
-          console.log("Committee:", response);
-          setTo(response);
-        }
-        else  if (selectedCommittee) {
-          const response = String(await axios.get(
-            `http://localhost:3000/members-finder/committee/${selectedCommittee}`,
-          ));
-          setTo(response);
+
+    if (recipientType === "समिति/उप‍-समिति") {
+      if (selectedSubCommittee) {
+        const response = await axios.get(
+          `http://localhost:3000/members-finder/subcommittee/${selectedSubCommittee}`,
+        );
+        setTo(String(response.data));
+      } else if (selectedCommittee) {
+        const response = await axios.get(
+          `http://localhost:3000/members-finder/committee/${selectedCommittee}`,
+        );
+        setTo(String(response.data));
+      }
+    } else {
+      if (address === "नेपाल" || address === "अन्य") {
+        if (municipality) {
+          const encodedMun = encodeURIComponent(municipality);
+          const response = await axios.get(
+            `http://localhost:3000/members-finder/municipality/${encodedMun}`,
+          );
+          setTo(String(response.data));
+        } else if (district) {
+          const encodedDis = encodeURIComponent(district);
+          const response = await axios.get(
+            `http://localhost:3000/members-finder/district/${encodedDis}`,
+          );
+          setTo(String(response.data));
+        } else if (province) {
+          const encodedProv = encodeURIComponent(province);
+          const response = await axios.get(
+            `http://localhost:3000/members-finder/province/${encodedProv}`,
+          );
+          setTo(String(response.data));
+        } else {
+          const encodedAdd = encodeURIComponent(address);
+          const response = await axios.get(
+            `http://localhost:3000/members-finder/${encodedAdd}`,
+          );
+          setTo(String(response.data));
         }
       } else {
-        if (address === "नेपाल" || address === "अन्य") {
-          if (municipality) {
-            const encodedMun = encodeURIComponent(municipality);
-            const response = String(await axios.get(
-              `http://localhost:3000/members-finder/municipality/${encodedMun}`,
-            ));
-            setTo(response);
-          } else if (district) {
-            const encodedDis = encodeURIComponent(district);
-            const response = String(await axios.get(
-              `http://localhost:3000/members-finder/district/${encodedDis}`,
-            ));
-            setTo(response);
-          } else if (province) {
-            const encodedProv = encodeURIComponent(province);
-            const response = String(await axios.get(
-              `http://localhost:3000/members-finder/province/${encodedProv}`,
-            ));
-            setTo(response);
-          } else {
-            const encodedAdd = encodeURIComponent(address);
-            const response = String(await axios.get(
-              `http://localhost:3000/members-finder/${encodedAdd}`,
-            ));
-            setTo(response);
-          }
-        } else {
-          alert("नेपाल बाहेक अन्य देशमा सन्देश पठाउन अहिले मिल्दैन।");
-        }
+        alert("नेपाल बाहेक अन्य देशमा सन्देश पठाउन अहिले मिल्दैन।");
       }
+    }
+
+    const recipients = to
+      .split(",")
+      .filter((number) => number.trim() !== "").length;
+    const adminCredits = CreditsChecker();
 
     const payload = {
       token: token,
@@ -160,10 +195,22 @@ const MessageForm: React.FC<MessageFormProps> = ({
       text,
     };
 
-    try {
-      console.log("The sending payload", payload);
-    } catch (error) {
-      console.error("Error sending SMS:", error);
+    console.log("recipients:", recipients);
+    console.log("messageCount:", messageCount);
+    console.log("adminCredits:", adminCredits);
+
+    if (adminCredits >= recipients * messageCount * 3) {
+      try {
+        console.log("The sending payload", payload);
+        await axios.post("http://localhost:3000/messages", { from, to, text });
+        CreditsDeduct(recipients * messageCount * 3);
+      } catch (error) {
+        console.error("Error sending SMS:", error);
+      }
+    } else {
+      window.alert(
+        "तपाईँको खातामा पर्याप्त क्रेडिट छैन । कृपया क्रेडिट थप्नुहोस् ।",
+      );
     }
   };
 
@@ -300,7 +347,6 @@ const MessageForm: React.FC<MessageFormProps> = ({
             </div>
           )}
 
-
           {/* Text Input */}
           <div className="mb-6">
             <label
@@ -314,14 +360,10 @@ const MessageForm: React.FC<MessageFormProps> = ({
               className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white"
               value={text}
               onChange={handleTextChange}
-              maxLength={60}
               required
               rows={4}
               placeholder="Enter your message here..."
             />
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {charCount}/60 characters
-            </div>
           </div>
 
           {/* Submit Button */}

@@ -1,4 +1,5 @@
 import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
 
 interface DecodedToken {
   userId: number;
@@ -10,7 +11,7 @@ interface DecodedToken {
 const RoleChecker = (): string | null => {
   try {
     // Retrieve token from local storage
-    const token = localStorage.getItem("token") as string;
+    const token = Cookies.get("token");
 
     // Check if token exists
     if (!token) {

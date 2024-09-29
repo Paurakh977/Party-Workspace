@@ -1185,6 +1185,10 @@ body {
 .min-w-\[220px\] {
   min-width: 220px;
 }
+.min-w-fit {
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+}
 .min-w-full {
   min-width: 100%;
 }

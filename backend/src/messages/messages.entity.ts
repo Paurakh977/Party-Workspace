@@ -12,5 +12,5 @@ export class Messages {
   to: string;
 
   @Column()
-  text: number;
+  text: string;
 }

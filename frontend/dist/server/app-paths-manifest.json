@@ -1,4 +1,7 @@
 {
+  "/messages/input/page": "app/messages/input/page.js",
   "/home/page": "app/home/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/tables/usersTable/page": "app/tables/usersTable/page.js",
+  "/messages/list/page": "app/messages/list/page.js"
 }

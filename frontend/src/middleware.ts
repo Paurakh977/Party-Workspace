@@ -11,7 +11,20 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const url = request.nextUrl.clone();
 
-  const adminRoutes = ["/home"];
+  const adminRoutes = [
+    "/home",
+    "/tables/usersTable",
+    "/tables/membersTable",
+    "/tables/committeesTable",
+    "/forms/updateMembersForm/[memberId]",
+    "/forms/membersForm",
+    "/forms/eventsForm",
+    "/events/[eventId]",
+    "/events/input",
+    "/events/list",
+    "/messages/input",
+    "/messages/list",
+  ];
 
   const superAdminRoutes = [
     "/forms/committeeForm",
@@ -19,6 +32,7 @@ export async function middleware(request: NextRequest) {
     "/forms/levelsForm",
     "/forms/structuresForm",
     "/forms/representativesForm",
+    "/forms/usersForm",
   ];
 
   const publicRoutes = ["/", "/auth/signin"];
@@ -34,7 +48,11 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/static/") ||
     pathname.startsWith("/public/") ||
     pathname.startsWith("/node_modules/") ||
-    pathname.startsWith("/images/")
+    pathname.startsWith("/images/") ||
+    pathname.startsWith("/map-province-districts.json") ||
+    pathname.startsWith("/map-districts-municipalities.json") ||
+    pathname.startsWith("/map-municipalities-wards.json") ||
+    pathname.startsWith("/all-provinces.json")
   ) {
     return NextResponse.next();
   }
@@ -54,7 +72,7 @@ export async function middleware(request: NextRequest) {
       if (!adminRoutes.includes(pathname)) {
         return NextResponse.redirect(new URL("/", request.url));
       }
-    } else if (userData.role === "superAdmin") {
+    } else if (userData.role === "superadmin") {
       if (
         !adminRoutes.includes(pathname) &&
         !superAdminRoutes.includes(pathname)

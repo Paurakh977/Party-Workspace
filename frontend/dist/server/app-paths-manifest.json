@@ -1,7 +1,8 @@
 {
-  "/messages/input/page": "app/messages/input/page.js",
   "/home/page": "app/home/page.js",
-  "/page": "app/page.js",
-  "/tables/usersTable/page": "app/tables/usersTable/page.js",
-  "/messages/list/page": "app/messages/list/page.js"
+  "/forms/subCommitteeForm/page": "app/forms/subCommitteeForm/page.js",
+  "/forms/levelsForm/page": "app/forms/levelsForm/page.js",
+  "/forms/structuresForm/page": "app/forms/structuresForm/page.js",
+  "/tables/membersTable/page": "app/tables/membersTable/page.js",
+  "/forms/membersForm/page": "app/forms/membersForm/page.js"
 }

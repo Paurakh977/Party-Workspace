@@ -65,7 +65,7 @@ const EventsForm: React.FC = () => {
       console.log("Form submitted successfully");
 
       const shouldSendSMS = window.confirm(
-        "के तपाईंँ सन्देश पठाउन चहानुहुन्छ?",
+        "के तपाईंँ एस एम एस पठाउन चहानुहुन्छ?",
       );
       console.log(shouldSendSMS);
       if (shouldSendSMS) {

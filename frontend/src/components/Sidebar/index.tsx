@@ -382,7 +382,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
           <Link href="/" className="flex items-center space-x-2">
-            <div>
+            <div className="flex flex-col items-center gap-4">
               <Image
                 width={110}
                 height={12}
@@ -390,10 +390,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 alt="Logo"
                 priority
               />
-            </div>
-            <div className="flex h-12 flex-col justify-center leading-tight text-white">
               <span className="flex h-7 items-center text-title-md">
-                नेपाली
+                नेपाली काँग्रेस अभियान एप
+              </span>
+            </div>
+            {/* <div className="flex h-12 flex-col justify-center leading-tight text-white">
+              <span className="flex h-7 items-center text-title-md">
+                नेपाली काँग्रेस अभियान एप
               </span>
               <span className="flex h-7 items-center text-title-md">
                 काँग्रेस
@@ -401,7 +404,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <span className="flex h-7 items-center text-title-md">
                 अभियान एप
               </span>
-            </div>
+            </div> */}
           </Link>
 
           <button
@@ -431,7 +434,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           // style={{ backgroundColor: "#3669A2" }}
         >
           {/* <!-- Sidebar Menu --> */}
-          <nav className="mt-5 px-4 py-4 text-title-md lg:mt-9 lg:px-2">
+          <nav className="mt-5 px-4 py-4 text-sm lg:mt-9 lg:px-2">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">

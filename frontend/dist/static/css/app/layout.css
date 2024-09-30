@@ -685,6 +685,9 @@ body {
 .pointer-events-none {
   pointer-events: none;
 }
+.visible {
+  visibility: visible;
+}
 .invisible {
   visibility: hidden;
 }
@@ -792,6 +795,9 @@ body {
 }
 .top-full {
   top: 100%;
+}
+.top-16 {
+  top: 4rem;
 }
 .-z-1 {
   z-index: -1;
@@ -3071,6 +3077,10 @@ input[type="search"]::-webkit-search-cancel-button {
 
   .sm\:flex {
     display: flex;
+  }
+
+  .sm\:hidden {
+    display: none;
   }
 
   .sm\:h-44 {

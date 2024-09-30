@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Import the app router hook
+import { useRouter } from "next/navigation";
+import { FaSearch } from "react-icons/fa";
 
 const SearchComponent = () => {
   const [mobileNumber, setMobileNumber] = useState<string>("");
@@ -25,20 +26,36 @@ const SearchComponent = () => {
     }
   };
 
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
     <div className="search-container">
-      <div className="search-form">
+      <span className="border-gray-300 flex items-center rounded-lg border bg-white">
+        {/* Search Icon */}
+        <FaSearch className="text-gray-500 mx-2" />
+
+        {/* Search Input */}
         <input
           type="text"
           value={mobileNumber}
           onChange={(e) => setMobileNumber(e.target.value)}
+          onKeyDown={handleKeyPress} // Trigger search on Enter key press
           placeholder="Enter mobile number"
-          className="search-input"
+          className="search-input w-full px-3 py-2 focus:outline-none"
         />
-        <button onClick={handleSearch} className="search-button">
+
+        {/* Search Button */}
+        <button
+          onClick={handleSearch}
+          className="search-button rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none"
+        >
           Search
         </button>
-      </div>
+      </span>
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
     </div>

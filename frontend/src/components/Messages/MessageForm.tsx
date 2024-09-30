@@ -134,11 +134,6 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
     const messageCount = calculateMessageCount(text);
 
-    if (text.length > 60) {
-      alert("सन्देश ६० अक्षर भन्दा बढी छ । कृपया छोट्याउनुहोस् ।");
-      return;
-    }
-
     if (recipientType === "समिति/उप‍-समिति") {
       if (selectedSubCommittee) {
         const response = await axios.get(
@@ -179,7 +174,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
           setTo(String(response.data));
         }
       } else {
-        alert("नेपाल बाहेक अन्य देशमा सन्देश पठाउन अहिले मिल्दैन।");
+        alert("नेपाल बाहेक अन्य देशमा एस एम एस पठाउन अहिले मिल्दैन।");
       }
     }
 
@@ -199,11 +194,11 @@ const MessageForm: React.FC<MessageFormProps> = ({
     console.log("messageCount:", messageCount);
     console.log("adminCredits:", adminCredits);
 
-    if (adminCredits >= recipients * messageCount * 3) {
+    if (adminCredits >= recipients * messageCount * 4) {
       try {
         console.log("The sending payload", payload);
         await axios.post("http://localhost:3000/messages", { from, to, text });
-        CreditsDeduct(recipients * messageCount * 3);
+        CreditsDeduct(recipients * messageCount * 4);
       } catch (error) {
         console.error("Error sending SMS:", error);
       }
@@ -216,17 +211,15 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
   const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
-    if (newText.length <= 60) {
-      setText(newText);
-      setCharCount(newText.length);
-    }
+    setText(newText);
+    setCharCount(newText.length);
   };
 
   return (
     <div className="w-full rounded border bg-rose-100 shadow dark:bg-boxdark">
       <div className="rounded border-b bg-rose-200 px-7 py-4">
         <h3 className="font-medium text-black dark:text-white">
-          सन्देश विवरण प्रविष्टि फारम
+          एस एम एस विवरण प्रविष्टि फारम
         </h3>
       </div>
       <div className="p-7">
@@ -237,7 +230,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
               htmlFor="from"
               className="mb-2 block text-sm font-medium text-black dark:text-white"
             >
-              सन्देश प्रेषक
+              एस एम एस पठाउने
             </label>
             <input
               type="text"
@@ -255,7 +248,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
           {/* Radio Buttons for Recipient Type */}
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-              प्राप्तकर्ता चयन
+              एस एम एस पाउने व्यक्ति चयन
             </label>
             <div className="flex items-center space-x-4">
               <label className="flex items-center">
@@ -353,7 +346,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
               htmlFor="text"
               className="mb-2 block text-sm font-medium text-black dark:text-white"
             >
-              सन्देश विवरण
+              एस एम एस विवरण
             </label>
             <textarea
               id="text"
@@ -371,7 +364,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
             type="submit"
             className="w-full rounded bg-primary px-5 py-3 text-white shadow transition hover:bg-opacity-90"
           >
-            सन्देश पठाउनुहोस्
+            एस एम एस पठाउनुहोस्
           </button>
         </form>
       </div>

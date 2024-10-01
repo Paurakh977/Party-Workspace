@@ -1,4 +1,4 @@
-process.env.NEXT_PUBLIC_BE_HOST + import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 
 // Define interfaces for the data types

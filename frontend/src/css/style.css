@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Kalimati";
-  src: url("/fonts/kalimati.ttf") format("truetype");
+  src: url("../fonts/kalimati.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
@@ -9,9 +9,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
+
 @layer base {
   body {
-    @apply font-kalimati relative z-1 bg-whiten text-base font-normal text-body;
+    @apply relative z-1 bg-whiten font-kalimati text-base font-normal text-body;
   }
 }
 

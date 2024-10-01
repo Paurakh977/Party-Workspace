@@ -15,16 +15,20 @@ import { MessagesModule } from './messages/messages.module';
 import { MembersFinderModule } from './members-finder/members-finder.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     TypeOrmModule.forRoot({
       type: 'mariadb',
-      host: 'localhost',
+      host: process.env.DB_HOST || 'localhost',
       port: 3306,
-      username: 'nccCamp',
-      password: 'mT9ugB8hRE@ent<>?#',
-      database: 'nc_campaign',
+      username: process.env.DB_USERNAME || 'nccCamp',
+      password: process.env.DB_PASSWORD || 'mT9ugB8hRE@ent<>?#',
+      database: process.env.DB_NAME || 'nc_campaign',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),

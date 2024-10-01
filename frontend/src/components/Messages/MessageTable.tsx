@@ -26,7 +26,7 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
 
         // Fetch messages data
         const messagesResponse = await axios.get<Message[]>(
-          "http://localhost:3000/messages",
+          process.env.NEXT_PUBLIC_BE_HOST + "/messages",
         );
         setMessages(messagesResponse.data);
       } catch (error) {
@@ -42,7 +42,7 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
 
   const handleDeleteMessage = async (messageId: number) => {
     try {
-      await axios.delete(`http://localhost:3000/messages/${messageId}`);
+      await axios.delete(process.env.NEXT_PUBLIC_BE_HOST + `/messages/${messageId}`);
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message.messageId !== messageId),
       );
@@ -65,9 +65,6 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
   return (
     <div className="overflow-x-auto">
       <div className="border-gray-700 dark:border-gray-700 min-w-[1500px] rounded-sm border bg-rose-100 p-6 px-5 pb-2.5 pt-6 shadow dark:bg-boxdark sm:rounded-lg sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-          <span className="bg-lime-600">कार्यक्रम तालिका</span>
-        </h4>
         <table className="min-w-full table-auto">
           <thead className="dark:bg-gray-700">
             <tr className="bg-slate-400">
@@ -75,13 +72,13 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
                 क्रम संख्या
               </th>
               <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                सन्देश पठाउने
+                एस एम एस पठाउने
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                सन्देश पाउने
+                एस एम एस पाउने
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                सन्देश
+                एस एम एस
               </th>
               <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
                 सुधार

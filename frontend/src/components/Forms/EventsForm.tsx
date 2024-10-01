@@ -61,11 +61,11 @@ const EventsForm: React.FC = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/events", payload);
+      await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/events", payload);
       console.log("Form submitted successfully");
 
       const shouldSendSMS = window.confirm(
-        "के तपाईंँ सन्देश पठाउन चहानुहुन्छ?",
+        "के तपाईंँ एस एम एस पठाउन चहानुहुन्छ?",
       );
       console.log(shouldSendSMS);
       if (shouldSendSMS) {

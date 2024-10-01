@@ -27,7 +27,7 @@ const UsersTable = () => {
 
         // Fetch users data
         const usersResponse = await axios.get<User[]>(
-          "http://localhost:3000/users",
+          process.env.NEXT_PUBLIC_BE_HOST + "/users",
         );
         setUsers(usersResponse.data);
       } catch (error) {
@@ -43,7 +43,7 @@ const UsersTable = () => {
 
   const handleDeleteUser = async (userId: number) => {
     try {
-      await axios.delete(`http://localhost:3000/users/${userId}`);
+      await axios.delete(process.env.NEXT_PUBLIC_BE_HOST + `/users/${userId}`);
       setUsers((prevUsers) =>
         prevUsers.filter((user) => user.userId !== userId),
       );

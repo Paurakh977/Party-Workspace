@@ -66,7 +66,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
     const fetchCommittees = async () => {
       try {
         const response = await axios.get<Committee[]>(
-          "http://localhost:3000/committees",
+          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
         );
         setCommittees(response.data);
         setIsFormDisabled(response.data.length === 0);
@@ -85,7 +85,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
       if (selectedCommittee) {
         try {
           const response = await axios.get<SubCommittee[]>(
-            `http://localhost:3000/sub-committees/committee/${selectedCommittee}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${selectedCommittee}`,
           );
           setSubCommittees(response.data);
           setIsSubCommitteeDisabled(response.data.length === 0); // Disable if no sub-committees
@@ -134,20 +134,15 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
     const messageCount = calculateMessageCount(text);
 
-    if (text.length > 60) {
-      alert("सन्देश ६० अक्षर भन्दा बढी छ । कृपया छोट्याउनुहोस् ।");
-      return;
-    }
-
     if (recipientType === "समिति/उप‍-समिति") {
       if (selectedSubCommittee) {
         const response = await axios.get(
-          `http://localhost:3000/members-finder/subcommittee/${selectedSubCommittee}`,
+          process.env.NEXT_PUBLIC_BE_HOST + `/members-finder/subcommittee/${selectedSubCommittee}`,
         );
         setTo(String(response.data));
       } else if (selectedCommittee) {
         const response = await axios.get(
-          `http://localhost:3000/members-finder/committee/${selectedCommittee}`,
+          process.env.NEXT_PUBLIC_BE_HOST + `/members-finder/committee/${selectedCommittee}`,
         );
         setTo(String(response.data));
       }
@@ -156,30 +151,30 @@ const MessageForm: React.FC<MessageFormProps> = ({
         if (municipality) {
           const encodedMun = encodeURIComponent(municipality);
           const response = await axios.get(
-            `http://localhost:3000/members-finder/municipality/${encodedMun}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/members-finder/municipality/${encodedMun}`,
           );
           setTo(String(response.data));
         } else if (district) {
           const encodedDis = encodeURIComponent(district);
           const response = await axios.get(
-            `http://localhost:3000/members-finder/district/${encodedDis}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/members-finder/district/${encodedDis}`,
           );
           setTo(String(response.data));
         } else if (province) {
           const encodedProv = encodeURIComponent(province);
           const response = await axios.get(
-            `http://localhost:3000/members-finder/province/${encodedProv}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/members-finder/province/${encodedProv}`,
           );
           setTo(String(response.data));
         } else {
           const encodedAdd = encodeURIComponent(address);
           const response = await axios.get(
-            `http://localhost:3000/members-finder/${encodedAdd}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/members-finder/${encodedAdd}`,
           );
           setTo(String(response.data));
         }
       } else {
-        alert("नेपाल बाहेक अन्य देशमा सन्देश पठाउन अहिले मिल्दैन।");
+        alert("नेपाल बाहेक अन्य देशमा एस एम एस पठाउन अहिले मिल्दैन।");
       }
     }
 
@@ -199,10 +194,10 @@ const MessageForm: React.FC<MessageFormProps> = ({
     console.log("messageCount:", messageCount);
     console.log("adminCredits:", adminCredits);
 
-    if (adminCredits >= recipients * messageCount * 3) {
+    if (adminCredits >= recipients * messageCount * 4) {
       try {
         console.log("The sending payload", payload);
-        await axios.post("http://localhost:3000/messages", { from, to, text });
+        await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/messages", { from, to, text });
         CreditsDeduct(recipients * messageCount * 3);
       } catch (error) {
         console.error("Error sending SMS:", error);
@@ -216,17 +211,15 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
   const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
-    if (newText.length <= 60) {
-      setText(newText);
-      setCharCount(newText.length);
-    }
+    setText(newText);
+    setCharCount(newText.length);
   };
 
   return (
     <div className="w-full rounded border bg-rose-100 shadow dark:bg-boxdark">
       <div className="rounded border-b bg-rose-200 px-7 py-4">
         <h3 className="font-medium text-black dark:text-white">
-          सन्देश विवरण प्रविष्टि फारम
+          एस एम एस विवरण प्रविष्टि फारम
         </h3>
       </div>
       <div className="p-7">
@@ -237,7 +230,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
               htmlFor="from"
               className="mb-2 block text-sm font-medium text-black dark:text-white"
             >
-              सन्देश प्रेषक
+              एस एम एस पठाउने
             </label>
             <input
               type="text"
@@ -255,7 +248,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
           {/* Radio Buttons for Recipient Type */}
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-              प्राप्तकर्ता चयन
+              एस एम एस पाउने व्यक्ति चयन
             </label>
             <div className="flex items-center space-x-4">
               <label className="flex items-center">
@@ -353,7 +346,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
               htmlFor="text"
               className="mb-2 block text-sm font-medium text-black dark:text-white"
             >
-              सन्देश विवरण
+              एस एम एस विवरण
             </label>
             <textarea
               id="text"
@@ -371,7 +364,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
             type="submit"
             className="w-full rounded bg-primary px-5 py-3 text-white shadow transition hover:bg-opacity-90"
           >
-            सन्देश पठाउनुहोस्
+            एस एम एस पठाउनुहोस्
           </button>
         </form>
       </div>

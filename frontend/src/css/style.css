@@ -5,13 +5,17 @@
   font-style: normal;
 }
 
+.normal-font {
+  font-family: sans-serif !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply font-kalimati relative z-1 bg-whiten text-base font-normal text-body;
+    @apply relative z-1 bg-whiten font-kalimati text-base font-normal text-body;
   }
 }
 

@@ -69,7 +69,7 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
       const fetchEvent = async () => {
         try {
           const response = await axios.get<Event>(
-            `http://localhost:3000/events/${eventId}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/events/${eventId}`,
           );
           const eventData = response.data;
           setEvent(eventData);
@@ -115,7 +115,7 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
     };
 
     try {
-      await axios.put(`http://localhost:3000/events/${eventId}`, payload);
+      await axios.put(process.env.NEXT_PUBLIC_BE_HOST + `/events/${eventId}`, payload);
       console.log("Form submitted successfully");
       router.push("/events/list");
     } catch (error) {

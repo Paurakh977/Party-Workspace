@@ -26,7 +26,7 @@ const CreditsDeduct = async (costingCredits: number): Promise<void> => {
     const updatedCredits = decoded.credits - costingCredits;
 
     // Return the user's role
-    axios.put(`http://localhost:3000/users/${decoded.userId}`, {
+    axios.put(process.env.NEXT_PUBLIC_BE_HOST + `/users/${decoded.userId}`, {
       credits: updatedCredits,
     });
   } catch (error) {

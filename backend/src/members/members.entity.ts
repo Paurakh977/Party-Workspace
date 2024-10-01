@@ -18,7 +18,7 @@ export class Members {
   @Column()
   memberName: string;
 
-  @Column({ unique: true })
+  @Column({ unique: false })
   mobileNumber: string;
 
   @Column({ nullable: true })

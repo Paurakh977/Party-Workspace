@@ -76,7 +76,7 @@ const MembersForm: React.FC = () => {
     const fetchCommittees = async () => {
       try {
         const response = await axios.get<Committee[]>(
-          "http://localhost:3000/committees",
+          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
         );
         setCommittees(response.data);
         setIsFormDisabled(response.data.length === 0); // Disable form if no committees
@@ -95,7 +95,7 @@ const MembersForm: React.FC = () => {
       if (selectedCommittee) {
         try {
           const response = await axios.get<SubCommittee[]>(
-            `http://localhost:3000/sub-committees/committee/${selectedCommittee}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${selectedCommittee}`,
           );
           setSubCommittees(response.data);
           setIsSubCommitteeDisabled(response.data.length === 0); // Disable if no sub-committees
@@ -120,9 +120,9 @@ const MembersForm: React.FC = () => {
           let endpoint = "";
 
           if (selectedSubCommittee) {
-            endpoint = `http://localhost:3000/sub-level/sub-committee/${selectedSubCommittee}`;
+            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/sub-committee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = `http://localhost:3000/sub-level/committee/${selectedCommittee}`;
+            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -131,7 +131,7 @@ const MembersForm: React.FC = () => {
 
             if (levelIds.length > 0) {
               const levelsResponse = await axios.get<Level[]>(
-                "http://localhost:3000/levels",
+                process.env.NEXT_PUBLIC_BE_HOST + "/levels",
               );
               const filteredLevels = levelsResponse.data.filter((level) =>
                 levelIds.includes(level.levelId),
@@ -169,9 +169,9 @@ const MembersForm: React.FC = () => {
           let endpoint = "";
 
           if (selectedSubCommittee) {
-            endpoint = `http://localhost:3000/structures/subcommittee/${selectedSubCommittee}`;
+            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/structures/subcommittee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = `http://localhost:3000/structures/committee/${selectedCommittee}`;
+            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/structures/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -183,7 +183,7 @@ const MembersForm: React.FC = () => {
 
             if (positionIds.length > 0) {
               const positionsPromises = positionIds.map((id) =>
-                axios.get<Position>(`http://localhost:3000/positions/${id}`),
+                axios.get<Position>(process.env.NEXT_PUBLIC_BE_HOST + `/positions/${id}`),
               );
               const positionsResponses = await Promise.all(positionsPromises);
               const filteredPositions = positionsResponses.map(
@@ -235,7 +235,7 @@ const MembersForm: React.FC = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/members", payload);
+      await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/members", payload);
       console.log("Form submitted successfully");
 
       // Reset form state

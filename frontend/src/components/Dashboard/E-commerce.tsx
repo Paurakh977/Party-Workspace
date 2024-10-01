@@ -33,7 +33,7 @@ const ECommerce: React.FC = () => {
   useEffect(() => {
     const fetchCommitteeCount = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/committees/");
+        const response = await axios.get(process.env.NEXT_PUBLIC_BE_HOST + "/committees/");
         setCommitteeCount(response.data.length);
       } catch (error) {
         console.error("Error fetching committees count:", error);
@@ -43,7 +43,7 @@ const ECommerce: React.FC = () => {
     const fetchSubCommitteeCount = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/sub-committees/",
+          process.env.NEXT_PUBLIC_BE_HOST + "/sub-committees/",
         );
         setSubCommitteeCount(response.data.length);
       } catch (error) {
@@ -53,7 +53,7 @@ const ECommerce: React.FC = () => {
 
     const fetchSmsCount = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/messages/");
+        const response = await axios.get(process.env.NEXT_PUBLIC_BE_HOST + "/messages/");
         setSmsCount(response.data.length);
       } catch (error) {
         console.error("Error fetching SMS count:", error);
@@ -62,7 +62,7 @@ const ECommerce: React.FC = () => {
 
     const fetchEvents = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/events/");
+        const response = await axios.get(process.env.NEXT_PUBLIC_BE_HOST + "/events/");
         setEvents(response.data);
         categorizeEvents(response.data);
       } catch (error) {

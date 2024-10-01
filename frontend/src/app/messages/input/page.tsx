@@ -13,7 +13,7 @@ const MessageFormPage: React.FC = () => {
     <DefaultLayout>
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* Adjusted max-w to fit the form size */}
-        <Breadcrumb pageName="सन्देश व्यवस्थापन" />
+        <Breadcrumb pageName="एस एम एस व्यवस्थापन" />
         <div>
           {/* Adjusted padding */}
           <MessageForm

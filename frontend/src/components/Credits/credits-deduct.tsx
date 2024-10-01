@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
+import axios from "axios";
 
 interface DecodedToken {
   userId: number;
@@ -8,7 +9,7 @@ interface DecodedToken {
   credits: number;
 }
 
-const RoleChecker = (): string | null => {
+const CreditsDeduct = async (costingCredits: number): Promise<void> => {
   try {
     // Retrieve token from local storage
     const token = Cookies.get("token");
@@ -16,19 +17,23 @@ const RoleChecker = (): string | null => {
     // Check if token exists
     if (!token) {
       console.error("Token not found");
-      return null;
+      return;
     }
 
     // Decode the token
     const decoded: DecodedToken = jwtDecode(token);
 
+    const updatedCredits = decoded.credits - costingCredits;
+
     // Return the user's role
-    return decoded.role;
+    axios.put(process.env.NEXT_PUBLIC_BE_HOST + `/users/${decoded.userId}`, {
+      credits: updatedCredits,
+    });
   } catch (error) {
     // Handle token decoding error (e.g., invalid token)
     console.error("Error decoding token:", error);
-    return null;
+    return;
   }
 };
 
-export default RoleChecker;
+export default CreditsDeduct;

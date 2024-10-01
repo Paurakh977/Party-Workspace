@@ -1,24 +1,24 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Role {
-    SuperAdmin = 'superadmin',
-    Admin  = 'admin',
+  SuperAdmin = 'superadmin',
+  Admin = 'admin',
 }
 
 @Entity()
 export class Users {
-    @PrimaryGeneratedColumn()
-    userId: number;
+  @PrimaryGeneratedColumn()
+  userId: number;
 
-    @Column()
-    username: string;
+  @Column()
+  username: string;
 
-    @Column()
-    password: string;
+  @Column()
+  password: string;
 
-    @Column({ type: 'enum', enum: Role })
-    role: Role;
+  @Column({ type: 'enum', enum: Role })
+  role: Role;
 
-    @Column({ nullable: true })
-    credits: number;
+  @Column({ nullable: true })
+  credits: number;
 }

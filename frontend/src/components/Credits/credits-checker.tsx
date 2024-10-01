@@ -8,7 +8,7 @@ interface DecodedToken {
   credits: number;
 }
 
-const RoleChecker = (): string | null => {
+const CreditsChecker = (): number | 0 => {
   try {
     // Retrieve token from local storage
     const token = Cookies.get("token");
@@ -16,19 +16,19 @@ const RoleChecker = (): string | null => {
     // Check if token exists
     if (!token) {
       console.error("Token not found");
-      return null;
+      return 0;
     }
 
     // Decode the token
     const decoded: DecodedToken = jwtDecode(token);
 
     // Return the user's role
-    return decoded.role;
+    return decoded.credits;
   } catch (error) {
     // Handle token decoding error (e.g., invalid token)
     console.error("Error decoding token:", error);
-    return null;
+    return 0;
   }
 };
 
-export default RoleChecker;
+export default CreditsChecker;

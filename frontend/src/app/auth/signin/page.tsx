@@ -32,7 +32,7 @@ const SignIn: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/auth/login",
+        process.env.NEXT_PUBLIC_BE_HOST + "/auth/login",
         payload,
       );
 
@@ -58,7 +58,7 @@ const SignIn: React.FC = () => {
           <div className="hidden w-full xl:block xl:w-1/2">
             <div className="flex flex-col items-center justify-center space-y-4 px-26 py-17.5 text-center">
               <span className="whitespace-nowrap text-3xl font-bold text-black dark:text-white">
-                राष्ट्रियता, लोकतन्त्र, समाजवाद
+                भेटघाट, संवाद, परिवर्तन
               </span>
               <div className="flex justify-center">
                 <Image
@@ -70,7 +70,7 @@ const SignIn: React.FC = () => {
                 />
               </div>
               <h1 className="text-5xl font-bold text-black dark:text-white">
-                नेपाली काँग्रेस
+                नेपाली काँग्रेस अभियान एप
               </h1>
             </div>
           </div>

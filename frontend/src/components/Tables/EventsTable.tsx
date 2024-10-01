@@ -35,7 +35,7 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
 
         // Fetch events data
         const eventsResponse = await axios.get<Event[]>(
-          "http://localhost:3000/events",
+          process.env.NEXT_PUBLIC_BE_HOST + "/events",
         );
         setEvents(eventsResponse.data);
       } catch (error) {
@@ -58,7 +58,7 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
 
   const handleDeleteEvent = async (eventId: number) => {
     try {
-      await axios.delete(`http://localhost:3000/events/${eventId}`);
+      await axios.delete(process.env.NEXT_PUBLIC_BE_HOST + `/events/${eventId}`);
       setEvents((prevEvents) =>
         prevEvents.filter((event) => event.eventId !== eventId),
       );

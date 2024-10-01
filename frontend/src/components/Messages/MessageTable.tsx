@@ -26,7 +26,7 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
 
         // Fetch messages data
         const messagesResponse = await axios.get<Message[]>(
-          "http://localhost:3000/messages",
+          process.env.NEXT_PUBLIC_BE_HOST + "/messages",
         );
         setMessages(messagesResponse.data);
       } catch (error) {
@@ -42,7 +42,7 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
 
   const handleDeleteMessage = async (messageId: number) => {
     try {
-      await axios.delete(`http://localhost:3000/messages/${messageId}`);
+      await axios.delete(process.env.NEXT_PUBLIC_BE_HOST + `/messages/${messageId}`);
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message.messageId !== messageId),
       );

@@ -19,7 +19,7 @@ const UsersForm: React.FC = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/users", payload);
+      await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/users", payload);
       console.log("Form submitted successfully");
 
       setUsername("");

@@ -79,13 +79,13 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
         // Fetch committees
         const committeesResponse = await axios.get<Committee[]>(
-          "http://localhost:3000/committees",
+          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
         );
         setCommittees(committeesResponse.data);
 
         // Fetch levels data
         const levelsResponse = await axios.get<Level[]>(
-          "http://localhost:3000/levels",
+          process.env.NEXT_PUBLIC_BE_HOST + "/levels",
         );
         const levelsData = levelsResponse.data.reduce(
           (acc, level) => ({ ...acc, [level.levelId]: level.levelName }),
@@ -98,7 +98,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           committeesResponse.data.map(async (committee) => {
             try {
               const subResponse = await axios.get<SubCommittee[]>(
-                `http://localhost:3000/sub-committees/committee/${committee.committeeId}`,
+                process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${committee.committeeId}`,
               );
               return { [committee.committeeId]: subResponse.data };
             } catch {
@@ -114,7 +114,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
         // Fetch sub-levels data
         const subLevelsResponse = await axios.get<SubLevel[]>(
-          "http://localhost:3000/sub-level",
+          process.env.NEXT_PUBLIC_BE_HOST + "/sub-level",
         );
         setSubLevels(subLevelsResponse.data);
 
@@ -123,14 +123,14 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           committeesResponse.data.flatMap(async (committee) => {
             try {
               const committeeStructuresResponse = await axios.get<Structure[]>(
-                `http://localhost:3000/structures/committee/${committee.committeeId}`,
+                process.env.NEXT_PUBLIC_BE_HOST + `/structures/committee/${committee.committeeId}`,
               );
               const committeeStructures = committeeStructuresResponse.data;
 
               const subCommitteesStructuresResponses = await Promise.all(
                 (subCommittees[committee.committeeId] || []).map(async (sub) =>
                   axios.get<Structure[]>(
-                    `http://localhost:3000/structures/subcommittee/${sub.subCommitteeId}`,
+                    process.env.NEXT_PUBLIC_BE_HOST + `/structures/subcommittee/${sub.subCommitteeId}`,
                   ),
                 ),
               );
@@ -156,7 +156,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         const positionsResponses = await Promise.all(
           positionIds.map((positionId) =>
             axios.get<Position>(
-              `http://localhost:3000/positions/${positionId}`,
+              process.env.NEXT_PUBLIC_BE_HOST + `/positions/${positionId}`,
             ),
           ),
         );
@@ -171,7 +171,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
         // Fetch members data
         const membersResponse = await axios.get<Member[]>(
-          "http://localhost:3000/members",
+          process.env.NEXT_PUBLIC_BE_HOST + "/members",
         );
         setMembers(membersResponse.data);
       } catch (error) {
@@ -217,7 +217,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   const handleDeleteMember = async (memberId: number) => {
     try {
-      await axios.delete(`http://localhost:3000/members/${memberId}`);
+      await axios.delete(process.env.NEXT_PUBLIC_BE_HOST + `/members/${memberId}`);
       setMembers((prevMembers) =>
         prevMembers.filter((member) => member.memberId !== memberId),
       );

@@ -39,8 +39,8 @@ const SignIn: React.FC = () => {
       if (response.data.access_token) {
         Cookies.set("token", response.data.access_token, {
           expires: 7,
-          secure: true,
-          sameSite: "Strict",
+          secure: false,
+          // sameSite: "Strict",
         });
         router.push("/home");
       }

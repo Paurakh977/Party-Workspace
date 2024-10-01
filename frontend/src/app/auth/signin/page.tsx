@@ -32,7 +32,7 @@ const SignIn: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3003/auth/login",
+        process.env.NEXT_PUBLIC_BE_HOST + "/auth/login",
         payload,
       );
 

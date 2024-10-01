@@ -38,7 +38,7 @@ const LevelsForm: React.FC = () => {
     const fetchCommittees = async () => {
       try {
         const response = await axios.get<Committee[]>(
-          "http://localhost:3000/committees",
+          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
         );
         if (response.data.length > 0) {
           setCommittees(response.data);
@@ -65,7 +65,7 @@ const LevelsForm: React.FC = () => {
         ); // Debugging log
         try {
           const response = await axios.get<SubCommittee[]>(
-            `http://localhost:3000/sub-committees/committee/${selectedCommittee}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${selectedCommittee}`,
           );
           if (response.data.length > 0) {
             setSubCommittees(response.data);
@@ -91,7 +91,7 @@ const LevelsForm: React.FC = () => {
     const fetchLevels = async () => {
       try {
         const response = await axios.get<Level[]>(
-          "http://localhost:3000/levels",
+          process.env.NEXT_PUBLIC_BE_HOST + "/levels",
         );
         setLevels(response.data);
       } catch (error) {
@@ -115,7 +115,7 @@ const LevelsForm: React.FC = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/sub-level", payload);
+      await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/sub-level", payload);
       console.log("Form submitted successfully");
 
       // Reset form state

@@ -34,7 +34,7 @@ const RepresentativesForm: React.FC = () => {
     const fetchCommittees = async () => {
       try {
         const response = await axios.get<Committee[]>(
-          "http://localhost:3000/committees",
+          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
         );
         setCommittees(response.data);
         setIsFormDisabled(response.data.length === 0); // Disable form if no committees
@@ -53,7 +53,7 @@ const RepresentativesForm: React.FC = () => {
       if (selectedCommittee) {
         try {
           const response = await axios.get<SubCommittee[]>(
-            `http://localhost:3000/sub-committees/committee/${selectedCommittee}`,
+            process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${selectedCommittee}`,
           );
           setSubCommittees(response.data);
           setIsSubCommitteeDisabled(response.data.length === 0); // Disable if no sub-committees
@@ -77,9 +77,9 @@ const RepresentativesForm: React.FC = () => {
         let endpoint = "";
 
         if (selectedSubCommittee) {
-          endpoint = `http://localhost:3000/sub-level/sub-committee/${selectedSubCommittee}`;
+          endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/sub-committee/${selectedSubCommittee}`;
         } else if (selectedCommittee) {
-          endpoint = `http://localhost:3000/sub-level/committee/${selectedCommittee}`;
+          endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/committee/${selectedCommittee}`;
         }
 
         if (!endpoint) {
@@ -95,7 +95,7 @@ const RepresentativesForm: React.FC = () => {
         if (levelIds.length > 0) {
           // Fetch all levels and filter based on IDs
           const levelsResponse = await axios.get<Level[]>(
-            "http://localhost:3000/levels",
+            process.env.NEXT_PUBLIC_BE_HOST + "/levels",
           );
           const filteredLevels = levelsResponse.data.filter((level) =>
             levelIds.includes(level.levelId),
@@ -130,7 +130,7 @@ const RepresentativesForm: React.FC = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/structures", payload);
+      await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/structures", payload);
       console.log("Form submitted successfully");
 
       // Reset form state

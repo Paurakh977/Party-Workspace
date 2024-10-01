@@ -57,7 +57,7 @@ const SignIn: React.FC = () => {
         <div className="flex flex-wrap items-center">
           <div className="hidden w-full xl:block xl:w-1/2">
             <div className="flex flex-col items-center justify-center space-y-4 px-26 py-17.5 text-center">
-              <span className="whitespace-nowrap text-3xl font-bold text-black dark:text-white">
+              <span className="whitespace-nowrap text-lg font-bold text-black dark:text-white">
                 भेटघाट, संवाद, परिवर्तन
               </span>
               <div className="flex justify-center">
@@ -69,16 +69,16 @@ const SignIn: React.FC = () => {
                   height={60}
                 />
               </div>
-              <h1 className="text-5xl font-bold text-black dark:text-white">
-                नेपाली काँग्रेस अभियान एप
+              <h1 className="text-lg font-bold text-black dark:text-white">
+                नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन
               </h1>
             </div>
           </div>
 
           <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-              <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                अभियान एपमा लग ईन गर्नुहोेस्
+              <h2 className="mb-9 text-lg font-bold text-black dark:text-white sm:text-lg">
+                 नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन लगइन
               </h2>
 
               <form onSubmit={handleSubmit}>

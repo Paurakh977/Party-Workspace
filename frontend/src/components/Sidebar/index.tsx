@@ -390,9 +390,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 alt="Logo"
                 priority
               />
-              <span className="flex h-7 items-center text-title-md">
-                नेपाली काँग्रेस अभियान एप
-              </span>
+              <span className="flex h-7 items-center text-sm">
+                नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन
+              </span>/
             </div>
             {/* <div className="flex h-12 flex-col justify-center leading-tight text-white">
               <span className="flex h-7 items-center text-title-md">

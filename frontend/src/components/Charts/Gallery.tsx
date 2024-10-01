@@ -8,23 +8,23 @@ const Gallery: React.FC = () => {
   // Sample images for the gallery
   const images = [
     {
-      src: "/images/cards/cards-02.png",
+      src: "/images/congress/NC0.jpg",
       alt: "Gallery Image 1",
     },
     {
-      src: "/images/cards/cards-01.png",
+      src: "/images/congress/NC1.jpg",
       alt: "Gallery Image 2",
     },
     {
-      src: "/images/cards/cards-06.png",
+      src: "/images/congress/NC4.jpg",
       alt: "Gallery Image 3",
     },
     {
-      src: "/images/cards/cards-04.png",
+      src: "/images/congress/NC5.jpg",
       alt: "Gallery Image 4",
     },
     {
-      src: "/images/cards/cards-05.png",
+      src: "/images/congress/NC8.jpg",
       alt: "Gallery Image 5",
     },
   ];

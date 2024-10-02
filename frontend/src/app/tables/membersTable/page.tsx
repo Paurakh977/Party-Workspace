@@ -9,7 +9,7 @@ const MembersTablePage: React.FC = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto px-4 py-8">
-        <Breadcrumb pageName="समिति तालिका" />
+        <Breadcrumb pageName="सदस्य व्यवस्थापन" />
         <div>
           {/* Table component */}
           <MembersTable />

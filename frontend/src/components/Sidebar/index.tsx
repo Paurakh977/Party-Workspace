@@ -392,19 +392,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               />
               <span className="flex h-7 items-center text-sm">
                 नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन
-              </span>/
+              </span>
             </div>
-            {/* <div className="flex h-12 flex-col justify-center leading-tight text-white">
-              <span className="flex h-7 items-center text-title-md">
-                नेपाली काँग्रेस अभियान एप
-              </span>
-              <span className="flex h-7 items-center text-title-md">
-                काँग्रेस
-              </span>
-              <span className="flex h-7 items-center text-title-md">
-                अभियान एप
-              </span>
-            </div> */}
           </Link>
 
           <button
@@ -429,10 +418,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         </div>
         {/* <!-- SIDEBAR HEADER --> */}
 
-        <div
-          className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear"
-          // style={{ backgroundColor: "#3669A2" }}
-        >
+        <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           {/* <!-- Sidebar Menu --> */}
           <nav className="mt-5 px-4 py-4 text-sm lg:mt-9 lg:px-2">
             {menuGroups.map((group, groupIndex) => (

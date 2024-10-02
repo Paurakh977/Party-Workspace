@@ -69,6 +69,13 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [selectedCommitteeId, setSelectedCommitteeId] = useState<number | null>(
+    null,
+  );
+  const [selectedSubCommitteeId, setSelectedSubCommitteeId] = useState<
+    number | null
+  >(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -98,7 +105,8 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           committeesResponse.data.map(async (committee) => {
             try {
               const subResponse = await axios.get<SubCommittee[]>(
-                process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${committee.committeeId}`,
+                process.env.NEXT_PUBLIC_BE_HOST +
+                  `/sub-committees/committee/${committee.committeeId}`,
               );
               return { [committee.committeeId]: subResponse.data };
             } catch {
@@ -123,14 +131,16 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           committeesResponse.data.flatMap(async (committee) => {
             try {
               const committeeStructuresResponse = await axios.get<Structure[]>(
-                process.env.NEXT_PUBLIC_BE_HOST + `/structures/committee/${committee.committeeId}`,
+                process.env.NEXT_PUBLIC_BE_HOST +
+                  `/structures/committee/${committee.committeeId}`,
               );
               const committeeStructures = committeeStructuresResponse.data;
 
               const subCommitteesStructuresResponses = await Promise.all(
                 (subCommittees[committee.committeeId] || []).map(async (sub) =>
                   axios.get<Structure[]>(
-                    process.env.NEXT_PUBLIC_BE_HOST + `/structures/subcommittee/${sub.subCommitteeId}`,
+                    process.env.NEXT_PUBLIC_BE_HOST +
+                      `/structures/subcommittee/${sub.subCommitteeId}`,
                   ),
                 ),
               );
@@ -185,6 +195,17 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     fetchData();
   }, []);
 
+  const filteredMembers = members.filter((member) => {
+    const committeeMatch = selectedCommitteeId
+      ? member.committeeId === selectedCommitteeId
+      : true;
+    const subCommitteeMatch = selectedSubCommitteeId
+      ? member.subCommitteeId === selectedSubCommitteeId
+      : true;
+
+    return committeeMatch && subCommitteeMatch;
+  });
+
   // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
     committeeId: number,
@@ -217,7 +238,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   const handleDeleteMember = async (memberId: number) => {
     try {
-      await axios.delete(process.env.NEXT_PUBLIC_BE_HOST + `/members/${memberId}`);
+      await axios.delete(
+        process.env.NEXT_PUBLIC_BE_HOST + `/members/${memberId}`,
+      );
       setMembers((prevMembers) =>
         prevMembers.filter((member) => member.memberId !== memberId),
       );
@@ -235,11 +258,65 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
+  const handleCommitteeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // const committeeId = parseInt(e.target.value);
+    const committeeId = e.target.value ? parseInt(e.target.value) : null;
+    setSelectedCommitteeId(committeeId);
+    setSelectedSubCommitteeId(null); // Reset sub-committee when committee changes
+  };
+
+  const handleSubCommitteeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const subCommitteeId = parseInt(e.target.value);
+    setSelectedSubCommitteeId(subCommitteeId);
+  };
+
   // If singleMember is provided, display only that member
   const membersToDisplay = singleMember ? [singleMember] : members;
 
   return (
     <div className="overflow-x-auto">
+      <div className="mb-4">
+        <label className="mr-4">समिति द्वारा फिल्टर गर्नुहोस्:</label>
+        <select
+          value={selectedCommitteeId ?? ""}
+          onChange={handleCommitteeChange}
+          className="rounded border p-2"
+        >
+          <option value="">सबै समिति</option>
+          {committees.map((committee) => (
+            <option key={committee.committeeId} value={committee.committeeId}>
+              {committee.committeeName}
+            </option>
+          ))}
+        </select>
+
+        {selectedCommitteeId &&
+          subCommittees[selectedCommitteeId]?.length > 0 && (
+            <>
+              <label className="ml-4 mr-4">
+                उप-समिति द्वारा फिल्टर गर्नुहोस्:
+              </label>
+              <select
+                value={selectedSubCommitteeId ?? ""}
+                onChange={handleSubCommitteeChange}
+                className="rounded border p-2"
+              >
+                <option value="">सबै उप-समिति</option>
+                {subCommittees[selectedCommitteeId].map((subCommittee) => (
+                  <option
+                    key={subCommittee.subCommitteeId}
+                    value={subCommittee.subCommitteeId}
+                  >
+                    {subCommittee.subCommitteeName}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+      </div>
+
       <div className="border-gray-700 dark:border-gray-700 min-w-[1500px] rounded-sm border bg-rose-100 p-6 px-5 pb-2.5 pt-6 shadow dark:bg-boxdark sm:rounded-lg sm:px-7.5 xl:pb-1">
         <h4 className="mb-6  text-xl font-semibold text-black dark:text-white">
           <span className="bg-lime-600">सदस्य तालिका</span>
@@ -247,6 +324,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         <table className="min-w-full table-auto">
           <thead className="dark:bg-gray-700">
             <tr className="bg-slate-400">
+              {/* Table headers */}
               <th className="border-gray-700 w-2 border-2 px-4 py-2 font-bold text-black">
                 क्रम संख्या
               </th>
@@ -283,8 +361,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
             </tr>
           </thead>
           <tbody>
-            {membersToDisplay.map((member, index) => (
+            {filteredMembers.map((member, index) => (
               <tr key={member.memberId}>
+                {/* Table rows */}
                 <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
                   {index + 1}
                 </td>

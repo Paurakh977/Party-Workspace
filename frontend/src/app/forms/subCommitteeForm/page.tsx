@@ -23,9 +23,7 @@ const SubCommitteeFormPage = () => {
     // Fetch data from committees API
     const fetchCommittees = async () => {
       try {
-        const response = await fetch(
-          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
-        );
+        const response = await fetch("http://localhost:3000/committees");
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -50,9 +48,7 @@ const SubCommitteeFormPage = () => {
     // Check if there are any sub-committees available
     const fetchSubCommittees = async () => {
       try {
-        const response = await fetch(
-          process.env.NEXT_PUBLIC_BE_HOST + "/sub-committees",
-        );
+        const response = await fetch("http://localhost:3000/sub-committee");
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -88,13 +84,16 @@ const SubCommitteeFormPage = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/sub-committees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_BE_HOST + "/sub-committees",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(subCommitteePayload),
         },
-        body: JSON.stringify(subCommitteePayload),
-      });
+      );
 
       if (!response.ok) {
         console.log(subCommitteePayload);
@@ -136,12 +135,6 @@ const SubCommitteeFormPage = () => {
             onSubmit={handleSubCommitteeSubmit}
           />
         </div>
-
-        {hasSubCommittees && (
-          <div className="mt-8">
-            <LevelsForm />
-          </div>
-        )}
       </div>
     </DefaultLayout>
   );

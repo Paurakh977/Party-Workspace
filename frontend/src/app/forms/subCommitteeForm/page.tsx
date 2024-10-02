@@ -50,7 +50,9 @@ const SubCommitteeFormPage = () => {
     // Check if there are any sub-committees available
     const fetchSubCommittees = async () => {
       try {
-        const response = await fetch("http://localhost:3000/sub-committee");
+        const response = await fetch(
+          process.env.NEXT_PUBLIC_BE_HOST + "/sub-committee",
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }

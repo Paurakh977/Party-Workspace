@@ -23,7 +23,9 @@ const SubCommitteeFormPage = () => {
     // Fetch data from committees API
     const fetchCommittees = async () => {
       try {
-        const response = await fetch("http://localhost:3000/committees");
+        const response = await fetch(
+          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }

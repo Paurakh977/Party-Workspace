@@ -45,6 +45,7 @@ interface Member {
   memberName: string;
   mobileNumber: string;
   email: string;
+  representative: string;
   committeeId: number;
   subCommitteeId?: number;
   positionId?: number;
@@ -340,6 +341,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
                 ईमेल
               </th>
+              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
+                प्रतिनिधि
+              </th>
               <th className="border-gray-700 w-25 border-2 px-4 py-2 font-bold text-black">
                 समिति
               </th>
@@ -378,6 +382,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
                 </td>
                 <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
                   {member.email}
+                </td>
+                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
+                  {member.representative}
                 </td>
                 <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
                   {committees.find(

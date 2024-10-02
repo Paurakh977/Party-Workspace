@@ -19,13 +19,16 @@ const CommitteeFormPage = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/committees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_BE_HOST + "/committees",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);

@@ -51,7 +51,7 @@ const SubCommitteeFormPage = () => {
     const fetchSubCommittees = async () => {
       try {
         const response = await fetch(
-          process.env.NEXT_PUBLIC_BE_HOST + "/sub-committee",
+          process.env.NEXT_PUBLIC_BE_HOST + "/sub-committees",
         );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);

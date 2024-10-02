@@ -76,6 +76,12 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const [selectedSubCommitteeId, setSelectedSubCommitteeId] = useState<
     number | null
   >(null);
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [selectedMunicipality, setSelectedMunicipality] = useState<
+    string | null
+  >(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -203,10 +209,28 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     const subCommitteeMatch = selectedSubCommitteeId
       ? member.subCommitteeId === selectedSubCommitteeId
       : true;
+    const provinceMatch = selectedProvince
+      ? member.province === selectedProvince
+      : true;
+    const districtMatch = selectedDistrict
+      ? member.district === selectedDistrict
+      : true;
+    const municipalityMatch = selectedMunicipality
+      ? member.municipality === selectedMunicipality
+      : true;
+    const addressMatch = selectedAddress
+      ? member.address === selectedAddress
+      : true;
 
-    return committeeMatch && subCommitteeMatch;
+    return (
+      committeeMatch &&
+      subCommitteeMatch &&
+      provinceMatch &&
+      districtMatch &&
+      municipalityMatch &&
+      addressMatch
+    );
   });
-
   // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
     committeeId: number,
@@ -273,12 +297,31 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     setSelectedSubCommitteeId(subCommitteeId);
   };
 
+  const handleAddressChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAddress(e.target.value);
+  };
+
+  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProvince(e.target.value || null);
+  };
+
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDistrict(e.target.value || null);
+  };
+
+  const handleMunicipalityChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedMunicipality(e.target.value || null);
+  };
+
   // If singleMember is provided, display only that member
   const membersToDisplay = singleMember ? [singleMember] : members;
 
   return (
     <div className="overflow-x-auto">
       <div className="mb-4">
+        {/* Committee and Sub-committee filter */}
         <label className="mr-4">समिति द्वारा फिल्टर गर्नुहोस्:</label>
         <select
           value={selectedCommitteeId ?? ""}
@@ -316,6 +359,75 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               </select>
             </>
           )}
+
+        {/* Filters for Address (Country), Province, District, Municipality */}
+        <label className="ml-4 mr-4">देश द्वारा फिल्टर गर्नुहोस्:</label>
+        <select
+          value={selectedAddress ?? ""}
+          onChange={handleAddressChange}
+          className="rounded border p-2"
+        >
+          <option value="">सबै देश</option>
+          {members.length > 0 &&
+            Array.from(new Set(members.map((member) => member.address))).map(
+              (address) => (
+                <option key={address} value={address}>
+                  {address}
+                </option>
+              ),
+            )}
+        </select>
+
+        <label className="ml-4 mr-4">प्रदेश द्वारा फिल्टर गर्नुहोस्:</label>
+        <select
+          value={selectedProvince ?? ""}
+          onChange={handleProvinceChange}
+          className="rounded border p-2"
+        >
+          <option value="">सबै प्रदेश</option>
+          {members.length > 0 &&
+            Array.from(new Set(members.map((member) => member.province))).map(
+              (province) => (
+                <option key={province} value={province}>
+                  {province}
+                </option>
+              ),
+            )}
+        </select>
+
+        <label className="ml-4 mr-4">जिल्ला द्वारा फिल्टर गर्नुहोस्:</label>
+        <select
+          value={selectedDistrict ?? ""}
+          onChange={handleDistrictChange}
+          className="rounded border p-2"
+        >
+          <option value="">सबै जिल्ला</option>
+          {members.length > 0 &&
+            Array.from(new Set(members.map((member) => member.district))).map(
+              (district) => (
+                <option key={district} value={district}>
+                  {district}
+                </option>
+              ),
+            )}
+        </select>
+
+        <label className="ml-4 mr-4">नगरपालिका द्वारा फिल्टर गर्नुहोस्:</label>
+        <select
+          value={selectedMunicipality ?? ""}
+          onChange={handleMunicipalityChange}
+          className="rounded border p-2"
+        >
+          <option value="">सबै नगरपालिका</option>
+          {members.length > 0 &&
+            Array.from(
+              new Set(members.map((member) => member.municipality)),
+            ).map((municipality) => (
+              <option key={municipality} value={municipality}>
+                {municipality}
+              </option>
+            ))}
+        </select>
       </div>
 
       <div className="border-gray-700 dark:border-gray-700 min-w-[1500px] rounded-sm border bg-rose-100 p-6 px-5 pb-2.5 pt-6 shadow dark:bg-boxdark sm:rounded-lg sm:px-7.5 xl:pb-1">

@@ -59,7 +59,7 @@ const SearchResultPage = () => {
     <DefaultLayout>
       <div className="search-result-container">
         {/* Pass the search result to the MembersTable component */}
-        <MembersTable singleMember={searchResult} />
+        {/* <MembersTable singleMember={searchResult} /> */}
       </div>
     </DefaultLayout>
   );

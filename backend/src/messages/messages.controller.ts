@@ -6,6 +6,8 @@ import {
   Body,
   Put,
   Delete,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { Messages } from './messages.entity';
@@ -25,20 +27,45 @@ export class MessagesController {
   }
 
   @Post()
-  create(@Body() message: Messages): Promise<Messages> {
-    return this.messagesService.create(message);
+  async create(@Body() message: Messages): Promise<Messages> {
+    try {
+      // Create the message and send the SMS
+      return await this.messagesService.create(message);
+    } catch (error) {
+      // If SMS sending fails, throw an HTTP exception
+      throw new HttpException(
+        error.message || 'Failed to create message or send SMS',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Put(':messageId')
-  update(
+  async update(
     @Param('messageId') messageId: number,
     @Body() updateData: Partial<Messages>,
-  ) {
-    return this.messagesService.update(messageId, updateData);
+  ): Promise<Messages> {
+    try {
+      return await this.messagesService.update(messageId, updateData);
+    } catch (error) {
+      // Handle message not found or any other errors during update
+      throw new HttpException(
+        error.message || 'Failed to update message',
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 
   @Delete(':messageId')
-  delete(@Param('messageId') messageId: number) {
-    return this.messagesService.delete(messageId);
+  async delete(@Param('messageId') messageId: number): Promise<void> {
+    try {
+      await this.messagesService.delete(messageId);
+    } catch (error) {
+      // Handle errors during deletion
+      throw new HttpException(
+        error.message || 'Failed to delete message',
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 }

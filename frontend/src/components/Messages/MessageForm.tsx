@@ -307,11 +307,11 @@ const MessageForm: React.FC<MessageFormProps> = ({
     if (adminCredits >= cost) {
       try {
         console.log("The sending payload", payload);
-        // await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/messages", {
-        //   from,
-        //   to,
-        //   text,
-        // });
+        await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/messages", {
+          from,
+          to,
+          text,
+        });
         CreditsDeduct(cost);
       } catch (error) {
         console.error("Error sending SMS:", error);

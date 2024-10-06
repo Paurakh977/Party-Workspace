@@ -20,19 +20,62 @@ export class MessagesService {
   }
 
   // Create message and send SMS
-  async create(message: Messages): Promise<Messages> {
-    // First, save the message to the database
-    const savedMessage = await this.messagesRepository.save(message);
-
-    // After saving the message, send the SMS using the Sparrow SMS API
-    const smsResponse = await this.sendSms(message);
-
-    if (smsResponse.status !== 200) {
-      throw new Error(`Failed to send SMS: ${smsResponse.data.response}`);
+  async create(
+    message: Messages,
+    receivers: string[],
+    event: string,
+  ): Promise<Messages[]> {
+    if (!receivers || receivers.length === 0) {
+      throw new Error('Please select at least one receiver.');
     }
 
-    // Return the saved message if SMS was successful
-    return savedMessage;
+    if (!message.message) {
+      throw new Error('Please write a message.');
+    }
+
+    if (!event) {
+      throw new Error('Please enter an event name.');
+    }
+
+    const api_key = '9a165c2a-8924-40ef-9fcc-f5f301d55ccf';
+    const client_key = 'DNv49j46fj';
+    const smsUrl =
+      'http://samyamgroup.com/encraft-message/api/message/send-message';
+
+    message.receivers = JSON.stringify(receivers);
+    let totalCreditConsumed = 0;
+
+    for (const receiver of receivers) {
+      const [receiverName, mobile] = receiver.split('-');
+
+      const payload = {
+        api_key: api_key,
+        client_key: client_key,
+        message: message.message,
+        event: event,
+        ip_: message.ip,
+        message_id: '',
+      };
+
+      try {
+        const response = await axios.post(smsUrl, payload, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        totalCreditConsumed += response.data.credit_consumed;
+        console.log(response.data);
+      } catch (error) {
+        console.error(
+          `Failed to send SMS to ${receiverName} (${mobile}):`,
+          error.response ? error.response.data : error.message,
+        );
+      }
+    }
+
+    message.creditConsumed = totalCreditConsumed;
+    const savedMessage = await this.messagesRepository.save(message);
+    return [savedMessage];
   }
 
   async update(
@@ -54,37 +97,5 @@ export class MessagesService {
 
   async delete(messageId: number): Promise<void> {
     await this.messagesRepository.delete({ messageId });
-  }
-
-  // Helper method to send SMS via Sparrow SMS API
-  private async sendSms(message: Messages) {
-    const sparrowSmsUrl = 'http://api.sparrowsms.com/v2/sms/';
-    const apiToken = 'CCRfjs0IZfeyZsOAFWxl'; // Your Sparrow SMS token
-    const from = message.from; // Your sender identity
-    const to = message.to; // Recipient phone number
-
-    try {
-      // Send the SMS request
-      const response = await axios.post(sparrowSmsUrl, {
-        token: apiToken,
-        from: from,
-        to: to,
-        text: message.text, // Ensure `message.text` has the message content
-      });
-
-      // Log and return response data if successful
-      console.log('SMS sent successfully:', response.data);
-      return response.data;
-    } catch (error) {
-      // Check if error.response exists before trying to access its properties
-      if (error.response) {
-        console.error('SMS API Error:', error.response.data);
-        throw new Error(`SMS API Error: ${error.response.data.response}`);
-      } else {
-        // Handle case where there's no response (e.g., network error)
-        console.error('Network or other error:', error.message);
-        throw new Error(`Network error: ${error.message}`);
-      }
-    }
   }
 }

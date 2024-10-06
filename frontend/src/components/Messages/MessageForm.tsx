@@ -5,6 +5,7 @@ import CreditsChecker from "../Credits/credits-checker";
 import CreditsDeduct from "../Credits/credits-deduct";
 
 interface MessageFormProps {
+  eventHeading: string;
   eventDetails: string;
   eventOrganizer: string;
 }
@@ -62,11 +63,13 @@ interface Member {
 }
 
 const MessageForm: React.FC<MessageFormProps> = ({
+  eventHeading,
   eventDetails,
   eventOrganizer,
 }) => {
   const [token, setToken] = useState<string>("CCRfjs0IZfeyZsOAFWxl");
   const [from, setFrom] = useState<string>(eventOrganizer);
+  const [eventName, setEventName] = useState<string>(eventHeading);
   const [to, setTo] = useState<string>("");
   const [text, setText] = useState<string>(eventDetails);
   const [committees, setCommittees] = useState<Committee[]>([]);
@@ -276,50 +279,68 @@ const MessageForm: React.FC<MessageFormProps> = ({
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    const mobileNumbers = filteredMembers
-      .map((member) => member.mobileNumber)
-      .filter((number) => number) // Ensure we don't include undefined or empty values
-      .join(",");
-
-    setTo(mobileNumbers);
-
-    console.log("Sending message to", mobileNumbers);
-
-    const messageCount = calculateMessageCount(text);
-
-    const recipients = mobileNumbers
-      .split(",")
-      .filter((number) => number.trim() !== "").length;
-    const adminCredits = CreditsChecker();
-
-    const payload = {
-      token: token,
-      from,
-      to: mobileNumbers,
-      text,
+    // Function to get the user's IP address
+    const getUserIP = async () => {
+      try {
+        const response = await axios.get("https://api.ipify.org?format=json");
+        return response.data.ip; // Returns the user's public IP address
+      } catch (error) {
+        console.error("Error fetching IP address:", error);
+        return null; // Return null if fetching fails
+      }
     };
 
-    console.log("recipients:", recipients);
-    console.log("messageCount:", messageCount);
-    console.log("adminCredits:", adminCredits);
+    // Get the user's IP address
+    const userIP = await getUserIP();
+    if (!userIP) {
+      window.alert("Unable to retrieve IP address. Please try again.");
+      return;
+    }
+
+    // Validate and format receivers
+    const receivers = filteredMembers
+      .filter((member) => {
+        const mobile = member.mobileNumber;
+
+        // Check if the mobile number is 10 digits and contains only ASCII characters
+        const isValidMobileNumber =
+          mobile && /^[\x00-\x7F]*$/.test(mobile) && mobile.length === 10;
+        return isValidMobileNumber;
+      })
+      .map((member) => `${member.memberName}-${member.mobileNumber}`);
+
+    // Calculate message cost and required credits
+    const messageCount = calculateMessageCount(text);
+    const recipients = receivers.length;
+    const adminCredits = CreditsChecker();
     const cost = recipients * messageCount * 4;
 
-    if (adminCredits >= cost) {
-      try {
-        console.log("The sending payload", payload);
-        await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/messages", {
-          from,
-          to,
-          text,
-        });
-        CreditsDeduct(cost);
-      } catch (error) {
-        console.error("Error sending SMS:", error);
-      }
-    } else {
+    if (adminCredits < cost) {
       window.alert(
         "तपाईँको खातामा पर्याप्त क्रेडिट छैन । कृपया क्रेडिट थप्नुहोस् ।",
       );
+      return;
+    }
+
+    const payload = {
+      message: {
+        message: text, // The actual message text
+        event: eventName, // Add your eventName variable
+        receivers, // List of 'Name-MobileNumber' format strings
+        ip: userIP, // Add the retrieved IP address
+      },
+      receivers, // For backend, expects an array of strings
+      event_name: eventName, // Send the event name
+    };
+
+    try {
+      console.log("Sending payload:", payload);
+
+      await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/messages", payload);
+
+      CreditsDeduct(cost); // Deduct credits if successful
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
@@ -373,17 +394,17 @@ const MessageForm: React.FC<MessageFormProps> = ({
           {/* From Input */}
           <div className="mb-6">
             <label
-              htmlFor="from"
+              htmlFor="eventName"
               className="mb-2 block text-base font-medium text-black dark:text-white"
             >
-              एस एम एस पठाउने
+              कार्यक्रमको नाम
             </label>
             <input
               type="text"
-              id="from"
+              id="eventName"
               className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
               required
             />
           </div>

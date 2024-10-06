@@ -11,17 +11,19 @@ interface PageProps {
   };
 }
 
-const UpdateMemberPageWrapper: React.FC<PageProps> = ({ params }) => {
+// const UpdateMemberPageWrapper: React.FC<PageProps> = ({ params }) => {
+
+const Page = ({ params }: { params: { memberId: string } }) => {
   // Handle memberId being a string or array of strings
   const memberId = Array.isArray(params.memberId)
     ? params.memberId[0]
     : params.memberId;
 
-  useEffect(() => {
-    console.log(`params from wrapper:`, params.memberId);
-    console.log("params:", params);
-    // console.log("memberId from page:", memberId);
-  }, []);
+  // useEffect(() => {
+  //   console.log(`params from wrapper:`, params.memberId);
+  //   console.log("params:", params);
+  //   // console.log("memberId from page:", memberId);
+  // }, []);
 
   return (
     <DefaultLayout>
@@ -35,4 +37,5 @@ const UpdateMemberPageWrapper: React.FC<PageProps> = ({ params }) => {
   );
 };
 
-export default UpdateMemberPageWrapper;
+// export default UpdateMemberPageWrapper;
+export default Page;

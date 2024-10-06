@@ -13,13 +13,10 @@ export async function middleware(request: NextRequest) {
 
   const adminRoutes = [
     "/home",
-    "/tables/usersTable",
     "/tables/membersTable",
     "/tables/committeesTable",
-    "/forms/updateMembersForm/[memberId]",
     "/forms/membersForm",
     "/forms/eventsForm",
-    "/events/[eventId]",
     "/events/input",
     "/events/list",
     "/messages/input",
@@ -27,12 +24,14 @@ export async function middleware(request: NextRequest) {
   ];
 
   const superAdminRoutes = [
+    ...adminRoutes,
     "/forms/committeeForm",
     "/forms/subCommitteeForm",
     "/forms/levelsForm",
     "/forms/structuresForm",
     "/forms/representativesForm",
     "/forms/usersForm",
+    "/tables/usersTable",
   ];
 
   const publicRoutes = ["/", "/auth/signin"];
@@ -69,13 +68,13 @@ export async function middleware(request: NextRequest) {
 
     // Role-based access control
     if (userData.role === "admin") {
-      if (!adminRoutes.includes(pathname)) {
+      if (!adminRoutes.includes(pathname) && !isDynamicAdminRoute(pathname)) {
         return NextResponse.redirect(new URL("/", request.url));
       }
     } else if (userData.role === "superadmin") {
       if (
-        !adminRoutes.includes(pathname) &&
-        !superAdminRoutes.includes(pathname)
+        !superAdminRoutes.includes(pathname) &&
+        !isDynamicSuperAdminRoute(pathname)
       ) {
         return NextResponse.redirect(new URL("/", request.url));
       }
@@ -86,6 +85,30 @@ export async function middleware(request: NextRequest) {
     console.error("Error verifying token:", error);
     return NextResponse.redirect(new URL("/", request.url));
   }
+}
+
+function isDynamicAdminRoute(pathname: string): boolean {
+  const dynamicRoutes = [
+    /^\/forms\/updateMembersForm\/\d+$/, // Example for /forms/updateMembersForm/[memberId]
+    /^\/events\/\d+$/, // Example for /events/[eventId]
+    // Add other dynamic admin routes here
+    /^\/tables\/selectedMembersTable\/\d+$/,
+    /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,
+  ];
+  return dynamicRoutes.some((route) => route.test(pathname));
+}
+
+// --- added: Check if the route is a dynamic super admin route
+function isDynamicSuperAdminRoute(pathname: string): boolean {
+  const dynamicRoutes = [
+    /^\/forms\/updateMembersForm\/\d+$/, // Example for /forms/updateMembersForm/[memberId]
+    /^\/events\/\d+$/, // Example for /events/[eventId]
+    // Add other dynamic super admin routes here
+    /^\/tables\/selectedMembersTable\/\d+$/,
+    /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,
+    /^\/forms\/updateUsersForm\/\d+$/,
+  ];
+  return dynamicRoutes.some((route) => route.test(pathname));
 }
 
 async function verifyToken(token: string): Promise<DecodedToken> {

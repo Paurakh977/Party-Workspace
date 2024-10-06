@@ -65,14 +65,14 @@ const EventsForm: React.FC = () => {
       console.log("Form submitted successfully");
 
       const shouldSendSMS = window.confirm(
-        "के तपाईंँ एस एम एस पठाउन चहानुहुन्छ?",
+        "तपाईंँको कार्यक्रम विवरण सुरक्षित गरिएको छ। के तपाईंँ एस एम एस पठाउन चहानुहुन्छ?",
       );
       console.log(shouldSendSMS);
       if (shouldSendSMS) {
         console.log("Event Details:", payload.eventDetails);
         console.log("Event Organizer:", payload.eventOrganizer);
         router.push(
-          `/messages/input?eventDetails=${eventDetails}&eventOrganizer=${eventOrganizer}`,
+          `/messages/input?eventHeading=${eventHeading}&eventDetails=${eventDetails}&eventOrganizer=${eventOrganizer}`,
         );
       } else {
         router.push("/events/list");

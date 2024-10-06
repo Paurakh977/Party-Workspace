@@ -11,7 +11,7 @@ const DropdownUser = () => {
   const handleLogout = async () => {
     try {
       Cookies.remove("token");
-      router.push("/");
+      router.push("/auth/signin");
     } catch (error) {
       console.error("Logout failed", error);
     }

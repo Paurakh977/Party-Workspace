@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaFileExcel } from "react-icons/fa";
@@ -59,7 +59,13 @@ interface Member {
   remarks: string;
 }
 
-const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
+const MembersFilteredTable = ({
+  committeeId,
+  subCommitteeId,
+}: {
+  committeeId: number;
+  subCommitteeId: number | null;
+}) => {
   const role = RoleChecker();
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [subCommittees, setSubCommittees] = useState<
@@ -73,12 +79,11 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedCommitteeId, setSelectedCommitteeId] = useState<number | null>(
-    null,
-  );
+  const [selectedCommitteeId, setSelectedCommitteeId] =
+    useState<number>(committeeId);
   const [selectedSubCommitteeId, setSelectedSubCommitteeId] = useState<
     number | null
-  >(null);
+  >(subCommitteeId);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedMunicipality, setSelectedMunicipality] = useState<
@@ -324,7 +329,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   const handleCommitteeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     // const committeeId = parseInt(e.target.value);
-    const committeeId = e.target.value ? parseInt(e.target.value) : null;
+    const committeeId = e.target.value ? parseInt(e.target.value) : 0;
     setSelectedCommitteeId(committeeId);
     setSelectedSubCommitteeId(null); // Reset sub-committee when committee changes
   };
@@ -359,26 +364,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   };
 
   // If singleMember is provided, display only that member
-  const membersToDisplay = singleMember ? [singleMember] : members;
-
   return (
     <div className="overflow-x-auto">
       <div className="mb-4">
-        {/* Committee and Sub-committee filter */}
-        <label className="mr-4">समिति द्वारा फिल्टर गर्नुहोस्:</label>
-        <select
-          value={selectedCommitteeId ?? ""}
-          onChange={handleCommitteeChange}
-          className="rounded border p-2"
-        >
-          <option value="">सबै समिति</option>
-          {committees.map((committee) => (
-            <option key={committee.committeeId} value={committee.committeeId}>
-              {committee.committeeName}
-            </option>
-          ))}
-        </select>
-
         {selectedCommitteeId &&
           subCommittees[selectedCommitteeId]?.length > 0 && (
             <>
@@ -617,4 +605,4 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   );
 };
 
-export default MembersTable;
+export default MembersFilteredTable;

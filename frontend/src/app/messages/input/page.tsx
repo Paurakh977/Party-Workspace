@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 
 const MessageFormPage: React.FC = () => {
   const searchParams = useSearchParams();
+  const eventHeading = String(searchParams.get("eventHeading") || "");
   const eventDetails = String(searchParams.get("eventDetails") || "");
   const eventOrganizer = String(searchParams.get("eventOrganizer") || "");
   return (
@@ -17,6 +18,7 @@ const MessageFormPage: React.FC = () => {
         <div>
           {/* Adjusted padding */}
           <MessageForm
+            eventHeading={eventHeading}
             eventDetails={eventDetails}
             eventOrganizer={eventOrganizer}
           />

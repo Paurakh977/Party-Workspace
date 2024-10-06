@@ -27,10 +27,18 @@ export class MessagesController {
   }
 
   @Post()
-  async create(@Body() message: Messages): Promise<Messages> {
+  async create(
+    @Body()
+    body: {
+      message: Messages;
+      receivers: string[];
+      event_name: string;
+    },
+  ): Promise<Messages[]> {
+    const { message, receivers, event_name } = body;
     try {
       // Create the message and send the SMS
-      return await this.messagesService.create(message);
+      return await this.messagesService.create(message, receivers, event_name);
     } catch (error) {
       // If SMS sending fails, throw an HTTP exception
       throw new HttpException(

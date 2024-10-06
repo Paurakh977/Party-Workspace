@@ -6,11 +6,17 @@ export class Messages {
   messageId: number;
 
   @Column()
-  from: string;
+  message: string;
 
   @Column()
-  to: string;
+  event: string;
 
   @Column()
-  text: string;
+  receivers: string;
+
+  @Column()
+  creditConsumed: number;
+
+  @Column()
+  ip: string;
 }

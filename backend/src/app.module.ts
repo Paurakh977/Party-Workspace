@@ -16,11 +16,14 @@ import { MembersFinderModule } from './members-finder/members-finder.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { SettingsModule } from './settings/settings.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
     }),
     TypeOrmModule.forRoot({
       type: 'mariadb',
@@ -31,6 +34,10 @@ import { ConfigModule } from '@nestjs/config';
       database: process.env.DB_NAME || 'nc_campaign',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public/images/logo'),
+      serveRoot: '/images/logo/',
     }),
     CommitteesModule,
     SubCommitteesModule,
@@ -45,6 +52,7 @@ import { ConfigModule } from '@nestjs/config';
     MembersFinderModule,
     UsersModule,
     AuthModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -5,6 +5,7 @@ import Image from "next/image";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import ImageFetchLoader from "@/components/ImageFetchLoader";
 
 interface DecodedToken {
   userId: number;
@@ -51,6 +52,8 @@ const SignIn: React.FC = () => {
     }
   };
 
+  const settings = ImageFetchLoader();
+
   return (
     <main className="bg-gray-50 dark:bg-gray-900 flex min-h-screen items-center justify-center">
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -61,13 +64,15 @@ const SignIn: React.FC = () => {
                 भेटघाट, संवाद, परिवर्तन
               </span>
               <div className="flex justify-center">
-                <Image
-                  className="dark:block"
-                  src={"/images/logo/logo.svg"}
-                  alt="Logo"
-                  width={200}
-                  height={60}
-                />
+                {settings && settings.icon && (
+                  <Image
+                    className="dark:block"
+                    src={settings.icon}
+                    alt="Logo"
+                    width={200}
+                    height={60}
+                  />
+                )}
               </div>
               <h1 className="text-lg font-bold text-black dark:text-white">
                 नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन
@@ -78,7 +83,7 @@ const SignIn: React.FC = () => {
           <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
               <h2 className="mb-9 text-lg font-bold text-black dark:text-white sm:text-lg">
-                 नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन लगइन
+                नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन लगइन
               </h2>
 
               <form onSubmit={handleSubmit}>
@@ -160,6 +165,7 @@ const SignIn: React.FC = () => {
                   />
                 </div>
               </form>
+              {error && <div className="text-red ">{error}</div>}
             </div>
           </div>
         </div>

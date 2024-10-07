@@ -8,10 +8,21 @@ import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import RoleChecker from "../Role/role-checker";
+import ImageFetchLoader from "../ImageFetchLoader";
 
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
+}
+
+interface Settings {
+  settingId: number;
+  icon: string | null;
+  carousel1: string | null;
+  carousel2: string | null;
+  carousel3: string | null;
+  carousel4: string | null;
+  carousel5: string | null;
 }
 
 interface DecodedToken {
@@ -385,7 +396,7 @@ const menuGroups = [
             />
           </svg>
         ),
-        label: "Profile",
+        label: "प्रोफाइल",
         route: "/profile",
       },
       {
@@ -469,6 +480,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const role = RoleChecker();
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const settings = ImageFetchLoader();
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
@@ -481,13 +494,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
           <Link href="/" className="flex items-center space-x-2">
             <div className="flex flex-col items-center gap-4">
-              <Image
-                width={110}
-                height={12}
-                src={"/images/logo/logo.svg"}
-                alt="Logo"
-                priority
-              />
+              {settings && settings.icon && (
+                <Image
+                  src={settings.icon}
+                  alt="Uploaded Icon"
+                  width={110}
+                  height={30}
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                    const target = e.target as HTMLImageElement; // Type assertion
+                    target.src = "/images/logo/logo.svg"; // Fallback image
+                  }}
+                />
+              )}
+
               <span className="flex h-7 items-center text-sm">
                 नेपाली काँग्रेस समर्थक अभियान एप्लिकेशन
               </span>

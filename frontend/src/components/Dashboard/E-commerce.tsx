@@ -10,6 +10,8 @@ import axios from "axios";
 import CreditsChecker from "../Credits/credits-checker";
 import NepaliDate from "nepali-datetime";
 import Gallery from "../Charts/Gallery";
+import PastEvents from "../Tables/PastEvent";
+import FutureEvents from "../Tables/FutureEvent";
 
 const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
   ssr: false,
@@ -33,7 +35,9 @@ const ECommerce: React.FC = () => {
   useEffect(() => {
     const fetchCommitteeCount = async () => {
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BE_HOST + "/committees/");
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_BE_HOST + "/committees/",
+        );
         setCommitteeCount(response.data.length);
       } catch (error) {
         console.error("Error fetching committees count:", error);
@@ -53,7 +57,9 @@ const ECommerce: React.FC = () => {
 
     const fetchSmsCount = async () => {
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BE_HOST + "/messages/");
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_BE_HOST + "/messages/",
+        );
         setSmsCount(response.data.length);
       } catch (error) {
         console.error("Error fetching SMS count:", error);
@@ -62,7 +68,9 @@ const ECommerce: React.FC = () => {
 
     const fetchEvents = async () => {
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BE_HOST + "/events/");
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_BE_HOST + "/events/",
+        );
         setEvents(response.data);
         categorizeEvents(response.data);
       } catch (error) {
@@ -277,10 +285,12 @@ const ECommerce: React.FC = () => {
         <ChartTwo />
         <ChartThree />
         <MapOne />
-        <div className="col-span-12 xl:col-span-8">
-          <TableOne />
+        <div className="col-span-12 xl:col-span-6">
+          <PastEvents />
         </div>
-        <ChatCard />
+        <div className="col-span-12 xl:col-span-6">
+          <FutureEvents />
+        </div>
       </div>
     </>
   );

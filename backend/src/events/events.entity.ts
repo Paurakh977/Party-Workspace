@@ -1,13 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
-import { Committees } from 'src/committees/committees.entity';
-import { SubCommittees } from 'src/sub-committees/sub-committees.entity';
-import { Levels } from 'src/levels/levels.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Events {

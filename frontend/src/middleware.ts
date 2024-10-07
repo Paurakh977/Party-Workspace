@@ -21,6 +21,7 @@ export async function middleware(request: NextRequest) {
     "/events/list",
     "/messages/input",
     "/messages/list",
+    "/profile",
   ];
 
   const superAdminRoutes = [

@@ -116,6 +116,40 @@ const MembersFilteredTable = ({
       Remarks: member.remarks,
     }));
 
+    // Generate the file name based on the selected filters
+    let fileName = "MembersData";
+
+    if (selectedCommitteeId) {
+      const committeeName =
+        committees.find((c) => c.committeeId === selectedCommitteeId)
+          ?.committeeName || "Committee";
+      fileName += `_${committeeName}`;
+    }
+
+    if (selectedSubCommitteeId) {
+      const subCommitteeName =
+        subCommittees[selectedCommitteeId]?.find(
+          (sub) => sub.subCommitteeId === selectedSubCommitteeId,
+        )?.subCommitteeName || "SubCommittee";
+      fileName += `_${subCommitteeName}`;
+    }
+
+    if (selectedProvince) {
+      fileName += `_${selectedProvince}`;
+    }
+    if (selectedDistrict) {
+      fileName += `_${selectedDistrict}`;
+    }
+    if (selectedMunicipality) {
+      fileName += `_${selectedMunicipality}`;
+    }
+    if (selectedWard) {
+      fileName += `_Ward${selectedWard}`;
+    }
+
+    // Final file name with .xlsx extension
+    fileName += ".xlsx";
+
     // Create a worksheet
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
@@ -123,8 +157,8 @@ const MembersFilteredTable = ({
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Members");
 
-    // Export the workbook
-    XLSX.writeFile(workbook, "MembersData.xlsx");
+    // Export the workbook with the dynamic file name
+    XLSX.writeFile(workbook, fileName);
   };
 
   useEffect(() => {

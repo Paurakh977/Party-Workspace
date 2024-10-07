@@ -7,6 +7,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "via.placeholder.com",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
     ],
   },
   // Enable React strict mode for debugging issues more easily

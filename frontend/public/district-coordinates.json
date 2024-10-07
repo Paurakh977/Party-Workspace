@@ -1,0 +1,310 @@
+{
+  "भोजपुर": {
+    "latitude": 27.2255,
+    "longitude": 87.4587
+  },
+  "धनकुटा": {
+    "latitude": 27.3002,
+    "longitude": 87.4223
+  },
+  "इलाम": {
+    "latitude": 27.2844,
+    "longitude": 88.4033
+  },
+  "झापा": {
+    "latitude": 26.738,
+    "longitude": 88.0518
+  },
+  "खोटाँग": {
+    "latitude": 27.1144,
+    "longitude": 86.9041
+  },
+  "मोरंग": {
+    "latitude": 26.457,
+    "longitude": 87.262
+  },
+  "ओखलढुंगा": {
+    "latitude": 27.233,
+    "longitude": 86.7467
+  },
+  "पांचथर": {
+    "latitude": 27.2924,
+    "longitude": 88.4626
+  },
+  "संखुवासभा": {
+    "latitude": 27.452,
+    "longitude": 87.658
+  },
+  "सोलुखुम्बू": {
+    "latitude": 27.3344,
+    "longitude": 86.6948
+  },
+  "सुनसरी": {
+    "latitude": 26.9841,
+    "longitude": 87.27
+  },
+  "ताप्लेजुंग": {
+    "latitude": 27.365,
+    "longitude": 87.4395
+  },
+  "तेह्रथुम": {
+    "latitude": 27.2008,
+    "longitude": 87.6684
+  },
+  "उदयपुर": {
+    "latitude": 27.8195,
+    "longitude": 86.632
+  },
+  "पर्सा": {
+    "latitude": 27.005,
+    "longitude": 84.8704
+  },
+  "बारा": {
+    "latitude": 27.025,
+    "longitude": 84.9503
+  },
+  "रौतहट": {
+    "latitude": 27.2188,
+    "longitude": 84.1274
+  },
+  "सर्लाही": {
+    "latitude": 27.2088,
+    "longitude": 85.9594
+  },
+  "सिराहा": {
+    "latitude": 26.9139,
+    "longitude": 86.484
+  },
+  "धनुषा": {
+    "latitude": 26.774,
+    "longitude": 85.8882
+  },
+  "सप्तरी": {
+    "latitude": 26.6007,
+    "longitude": 86.7457
+  },
+  "महोत्तरी": {
+    "latitude": 26.6678,
+    "longitude": 85.7887
+  },
+  "भक्तपुर": {
+    "latitude": 27.6666,
+    "longitude": 85.4265
+  },
+  "चितवन": {
+    "latitude": 27.5258,
+    "longitude": 84.5012
+  },
+  "धादिंङ्ग": {
+    "latitude": 27.8211,
+    "longitude": 84.7936
+  },
+  "दोलखा": {
+    "latitude": 27.7163,
+    "longitude": 85.6724
+  },
+  "काठमाडौँ": {
+    "latitude": 27.7172,
+    "longitude": 85.324
+  },
+  "काभ्रेपलान्चोक": {
+    "latitude": 27.6501,
+    "longitude": 85.5382
+  },
+  "ललितपुर": {
+    "latitude": 27.6718,
+    "longitude": 85.324
+  },
+  "मकवानपुर": {
+    "latitude": 27.2164,
+    "longitude": 84.8322
+  },
+  "नुवाकोट": {
+    "latitude": 28.0425,
+    "longitude": 84.696
+  },
+  "रामेछाप": {
+    "latitude": 27.7682,
+    "longitude": 85.8118
+  },
+  "रसुवा": {
+    "latitude": 28.1354,
+    "longitude": 85.4087
+  },
+  "सिन्धुली": {
+    "latitude": 27.2995,
+    "longitude": 85.9657
+  },
+  "सिन्धुपाल्चोक": {
+    "latitude": 27.7344,
+    "longitude": 85.6346
+  },
+  "बागलुङ": {
+    "latitude": 28.2215,
+    "longitude": 83.6921
+  },
+  "गोरखा": {
+    "latitude": 28.148,
+    "longitude": 84.7032
+  },
+  "कास्की": {
+    "latitude": 28.2234,
+    "longitude": 83.9821
+  },
+  "लमजुङ": {
+    "latitude": 28.2271,
+    "longitude": 84.3657
+  },
+  "मनाङ": {
+    "latitude": 28.7861,
+    "longitude": 84.0634
+  },
+  "मुस्ताङ": {
+    "latitude": 28.733,
+    "longitude": 83.9647
+  },
+  "म्याग्दी": {
+    "latitude": 28.3982,
+    "longitude": 83.5203
+  },
+  "नवलपरासी (पूर्व)": {
+    "latitude": 27.8092,
+    "longitude": 83.4598
+  },
+  "पर्वत": {
+    "latitude": 28.3254,
+    "longitude": 83.6796
+  },
+  "स्याङग्जा": {
+    "latitude": 28.246,
+    "longitude": 83.5767
+  },
+  "तनहुँ": {
+    "latitude": 28.2511,
+    "longitude": 84.3118
+  },
+  "कपिलवस्तु": {
+    "latitude": 27.6688,
+    "longitude": 83.4676
+  },
+  "नवलपरासी (पश्चिम)": {
+    "latitude": 27.8008,
+    "longitude": 83.5263
+  },
+  "रुपन्देही": {
+    "latitude": 27.6467,
+    "longitude": 83.4433
+  },
+  "अर्घाखाँची": {
+    "latitude": 28.038,
+    "longitude": 83.6225
+  },
+  "गुल्मी": {
+    "latitude": 28.249,
+    "longitude": 83.4835
+  },
+  "पाल्पा": {
+    "latitude": 27.9675,
+    "longitude": 83.594
+  },
+  "दाङ": {
+    "latitude": 27.9401,
+    "longitude": 82.8603
+  },
+  "प्युठान": {
+    "latitude": 28.0197,
+    "longitude": 82.9743
+  },
+  "रोल्पा": {
+    "latitude": 28.6532,
+    "longitude": 82.9536
+  },
+  "रुकुम (पूर्व)": {
+    "latitude": 28.7168,
+    "longitude": 82.3742
+  },
+  "बाँके": {
+    "latitude": 28.1824,
+    "longitude": 81.6634
+  },
+  "बर्दिया": {
+    "latitude": 28.4157,
+    "longitude": 81.4072
+  },
+  "रुकुम (पश्चिम)": {
+    "latitude": 28.6885,
+    "longitude": 82.2062
+  },
+  "सल्यान": {
+    "latitude": 28.3757,
+    "longitude": 82.7404
+  },
+  "डोल्पा": {
+    "latitude": 29.007,
+    "longitude": 82.3051
+  },
+  "हुम्ला": {
+    "latitude": 29.2061,
+    "longitude": 81.6544
+  },
+  "जुम्ला": {
+    "latitude": 29.2762,
+    "longitude": 82.1957
+  },
+  "कालिकोट": {
+    "latitude": 29.1608,
+    "longitude": 81.7439
+  },
+  "मुगु": {
+    "latitude": 29.213,
+    "longitude": 81.647
+  },
+  "सुर्खेत": {
+    "latitude": 28.6698,
+    "longitude": 81.611
+  },
+  "दैलेख": {
+    "latitude": 28.8676,
+    "longitude": 81.6564
+  },
+  "जाजरकोट": {
+    "latitude": 29.1531,
+    "longitude": 82.1366
+  },
+  "दार्चुला": {
+    "latitude": 29.6714,
+    "longitude": 80.8623
+  },
+  "बझाङ": {
+    "latitude": 29.2861,
+    "longitude": 81.0037
+  },
+  "बाजुरा": {
+    "latitude": 29.4217,
+    "longitude": 81.5278
+  },
+  "बैतडी": {
+    "latitude": 29.5838,
+    "longitude": 80.7935
+  },
+  "डोटी": {
+    "latitude": 29.1841,
+    "longitude": 80.6843
+  },
+  "अछाम": {
+    "latitude": 29.2398,
+    "longitude": 80.859
+  },
+  "डडेलधुरा": {
+    "latitude": 29.4201,
+    "longitude": 80.6615
+  },
+  "कञ्चनपुर": {
+    "latitude": 29.3711,
+    "longitude": 80.6162
+  },
+  "कैलाली": {
+    "latitude": 29.2631,
+    "longitude": 80.5861
+  }
+}

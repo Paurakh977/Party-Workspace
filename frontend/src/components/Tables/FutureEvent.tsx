@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import NepaliDate from "nepali-datetime";
+import Image from "next/image";
 
 interface Event {
   eventId: number;
@@ -38,18 +40,19 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
           process.env.NEXT_PUBLIC_BE_HOST + "/events",
         );
 
-        const now = new Date(); // Use the appropriate date object for comparisons
-        const futureEvents = eventsResponse.data.filter((event) => {
-          const eventDate = new Date(event.eventDate); // Assuming eventDate is in a valid format
-          return eventDate > now; // Filter for future events
-        });
+        const now = new NepaliDate();
+        const pastEvents: any[] = [];
+        const upcoming: any[] = [];
 
-        // Sort future events by date in ascending order and take the first 5
-        futureEvents.sort(
-          (a, b) =>
-            new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),
-        );
-        setEvents(futureEvents.slice(0, 5)); // Get the first 5 future events
+        eventsResponse.data.forEach((event) => {
+          const eventDate = new NepaliDate(event.eventDate);
+          if (eventDate.getDate() < now.getDate()) {
+            pastEvents.push(event);
+          } else {
+            upcoming.push(event);
+          }
+        });
+        setEvents(upcoming.slice(0, 4)); // Get the last 5 past events
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -60,13 +63,6 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
 
     fetchData();
   }, []);
-
-  // Helper function to format address
-  const formatAddress = (event: Event): string => {
-    const { municipality, ward, district, province, address } = event;
-    if (!address) return `${municipality} - ${ward}, ${district}`;
-    return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${address}`;
-  };
 
   const handleDeleteEvent = async (eventId: number) => {
     try {
@@ -86,6 +82,11 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
     router.push(`/forms/updateEventsForm/${eventId}`);
   };
 
+  const handleViewEvent = (eventId: number) => {
+    console.log("Updating event with ID:", eventId);
+    router.push(`/events/detail/${eventId}`);
+  };
+
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -93,68 +94,80 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   const eventsToDisplay = singleEvent ? [singleEvent] : events;
 
   return (
-    <div className="overflow-x-auto">
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-          भविष्यका कार्यक्रम
-        </h4>
-        <table className="min-w-full table-auto">
-          <thead className="dark:bg-gray-700">
-            <tr className="bg-slate-400">
-              <th className="border-gray-700 w-2 border-2 px-4 py-2 font-bold text-black">
-                क्रम संख्या
-              </th>
-              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                कार्यक्रमको शिर्षक
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                कार्यक्रमको मिति
-              </th>
-              <th className="border-gray-700 w-10 border-2 px-4 py-2 font-bold text-black">
-                सुधार
-              </th>
-            </tr>
-          </thead>
+    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+        भएका कार्यक्रम
+      </h4>
 
-          <tbody>
-            {eventsToDisplay.map((event, index) => {
-              return (
-                <tr
-                  key={event.eventId}
-                  className={`${
-                    index === eventsToDisplay.length - 1
-                      ? ""
-                      : "border-gray-700 border-b"
-                  }`}
-                >
-                  <td className="border-2 px-4 py-2 text-center text-black">
-                    {index + 1}
-                  </td>
-                  <td className="border-2 px-4 py-2 text-center text-black">
-                    {event.eventHeading}
-                  </td>
-                  <td className="border-2 px-4 py-2 text-center text-black">
-                    {event.eventDate}
-                  </td>
-                  <td className="border-gray-700 border-2 border-r-2 px-4 py-2 text-center text-black">
-                    <button
-                      onClick={() => handleUpdateEvent(event.eventId)}
-                      className="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteEvent(event.eventId)}
-                      className="mr-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="flex flex-col px-4">
+        <div className="grid grid-cols-3 rounded-sm bg-gray-2 px-4 dark:bg-meta-4 sm:grid-cols-4">
+          <div className="p-2.5 xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base"></h5>
+          </div>
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              कार्यक्रमको शिर्षक
+            </h5>
+          </div>
+          <div className="hidden p-2.5 text-center sm:block xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              कार्यक्रमको मिति
+            </h5>
+          </div>
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              सुधार
+            </h5>
+          </div>
+        </div>
+
+        {eventsToDisplay.map((event, index) => (
+          <div
+            className={`grid grid-cols-3 sm:grid-cols-4 ${
+              index === eventsToDisplay.length - 1
+                ? ""
+                : "border-b border-stroke dark:border-strokedark"
+            }`}
+            key={event.eventId}
+          >
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white">
+                <Image
+                  src="/images/ncIcon.png"
+                  alt="event image"
+                  width={100}
+                  height={100}
+                />
+              </p>
+            </div>
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white">{event.eventHeading}</p>
+            </div>
+            <div className="hidden justify-center p-2.5 text-center sm:flex xl:p-5">
+              <p className="text-black dark:text-white">{event.eventDate}</p>
+            </div>
+            <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
+              <button
+                onClick={() => handleViewEvent(event.eventId)}
+                className="mb-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+              >
+                <FaEye />
+              </button>
+              <button
+                onClick={() => handleUpdateEvent(event.eventId)}
+                className="mb-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+              >
+                <FaEdit />
+              </button>
+              <button
+                onClick={() => handleDeleteEvent(event.eventId)}
+                className="rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
+              >
+                <FaTrash />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

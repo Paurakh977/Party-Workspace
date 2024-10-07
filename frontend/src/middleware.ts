@@ -90,8 +90,9 @@ export async function middleware(request: NextRequest) {
 
 function isDynamicAdminRoute(pathname: string): boolean {
   const dynamicRoutes = [
-    /^\/forms\/updateMembersForm\/\d+$/, // Example for /forms/updateMembersForm/[memberId]
-    /^\/events\/\d+$/, // Example for /events/[eventId]
+    /^\/forms\/updateMembersForm\/\d+$/,
+    /^\/forms\/updateEventsForm\/\d+$/, // Example for /forms/updateMembersForm/[memberId]
+    /^\/events\/detail\/\d+$/, // Example for /events/[eventId]
     // Add other dynamic admin routes here
     /^\/tables\/selectedMembersTable\/\d+$/,
     /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,
@@ -102,8 +103,9 @@ function isDynamicAdminRoute(pathname: string): boolean {
 // --- added: Check if the route is a dynamic super admin route
 function isDynamicSuperAdminRoute(pathname: string): boolean {
   const dynamicRoutes = [
-    /^\/forms\/updateMembersForm\/\d+$/, // Example for /forms/updateMembersForm/[memberId]
-    /^\/events\/\d+$/, // Example for /events/[eventId]
+    /^\/forms\/updateMembersForm\/\d+$/,
+    /^\/forms\/updateEventsForm\/\d+$/, // Example for /forms/updateMembersForm/[memberId]
+    /^\/events\/detail\/\d+$/, // Example for /events/[eventId]
     // Add other dynamic super admin routes here
     /^\/tables\/selectedMembersTable\/\d+$/,
     /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,

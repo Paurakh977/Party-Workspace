@@ -12,6 +12,7 @@ import NepaliDate from "nepali-datetime";
 import Gallery from "../Charts/Gallery";
 import PastEvents from "../Tables/PastEvent";
 import FutureEvents from "../Tables/FutureEvent";
+import PdfDisplayer from "../PDFUploader/pdfDisplayer";
 
 const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
   ssr: false,

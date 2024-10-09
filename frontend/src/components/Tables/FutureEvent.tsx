@@ -98,6 +98,9 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
         भएका कार्यक्रम
       </h4>
+      <span onClick={() => router.push("/events/list")}>
+        सबै कार्यक्रमहरू हेर्नुहोस्
+      </span>
 
       <div className="flex flex-col px-4">
         <div className="grid grid-cols-3 rounded-sm bg-gray-2 px-4 dark:bg-meta-4 sm:grid-cols-4">

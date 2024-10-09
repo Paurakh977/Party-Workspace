@@ -22,6 +22,7 @@ export async function middleware(request: NextRequest) {
     "/messages/input",
     "/messages/list",
     "/profile",
+    "/pdf",
   ];
 
   const superAdminRoutes = [
@@ -52,7 +53,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/map-province-districts.json") ||
     pathname.startsWith("/map-districts-municipalities.json") ||
     pathname.startsWith("/map-municipalities-wards.json") ||
-    pathname.startsWith("/all-provinces.json")
+    pathname.startsWith("/all-provinces.json") ||
+    pathname.startsWith("/uploads")
   ) {
     return NextResponse.next();
   }

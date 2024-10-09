@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import NepaliDate from "nepali-datetime";
+import L from "leaflet";
 
 interface Event {
   eventId: number;
@@ -21,12 +22,21 @@ interface Event {
   remarks: string;
 }
 
+interface fetchCoordinateResponse {
+  districtCoordinate: {
+    [key: string]: { latitude: number; longitude: number };
+  };
+}
+
 // Center the map over Nepal's geographic coordinates with a suitable zoom level
 const MapOne: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [eventDistricts, setEventDistricts] = useState<string[]>([]); // State to store event districts
+  const [districtCoordinates, setDistrictCoordinates] = useState<{
+    [key: string]: { latitude: number; longitude: number };
+  }>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -57,7 +67,8 @@ const MapOne: React.FC = () => {
 
           // Extract eventDistrict and add to Set
           if (event.district) {
-            districtsSet.add(event.district); // Assuming eventDistrict is a string
+            districtsSet.add(event.district);
+            console.log("the event district", event.district); // Assuming eventDistrict is a string
           }
         });
 
@@ -71,7 +82,21 @@ const MapOne: React.FC = () => {
       }
     };
 
+    const fetchCoordinates = async (): Promise<void> => {
+      try {
+        const response = await fetch("/district-coordinates.json");
+        console.log(response.status, response.statusText); // Log status code
+        const text = await response.text();
+        console.log(text); // Log the raw response to inspect it
+        const coordinatesResult = JSON.parse(text); // Parse only if the response is valid
+        setDistrictCoordinates(coordinatesResult.districtCoordinate);
+      } catch (error) {
+        console.error("Error fetching coordinates:", error);
+      }
+    };
+
     fetchData();
+    fetchCoordinates();
   }, []);
 
   return (
@@ -90,6 +115,39 @@ const MapOne: React.FC = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
+
+          {/* Plotting markers for each event */}
+          {events.map((event) => {
+            const districtName = event.district;
+            const districtData = districtCoordinates[districtName || ""];
+
+            if (districtData) {
+              const { latitude, longitude } = districtData; // Destructure latitude and longitude
+
+              return (
+                <Marker
+                  key={event.eventId}
+                  position={[latitude, longitude]}
+                  icon={L.icon({
+                    iconUrl: "/path-to-marker-icon.png", // Adjust icon URL as needed
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                  })}
+                >
+                  <Popup>
+                    <strong>{event.eventHeading}</strong>
+                    <br />
+                    Date: {event.eventDate}
+                    <br />
+                    Time: {event.eventTime}
+                    <br />
+                    Location: {event.address}, {event.district}
+                  </Popup>
+                </Marker>
+              );
+            }
+            return null; // Return nothing if no coordinates found for the district
+          })}
         </MapContainer>
       </div>
     </div>

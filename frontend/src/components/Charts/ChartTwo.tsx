@@ -3,6 +3,7 @@
 import { ApexOptions } from "apexcharts";
 import React from "react";
 import dynamic from "next/dynamic";
+import PdfDisplayer from "../PDFUploader/pdfDisplayer";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -92,10 +93,11 @@ const ChartTwo: React.FC = () => {
       <div className="mb-4 justify-between gap-4 sm:flex">
         <div>
           <h4 className="text-xl font-semibold text-black dark:text-white">
-            Please wait for content
+            पि डि एफ
           </h4>
+          <PdfDisplayer />
         </div>
-        </div>
+      </div>
     </div>
   );
 };

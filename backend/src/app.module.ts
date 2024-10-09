@@ -19,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
 import { SettingsModule } from './settings/settings.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { PdfUploadModule } from './pdf-upload/pdf-upload.module';
 
 @Module({
   imports: [
@@ -39,6 +40,10 @@ import { join } from 'path';
       rootPath: join(__dirname, '..', 'public/images/logo'),
       serveRoot: '/images/logo/',
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public/pdf'),
+      serveRoot: '/pdf/',
+    }),
     CommitteesModule,
     SubCommitteesModule,
     LevelsModule,
@@ -53,6 +58,7 @@ import { join } from 'path';
     UsersModule,
     AuthModule,
     SettingsModule,
+    PdfUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

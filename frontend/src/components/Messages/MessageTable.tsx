@@ -72,7 +72,7 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
                 क्रम संख्या
               </th>
               <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                एस एम एस पठाउने
+                एस एम एस शिर्षक
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
                 एस एम एस पाउने
@@ -101,13 +101,13 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
                     {index + 1}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {message.from}
+                    {message.event}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {message.to}
+                    {message.receivers}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
-                    {message.text}
+                    {message.message}
                   </td>
                   <td className="border-gray-700 border-2 px-4 py-2 text-center">
                     <button

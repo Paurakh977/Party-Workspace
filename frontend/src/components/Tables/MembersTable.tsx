@@ -239,37 +239,39 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     fetchData();
   }, []);
 
-  const filteredMembers = members.filter((member) => {
-    const committeeMatch = selectedCommitteeId
-      ? member.committeeId === selectedCommitteeId
-      : true;
-    const subCommitteeMatch = selectedSubCommitteeId
-      ? member.subCommitteeId === selectedSubCommitteeId
-      : true;
-    const provinceMatch = selectedProvince
-      ? member.province === selectedProvince
-      : true;
-    const districtMatch = selectedDistrict
-      ? member.district === selectedDistrict
-      : true;
-    const municipalityMatch = selectedMunicipality
-      ? member.municipality === selectedMunicipality
-      : true;
-    const addressMatch = selectedAddress
-      ? member.address === selectedAddress
-      : true;
-    const wardMatch = selectedWard ? member.ward === selectedWard : true;
+  const filteredMembers = singleMember
+    ? [singleMember]
+    : members.filter((member) => {
+        const committeeMatch = selectedCommitteeId
+          ? member.committeeId === selectedCommitteeId
+          : true;
+        const subCommitteeMatch = selectedSubCommitteeId
+          ? member.subCommitteeId === selectedSubCommitteeId
+          : true;
+        const provinceMatch = selectedProvince
+          ? member.province === selectedProvince
+          : true;
+        const districtMatch = selectedDistrict
+          ? member.district === selectedDistrict
+          : true;
+        const municipalityMatch = selectedMunicipality
+          ? member.municipality === selectedMunicipality
+          : true;
+        const addressMatch = selectedAddress
+          ? member.address === selectedAddress
+          : true;
+        const wardMatch = selectedWard ? member.ward === selectedWard : true;
 
-    return (
-      committeeMatch &&
-      subCommitteeMatch &&
-      provinceMatch &&
-      districtMatch &&
-      municipalityMatch &&
-      addressMatch &&
-      wardMatch
-    );
-  });
+        return (
+          committeeMatch &&
+          subCommitteeMatch &&
+          provinceMatch &&
+          districtMatch &&
+          municipalityMatch &&
+          addressMatch &&
+          wardMatch
+        );
+      });
   // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
     committeeId: number,
@@ -358,8 +360,8 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     setSelectedWard(e.target.value || null);
   };
 
-  // If singleMember is provided, display only that member
-  const membersToDisplay = singleMember ? [singleMember] : members;
+  // Updated membersToDisplay logic
+  const membersToDisplay = singleMember ? [singleMember] : filteredMembers;
 
   return (
     <div className="overflow-x-auto">
@@ -549,7 +551,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredMembers.map((member, index) => (
+            {membersToDisplay.map((member, index) => (
               <tr key={member.memberId}>
                 {/* Table rows */}
                 <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">

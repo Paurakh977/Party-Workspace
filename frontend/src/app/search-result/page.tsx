@@ -11,6 +11,7 @@ interface Member {
   memberName: string;
   mobileNumber: string;
   email: string;
+  representative: string;
   committeeId: number;
   subCommitteeId?: number;
   positionId?: number;
@@ -30,6 +31,7 @@ const SearchResultPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("Got inside search-result folder");
     const fetchMember = async () => {
       if (!mobileNumber) return;
 
@@ -38,7 +40,8 @@ const SearchResultPage = () => {
 
       try {
         const response = await axios.get<Member>(
-          `http://localhost:3000/members/mobileNumber/${mobileNumber}`,
+          process.env.NEXT_PUBLIC_BE_HOST +
+            `/members/mobileNumber/${mobileNumber}`,
         );
         setSearchResult(response.data);
       } catch (error) {
@@ -58,8 +61,7 @@ const SearchResultPage = () => {
   return (
     <DefaultLayout>
       <div className="search-result-container">
-        {/* Pass the search result to the MembersTable component */}
-        {/* <MembersTable singleMember={searchResult} /> */}
+        <MembersTable singleMember={searchResult} />
       </div>
     </DefaultLayout>
   );

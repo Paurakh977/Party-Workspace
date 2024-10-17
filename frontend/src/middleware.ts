@@ -98,6 +98,7 @@ function isDynamicAdminRoute(pathname: string): boolean {
     // Add other dynamic admin routes here
     /^\/tables\/selectedMembersTable\/\d+$/,
     /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,
+    /^\/search-result\?mobileNumber=[^&]*$/,
   ];
   return dynamicRoutes.some((route) => route.test(pathname));
 }
@@ -112,6 +113,7 @@ function isDynamicSuperAdminRoute(pathname: string): boolean {
     /^\/tables\/selectedMembersTable\/\d+$/,
     /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,
     /^\/forms\/updateUsersForm\/\d+$/,
+    /^\/search-result\?mobileNumber=[^&]*$/,
   ];
   return dynamicRoutes.some((route) => route.test(pathname));
 }

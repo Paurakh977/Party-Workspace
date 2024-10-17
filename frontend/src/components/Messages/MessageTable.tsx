@@ -7,9 +7,10 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 
 interface Message {
   messageId: number;
+  event: string;
   from: string;
-  to: string;
-  text: string;
+  receivers: string;
+  message: string;
 }
 
 const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
@@ -110,18 +111,20 @@ const MessagesTable = ({ singleMessage }: { singleMessage?: Message }) => {
                     {message.message}
                   </td>
                   <td className="border-gray-700 border-2 px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleUpdateMessage(message.messageId)}
-                      className="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteMessage(message.messageId)}
-                      className="mr-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
-                    >
-                      <FaTrash />
-                    </button>
+                    <div className="flex flex-col">
+                      <button
+                        onClick={() => handleUpdateMessage(message.messageId)}
+                        className="mb-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMessage(message.messageId)}
+                        className="rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

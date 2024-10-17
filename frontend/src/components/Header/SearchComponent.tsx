@@ -17,6 +17,7 @@ const SearchComponent = () => {
     setError(null);
 
     try {
+      console.log("Mobile number", mobileNumber);
       // Navigate to the search-result page, passing the mobile number in the query
       router.push(`/search-result?mobileNumber=${mobileNumber}`);
     } catch (error) {

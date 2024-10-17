@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
     "/messages/list",
     "/profile",
     "/pdf",
+    "/search-result",
   ];
 
   const superAdminRoutes = [

@@ -47,7 +47,7 @@ const MembersForm: React.FC = () => {
   const [representative, setRepresentative] = useState<string>("");
 
   // New state for address
-  const [address, setAddress] = useState("");
+  const [country, setCountry] = useState("");
 
   const [province, setProvince] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
@@ -58,13 +58,13 @@ const MembersForm: React.FC = () => {
 
   // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
-    address: string;
+    country: string;
     province?: string;
     district?: string;
     municipality?: string;
     ward?: string;
   }) => {
-    setAddress(newAddress.address);
+    setCountry(newAddress.country);
     setProvince(newAddress.province || "");
     setDistrict(newAddress.district || "");
     setMunicipality(newAddress.municipality || "");
@@ -95,7 +95,8 @@ const MembersForm: React.FC = () => {
       if (selectedCommittee) {
         try {
           const response = await axios.get<SubCommittee[]>(
-            process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${selectedCommittee}`,
+            process.env.NEXT_PUBLIC_BE_HOST +
+              `/sub-committees/committee/${selectedCommittee}`,
           );
           setSubCommittees(response.data);
           setIsSubCommitteeDisabled(response.data.length === 0); // Disable if no sub-committees
@@ -120,9 +121,13 @@ const MembersForm: React.FC = () => {
           let endpoint = "";
 
           if (selectedSubCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/sub-committee/${selectedSubCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/sub-level/sub-committee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/committee/${selectedCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/sub-level/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -169,9 +174,13 @@ const MembersForm: React.FC = () => {
           let endpoint = "";
 
           if (selectedSubCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/structures/subcommittee/${selectedSubCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/structures/subcommittee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/structures/committee/${selectedCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/structures/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -183,7 +192,9 @@ const MembersForm: React.FC = () => {
 
             if (positionIds.length > 0) {
               const positionsPromises = positionIds.map((id) =>
-                axios.get<Position>(process.env.NEXT_PUBLIC_BE_HOST + `/positions/${id}`),
+                axios.get<Position>(
+                  process.env.NEXT_PUBLIC_BE_HOST + `/positions/${id}`,
+                ),
               );
               const positionsResponses = await Promise.all(positionsPromises);
               const filteredPositions = positionsResponses.map(
@@ -226,7 +237,7 @@ const MembersForm: React.FC = () => {
       levelId: selectedLevel !== "" ? selectedLevel : null,
       positionId: selectedPosition !== "" ? selectedPosition : null,
       representative: representative || null,
-      address: address || null,
+      country: country || null,
       province: province || null,
       district: district || null,
       municipality: municipality || null,
@@ -243,7 +254,7 @@ const MembersForm: React.FC = () => {
       setMobileNumber("");
       setEmail("");
       setRepresentative("");
-      setAddress("");
+      setCountry("");
       setSelectedCommittee("");
       setSelectedSubCommittee("");
       setSelectedLevel("");

@@ -51,7 +51,7 @@ interface Member {
   committeeId: number;
   subCommitteeId?: number;
   positionId?: number;
-  address: string;
+  country: string;
   province: string;
   district: string;
   municipality: string;
@@ -84,7 +84,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const [selectedMunicipality, setSelectedMunicipality] = useState<
     string | null
   >(null);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
 
   const router = useRouter();
@@ -257,8 +257,8 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         const municipalityMatch = selectedMunicipality
           ? member.municipality === selectedMunicipality
           : true;
-        const addressMatch = selectedAddress
-          ? member.address === selectedAddress
+        const countryMatch = selectedCountry
+          ? member.country === selectedCountry
           : true;
         const wardMatch = selectedWard ? member.ward === selectedWard : true;
 
@@ -268,7 +268,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           provinceMatch &&
           districtMatch &&
           municipalityMatch &&
-          addressMatch &&
+          countryMatch &&
           wardMatch
         );
       });
@@ -297,9 +297,22 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   // Helper function to format address
   const formatAddress = (member: Member): string => {
-    const { municipality, ward, district, province, address } = member;
-    if (!address) return `${municipality} - ${ward}, ${district}`;
-    return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${address}`;
+    const { municipality, ward, district, province, country } = member;
+
+    // Check for each part of the address from the most specific to the least
+    if (municipality && ward) {
+      return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${country}`;
+    }
+    if (municipality) {
+      return `${municipality}, ${district} जिल्ला, ${province} प्रदेश, ${country}`;
+    }
+    if (district) {
+      return `${district} जिल्ला, ${province} प्रदेश, ${country}`;
+    }
+    if (province) {
+      return `${province} प्रदेश, ${country}`;
+    }
+    return `${country}`; // If none of the above exist, just return the country
   };
 
   const handleDeleteMember = async (memberId: number) => {
@@ -339,7 +352,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAddress(e.target.value);
+    setSelectedCountry(e.target.value);
   };
 
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -408,16 +421,16 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         {/* Filters for Address (Country), Province, District, Municipality */}
         <label className="ml-4 mr-4">देश द्वारा फिल्टर गर्नुहोस्:</label>
         <select
-          value={selectedAddress ?? ""}
+          value={selectedCountry ?? ""}
           onChange={handleAddressChange}
           className="rounded border p-2"
         >
           <option value="">सबै देश</option>
           {members.length > 0 &&
-            Array.from(new Set(members.map((member) => member.address))).map(
-              (address) => (
-                <option key={address} value={address}>
-                  {address}
+            Array.from(new Set(members.map((member) => member.country))).map(
+              (country) => (
+                <option key={country} value={country}>
+                  {country}
                 </option>
               ),
             )}

@@ -115,7 +115,10 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
     };
 
     try {
-      await axios.put(process.env.NEXT_PUBLIC_BE_HOST + `/events/${eventId}`, payload);
+      await axios.put(
+        process.env.NEXT_PUBLIC_BE_HOST + `/events/${eventId}`,
+        payload,
+      );
       console.log("Form submitted successfully");
       router.push("/events/list");
     } catch (error) {
@@ -214,7 +217,7 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
             </label>
             {event && (
               <AddressInput
-                initialAddress={event.address}
+                initialCountry={event.address}
                 initialProvince={event.province}
                 initialDistrict={event.district}
                 initialMunicipality={event.municipality}

@@ -39,8 +39,8 @@ export class Members {
   @Column({ nullable: true })
   representative: string;
 
-  @Column({ default: 'अन्य', nullable: true })
-  address: string;
+  @Column({ default: '0', nullable: true })
+  country: string;
 
   @Column({ nullable: true })
   province: string;

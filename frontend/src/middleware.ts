@@ -55,6 +55,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/map-districts-municipalities.json") ||
     pathname.startsWith("/map-municipalities-wards.json") ||
     pathname.startsWith("/all-provinces.json") ||
+    pathname.startsWith("/all-countries.json") ||
     pathname.startsWith("/uploads")
   ) {
     return NextResponse.next();

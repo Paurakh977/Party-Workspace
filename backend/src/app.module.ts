@@ -20,6 +20,10 @@ import { SettingsModule } from './settings/settings.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PdfUploadModule } from './pdf-upload/pdf-upload.module';
+import { CountryModule } from './country/country.module';
+import { ProvinceModule } from './province/province.module';
+import { DistrictModule } from './district/district.module';
+import { MunicipalityModule } from './municipality/municipality.module';
 
 @Module({
   imports: [
@@ -59,6 +63,10 @@ import { PdfUploadModule } from './pdf-upload/pdf-upload.module';
     AuthModule,
     SettingsModule,
     PdfUploadModule,
+    CountryModule,
+    ProvinceModule,
+    DistrictModule,
+    MunicipalityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

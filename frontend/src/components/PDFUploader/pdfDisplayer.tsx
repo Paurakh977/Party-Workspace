@@ -57,12 +57,12 @@ const PdfDisplayer: React.FC = () => {
         <div className="bg-gray-200 grid grid-cols-2 rounded-sm px-4 py-2.5 text-center dark:bg-meta-4 sm:grid-cols-4">
           <div className="col-span-2 p-2.5 sm:col-span-2 xl:col-span-3">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              File Name
+              फाइलको नाम
             </h5>
           </div>
           <div className="p-2.5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Download Link
+              फाइलको लिंक
             </h5>
           </div>
         </div>
@@ -81,7 +81,7 @@ const PdfDisplayer: React.FC = () => {
             </div>
             <div className="flex items-center justify-center p-2.5">
               <button type="button" onClick={() => handleViewPdf(pdf.filePath)}>
-                View PDF
+                हेर्नुहोस्
               </button>
             </div>
           </div>

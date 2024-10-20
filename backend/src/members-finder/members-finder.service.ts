@@ -25,8 +25,8 @@ export class MembersFinderService {
     return members.map((member) => member.mobileNumber).join(',');
   }
 
-  async findByAddress(address: string): Promise<string> {
-    const members = await this.membersRepository.findBy({ address });
+  async findByAddress(country: string): Promise<string> {
+    const members = await this.membersRepository.findBy({ country });
     return members.map((member) => member.mobileNumber).join(',');
   }
 

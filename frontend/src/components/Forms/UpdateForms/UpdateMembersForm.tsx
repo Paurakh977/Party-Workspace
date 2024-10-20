@@ -135,7 +135,8 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
       if (selectedCommittee) {
         try {
           const response = await axios.get<SubCommittee[]>(
-            process.env.NEXT_PUBLIC_BE_HOST + `/sub-committees/committee/${selectedCommittee}`,
+            process.env.NEXT_PUBLIC_BE_HOST +
+              `/sub-committees/committee/${selectedCommittee}`,
           );
           console.log("Fetched sub-committees:", response.data);
           setSubCommittees(response.data);
@@ -154,9 +155,13 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
         try {
           let endpoint = "";
           if (selectedSubCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/sub-committee/${selectedSubCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/sub-level/sub-committee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/sub-level/committee/${selectedCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/sub-level/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -196,9 +201,13 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
         try {
           let endpoint = "";
           if (selectedSubCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/structures/subcommittee/${selectedSubCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/structures/subcommittee/${selectedSubCommittee}`;
           } else if (selectedCommittee) {
-            endpoint = process.env.NEXT_PUBLIC_BE_HOST + `/structures/committee/${selectedCommittee}`;
+            endpoint =
+              process.env.NEXT_PUBLIC_BE_HOST +
+              `/structures/committee/${selectedCommittee}`;
           }
 
           if (endpoint) {
@@ -211,7 +220,9 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
 
             if (positionIds.length > 0) {
               const positionsPromises = positionIds.map((id) =>
-                axios.get<Position>(process.env.NEXT_PUBLIC_BE_HOST + `/positions/${id}`),
+                axios.get<Position>(
+                  process.env.NEXT_PUBLIC_BE_HOST + `/positions/${id}`,
+                ),
               );
               const positionsResponses = await Promise.all(positionsPromises);
               const filteredPositions = positionsResponses.map(
@@ -258,7 +269,10 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
     console.log("Submitting payload:", payload);
 
     try {
-      await axios.put(process.env.NEXT_PUBLIC_BE_HOST + `/members/${memberId}`, payload);
+      await axios.put(
+        process.env.NEXT_PUBLIC_BE_HOST + `/members/${memberId}`,
+        payload,
+      );
       console.log("Member updated successfully");
       router.push("/tables/membersTable");
     } catch (error) {
@@ -374,7 +388,7 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
             </label>
 
             <AddressInput
-              initialAddress={member.address}
+              initialCountry={member.address}
               initialProvince={member.province}
               initialDistrict={member.district}
               initialMunicipality={member.municipality}

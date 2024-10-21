@@ -42,6 +42,26 @@ interface Position {
   positionName: string;
 }
 
+interface Country {
+  countryId: number;
+  countryName: string;
+}
+
+interface Province {
+  provinceId: number;
+  provinceName: string;
+}
+
+interface District {
+  districtId: number;
+  districtName: string;
+}
+
+interface Municipality {
+  municipalityId: number;
+  municipalityName: string;
+}
+
 interface Member {
   memberId: number;
   memberName: string;
@@ -61,6 +81,10 @@ interface Member {
 
 const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const role = RoleChecker();
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [subCommittees, setSubCommittees] = useState<
     Record<number, SubCommittee[]>
@@ -86,6 +110,8 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   >(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
+
+  const [applyFilters, setApplyFilters] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -127,6 +153,26 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
       try {
         setLoading(true);
         setError(null);
+
+        const countriesResponse = await axios.get<Country[]>(
+          process.env.NEXT_PUBLIC_BE_HOST + "/country",
+        );
+        setCountries(countriesResponse.data);
+
+        const provincesResponse = await axios.get<Province[]>(
+          process.env.NEXT_PUBLIC_BE_HOST + "/province",
+        );
+        setProvinces(provincesResponse.data);
+
+        const districtsResponse = await axios.get<District[]>(
+          process.env.NEXT_PUBLIC_BE_HOST + "/district",
+        );
+        setDistricts(districtsResponse.data);
+
+        const municipalitiesResponse = await axios.get<Municipality[]>(
+          process.env.NEXT_PUBLIC_BE_HOST + "/municipality",
+        );
+        setMunicipalities(municipalitiesResponse.data);
 
         // Fetch committees
         const committeesResponse = await axios.get<Committee[]>(
@@ -299,20 +345,34 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const formatAddress = (member: Member): string => {
     const { municipality, ward, district, province, country } = member;
 
+    // Retrieve proper names from the corresponding arrays using the current context
+    const countryName =
+      countries.find((c) => c.countryId === parseInt(country))?.countryName ||
+      "";
+    const provinceName =
+      provinces.find((p) => p.provinceId === parseInt(province))
+        ?.provinceName || "";
+    const districtName =
+      districts.find((d) => d.districtId === parseInt(district))
+        ?.districtName || "";
+    const municipalityName =
+      municipalities.find((m) => m.municipalityId === parseInt(municipality))
+        ?.municipalityName || "";
+
     // Check for each part of the address from the most specific to the least
-    if (municipality && ward) {
-      return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${country}`;
+    if (municipalityName && ward) {
+      return `${municipalityName} - ${ward}, ${districtName} जिल्ला, ${provinceName} प्रदेश, ${countryName}`;
     }
-    if (municipality) {
-      return `${municipality}, ${district} जिल्ला, ${province} प्रदेश, ${country}`;
+    if (municipalityName) {
+      return `${municipalityName}, ${districtName} जिल्ला, ${provinceName} प्रदेश, ${countryName}`;
     }
-    if (district) {
-      return `${district} जिल्ला, ${province} प्रदेश, ${country}`;
+    if (districtName) {
+      return `${districtName} जिल्ला, ${provinceName} प्रदेश, ${countryName}`;
     }
-    if (province) {
-      return `${province} प्रदेश, ${country}`;
+    if (provinceName) {
+      return `${provinceName} प्रदेश, ${countryName}`;
     }
-    return `${country}`; // If none of the above exist, just return the country
+    return countryName; // If none of the above exist, just return the country name
   };
 
   const handleDeleteMember = async (memberId: number) => {
@@ -373,8 +433,16 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     setSelectedWard(e.target.value || null);
   };
 
+  const handleFilter = () => {
+    setApplyFilters(true); // Apply filters when button is clicked
+  };
+
   // Updated membersToDisplay logic
-  const membersToDisplay = singleMember ? [singleMember] : filteredMembers;
+  const membersToDisplay = singleMember
+    ? [singleMember]
+    : applyFilters
+      ? filteredMembers // Show filtered members if filters are applied
+      : members; // Show all members initially
 
   return (
     <div className="overflow-x-auto">
@@ -426,14 +494,17 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           className="rounded border p-2"
         >
           <option value="">सबै देश</option>
-          {members.length > 0 &&
-            Array.from(new Set(members.map((member) => member.country))).map(
-              (country) => (
-                <option key={country} value={country}>
-                  {country}
-                </option>
+          {countries
+            .filter((country) =>
+              members.some(
+                (member) => parseInt(member.country) === country.countryId,
               ),
-            )}
+            )
+            .map((country) => (
+              <option key={country.countryId} value={country.countryId}>
+                {country.countryName}
+              </option>
+            ))}
         </select>
 
         <label className="ml-4 mr-4">प्रदेश द्वारा फिल्टर गर्नुहोस्:</label>
@@ -443,14 +514,17 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           className="rounded border p-2"
         >
           <option value="">सबै प्रदेश</option>
-          {members.length > 0 &&
-            Array.from(new Set(members.map((member) => member.province))).map(
-              (province) => (
-                <option key={province} value={province}>
-                  {province}
-                </option>
+          {provinces
+            .filter((province) =>
+              members.some(
+                (member) => parseInt(member.province) === province.provinceId,
               ),
-            )}
+            )
+            .map((province) => (
+              <option key={province.provinceId} value={province.provinceId}>
+                {province.provinceName}
+              </option>
+            ))}
         </select>
 
         <label className="ml-4 mr-4">जिल्ला द्वारा फिल्टर गर्नुहोस्:</label>
@@ -460,14 +534,17 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           className="rounded border p-2"
         >
           <option value="">सबै जिल्ला</option>
-          {members.length > 0 &&
-            Array.from(new Set(members.map((member) => member.district))).map(
-              (district) => (
-                <option key={district} value={district}>
-                  {district}
-                </option>
+          {districts
+            .filter((district) =>
+              members.some(
+                (member) => parseInt(member.district) === district.districtId,
               ),
-            )}
+            )
+            .map((district) => (
+              <option key={district.districtId} value={district.districtId}>
+                {district.districtName}
+              </option>
+            ))}
         </select>
 
         <label className="ml-4 mr-4">नगरपालिका द्वारा फिल्टर गर्नुहोस्:</label>
@@ -477,12 +554,19 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           className="rounded border p-2"
         >
           <option value="">सबै नगरपालिका</option>
-          {members.length > 0 &&
-            Array.from(
-              new Set(members.map((member) => member.municipality)),
-            ).map((municipality) => (
-              <option key={municipality} value={municipality}>
-                {municipality}
+          {municipalities
+            .filter((municipality) =>
+              members.some(
+                (member) =>
+                  parseInt(member.municipality) === municipality.municipalityId,
+              ),
+            )
+            .map((municipality) => (
+              <option
+                key={municipality.municipalityId}
+                value={municipality.municipalityId}
+              >
+                {municipality.municipalityName}
               </option>
             ))}
         </select>
@@ -503,6 +587,13 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               ),
             )}
         </select>
+
+        <button
+          onClick={handleFilter}
+          className="ml-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+        >
+          Filter
+        </button>
       </div>
 
       {role === "superadmin" && (

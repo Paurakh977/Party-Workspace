@@ -11,8 +11,8 @@ const HomePage: React.FC = () => {
         <Breadcrumb pageName="पि डि एफ" />
         <div>
           {/* Table component */}
-          <PdfUploader />
-          <PdfDisplayer />
+          {/* <PdfUploader />
+          <PdfDisplayer /> */}
         </div>
       </div>
     </DefaultLayout>

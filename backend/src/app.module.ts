@@ -24,6 +24,7 @@ import { CountryModule } from './country/country.module';
 import { ProvinceModule } from './province/province.module';
 import { DistrictModule } from './district/district.module';
 import { MunicipalityModule } from './municipality/municipality.module';
+import { SocialLinksModule } from './social-links/social-links.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { MunicipalityModule } from './municipality/municipality.module';
     ProvinceModule,
     DistrictModule,
     MunicipalityModule,
+    SocialLinksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

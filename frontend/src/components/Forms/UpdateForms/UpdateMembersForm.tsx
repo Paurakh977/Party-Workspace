@@ -259,6 +259,7 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
       subCommitteeId: selectedSubCommittee !== "" ? selectedSubCommittee : null,
       levelId: selectedLevel !== "" ? selectedLevel : null,
       positionId: selectedPosition !== "" ? selectedPosition : null,
+      address,
       province,
       district,
       municipality,

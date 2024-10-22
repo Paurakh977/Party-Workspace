@@ -123,7 +123,7 @@ const fetchAddress = async (): Promise<FetchAddressResponse> => {
 
 const AddressInput: React.FC<AddressInputProps> = ({
   onAddressChange,
-  initialCountry = "0", // Default country is "अन्य"
+  initialCountry = "", // Default country is "अन्य"
   initialProvince = "",
   initialDistrict = "",
   initialMunicipality = "",

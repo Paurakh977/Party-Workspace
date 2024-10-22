@@ -36,7 +36,7 @@ interface Member {
   subCommitteeId: number | null;
   levelId: number | null;
   positionId: number | null;
-  address: string;
+  country: string;
   province: string;
   district: string;
   municipality: string;
@@ -68,13 +68,13 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
   const [remarks, setRemarks] = useState<string>("");
 
   const handleAddressChange = (newAddress: {
-    address: string;
+    country: string;
     province?: string;
     district?: string;
     municipality?: string;
     ward?: string;
   }) => {
-    setAddress(newAddress.address);
+    setAddress(newAddress.country);
     setProvince(newAddress.province || "");
     setDistrict(newAddress.district || "");
     setMunicipality(newAddress.municipality || "");
@@ -388,7 +388,7 @@ const UpdateMemberPage: React.FC<UpdateMembersFormProps> = ({ memberId }) => {
             </label>
 
             <AddressInput
-              initialCountry={member.address}
+              initialCountry={member.country}
               initialProvince={member.province}
               initialDistrict={member.district}
               initialMunicipality={member.municipality}

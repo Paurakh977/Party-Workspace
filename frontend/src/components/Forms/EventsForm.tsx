@@ -29,13 +29,13 @@ const EventsForm: React.FC = () => {
 
   // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
-    address: string;
+    country: string;
     province?: string;
     district?: string;
     municipality?: string;
     ward?: string;
   }) => {
-    setAddress(newAddress.address);
+    setAddress(newAddress.country);
     setProvince(newAddress.province || "");
     setDistrict(newAddress.district || "");
     setMunicipality(newAddress.municipality || "");

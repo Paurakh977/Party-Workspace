@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import { FaPlus } from "react-icons/fa";
 
-const PdfUploader: React.FC = () => {
+interface PdfUploaderProps {
+  onUploadSuccess: () => void; // Function to call when upload is successful
+}
+
+const PdfUploader: React.FC<PdfUploaderProps> = ({ onUploadSuccess }) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +20,7 @@ const PdfUploader: React.FC = () => {
       setError(null); // Clear previous error
     } else {
       setError("Please select a valid PDF file.");
+      setFile(null); // Reset file if invalid
     }
   };
 
@@ -39,6 +44,7 @@ const PdfUploader: React.FC = () => {
       );
       setSuccessMessage("File uploaded successfully!");
       setFile(null); // Clear file after upload
+      onUploadSuccess(); // Trigger table reload after successful upload
     } catch (err) {
       setError("Error uploading file.");
       console.error(err);
@@ -63,6 +69,10 @@ const PdfUploader: React.FC = () => {
         <FaPlus className="mr-2" />
         Select PDF
       </label>
+
+      {/* Show the file name if a file is selected */}
+      {file && <p className="text-gray-600">{file.name}</p>}
+
       <button
         onClick={handleUpload}
         disabled={uploading}
@@ -72,6 +82,7 @@ const PdfUploader: React.FC = () => {
       >
         {uploading ? "Uploading..." : "Upload"}
       </button>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
       {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
     </div>

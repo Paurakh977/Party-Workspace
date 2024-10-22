@@ -15,21 +15,21 @@ const PdfDisplayer: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPdf, setCurrentPdf] = useState<string | null>(null); // State to hold the current PDF file path
 
-  useEffect(() => {
-    const fetchPdfs = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_HOST}/pdf-upload`,
-        );
-        setPdfs(response.data); // Ensure this data includes the correct `filePath`
-      } catch (err) {
-        setError("Error fetching PDF files.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPdfs = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_HOST}/pdf-upload`,
+      );
+      setPdfs(response.data); // Ensure this data includes the correct `filePath`
+    } catch (err) {
+      setError("Error fetching PDF files.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPdfs();
   }, []);
 
@@ -51,7 +51,8 @@ const PdfDisplayer: React.FC = () => {
 
   return (
     <div>
-      <PdfUploader />
+      {/* Pass fetchPdfs as a prop to PdfUploader */}
+      <PdfUploader onUploadSuccess={fetchPdfs} />
 
       <div className="flex flex-col space-y-4">
         <div className="bg-gray-200 grid grid-cols-2 rounded-sm px-4 py-2.5 text-center dark:bg-meta-4 sm:grid-cols-4">

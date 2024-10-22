@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import NepaliDate from "nepali-datetime";
 import Image from "next/image";
+import PdfDisplayer from "../PDFUploader/pdfDisplayer";
 
 interface Event {
   eventId: number;
@@ -46,7 +47,7 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
 
         eventsResponse.data.forEach((event) => {
           const eventDate = new NepaliDate(event.eventDate);
-          if (eventDate.getDate() < now.getDate()) {
+          if (eventDate.getDate() > now.getDate()) {
             pastEvents.push(event);
           } else {
             upcoming.push(event);
@@ -122,6 +123,11 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
               सुधार
             </h5>
           </div>
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              पि.डि.एफ
+            </h5>
+          </div>
         </div>
 
         {eventsToDisplay.map((event, index) => (
@@ -168,6 +174,10 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
               >
                 <FaTrash />
               </button>
+            </div>
+            {/* Include PdfDisplayer for each event */}
+            <div className="col-span-3 sm:col-span-4">
+              <PdfDisplayer /> {/* Render the PDF displayer for each event */}
             </div>
           </div>
         ))}

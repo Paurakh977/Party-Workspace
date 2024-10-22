@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import NepaliDate from "nepali-datetime";
 import Image from "next/image";
+import PdfDisplayer from "../PDFUploader/pdfDisplayer"; // Import the PdfDisplayer component
 
 interface Event {
   eventId: number;
@@ -46,13 +47,13 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
 
         eventsResponse.data.forEach((event) => {
           const eventDate = new NepaliDate(event.eventDate);
-          if (eventDate.getDate() < now.getDate()) {
+          if (eventDate.getDate() > now.getDate()) {
             pastEvents.push(event);
           } else {
             upcoming.push(event);
           }
         });
-        setEvents(pastEvents.slice(0, 4)); // Get the last 5 past events
+        setEvents(pastEvents); // Get the last 5 past events
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -83,7 +84,7 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   };
 
   const handleViewEvent = (eventId: number) => {
-    console.log("Updating event with ID:", eventId);
+    console.log("Viewing event with ID:", eventId);
     router.push(`/events/detail/${eventId}`);
   };
 
@@ -120,6 +121,11 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               सुधार
+            </h5>
+          </div>
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              पि.डि.एफ
             </h5>
           </div>
         </div>
@@ -168,6 +174,11 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
               >
                 <FaTrash />
               </button>
+            </div>
+
+            {/* Include PdfDisplayer for each event */}
+            <div className="col-span-3 sm:col-span-4">
+              <PdfDisplayer /> {/* Render the PDF displayer for each event */}
             </div>
           </div>
         ))}

@@ -15,7 +15,7 @@ interface Member {
   committeeId: number;
   subCommitteeId?: number;
   positionId?: number;
-  address: string;
+  country: string;
   province: string;
   district: string;
   municipality: string;

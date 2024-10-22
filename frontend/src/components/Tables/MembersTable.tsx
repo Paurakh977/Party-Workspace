@@ -113,6 +113,8 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   const [applyFilters, setApplyFilters] = useState<boolean>(false);
 
+  const [filteredMembers, setFilteredMembers] = useState<Member[]>(members);
+
   const router = useRouter();
 
   const exportToExcel = () => {
@@ -274,6 +276,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           process.env.NEXT_PUBLIC_BE_HOST + "/members",
         );
         setMembers(membersResponse.data);
+        setFilteredMembers(membersResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -285,39 +288,61 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     fetchData();
   }, []);
 
-  const filteredMembers = singleMember
-    ? [singleMember]
-    : members.filter((member) => {
-        const committeeMatch = selectedCommitteeId
-          ? member.committeeId === selectedCommitteeId
-          : true;
-        const subCommitteeMatch = selectedSubCommitteeId
-          ? member.subCommitteeId === selectedSubCommitteeId
-          : true;
-        const provinceMatch = selectedProvince
-          ? member.province === selectedProvince
-          : true;
-        const districtMatch = selectedDistrict
-          ? member.district === selectedDistrict
-          : true;
-        const municipalityMatch = selectedMunicipality
-          ? member.municipality === selectedMunicipality
-          : true;
-        const countryMatch = selectedCountry
-          ? member.country === selectedCountry
-          : true;
-        const wardMatch = selectedWard ? member.ward === selectedWard : true;
+  useEffect(() => {
+    if (!applyFilters) return;
 
-        return (
-          committeeMatch &&
-          subCommitteeMatch &&
-          provinceMatch &&
-          districtMatch &&
-          municipalityMatch &&
-          countryMatch &&
-          wardMatch
-        );
-      });
+    // Logic for applying filters
+    const filtered = singleMember
+      ? [singleMember]
+      : members.filter((member) => {
+          const committeeMatch = selectedCommitteeId
+            ? member.committeeId === selectedCommitteeId
+            : true;
+          const subCommitteeMatch = selectedSubCommitteeId
+            ? member.subCommitteeId === selectedSubCommitteeId
+            : true;
+          const provinceMatch = selectedProvince
+            ? member.province === selectedProvince
+            : true;
+          const districtMatch = selectedDistrict
+            ? member.district === selectedDistrict
+            : true;
+          const municipalityMatch = selectedMunicipality
+            ? member.municipality === selectedMunicipality
+            : true;
+          const countryMatch = selectedCountry
+            ? member.country === selectedCountry
+            : true;
+          const wardMatch = selectedWard ? member.ward === selectedWard : true;
+
+          return (
+            committeeMatch &&
+            subCommitteeMatch &&
+            provinceMatch &&
+            districtMatch &&
+            municipalityMatch &&
+            countryMatch &&
+            wardMatch
+          );
+        });
+
+    setFilteredMembers(filtered);
+
+    // Move setApplyFilters(false) here, to reset after applying the filters
+    setApplyFilters(false);
+  }, [
+    applyFilters,
+    singleMember,
+    members,
+    selectedCommitteeId,
+    selectedSubCommitteeId,
+    selectedProvince,
+    selectedDistrict,
+    selectedMunicipality,
+    selectedCountry,
+    selectedWard,
+  ]);
+
   // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
     committeeId: number,
@@ -437,12 +462,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     setApplyFilters(true); // Apply filters when button is clicked
   };
 
-  // Updated membersToDisplay logic
-  const membersToDisplay = singleMember
-    ? [singleMember]
-    : applyFilters
-      ? filteredMembers // Show filtered members if filters are applied
-      : members; // Show all members initially
+  const membersToDisplay = singleMember ? [singleMember] : filteredMembers;
 
   return (
     <div className="overflow-x-auto">

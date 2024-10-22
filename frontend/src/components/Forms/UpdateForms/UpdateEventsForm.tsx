@@ -15,7 +15,7 @@ interface Event {
   eventDetails: string;
   eventDate: string;
   eventTime: string;
-  address: string;
+  country: string;
   province?: string;
   district?: string;
   municipality?: string;
@@ -50,13 +50,13 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
 
   // Handle address changes from AddressInput component
   const handleAddressChange = (newAddress: {
-    address: string;
+    country: string;
     province?: string;
     district?: string;
     municipality?: string;
     ward?: string;
   }) => {
-    setAddress(newAddress.address);
+    setAddress(newAddress.country);
     setProvince(newAddress.province || "");
     setDistrict(newAddress.district || "");
     setMunicipality(newAddress.municipality || "");
@@ -79,7 +79,7 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
           setEventDetails(eventData.eventDetails || "");
           setEventDate(eventData.eventDate || "");
           setEventTime(eventData.eventTime || "");
-          setAddress(eventData.address || "");
+          setAddress(eventData.country || "");
           setProvince(eventData.province || "");
           setDistrict(eventData.district || "");
           setMunicipality(eventData.municipality || "");
@@ -217,7 +217,7 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
             </label>
             {event && (
               <AddressInput
-                initialCountry={event.address}
+                initialCountry={event.country}
                 initialProvince={event.province}
                 initialDistrict={event.district}
                 initialMunicipality={event.municipality}

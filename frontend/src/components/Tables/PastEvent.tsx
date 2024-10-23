@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaFilePdf } from "react-icons/fa"; // Import the document icon
 import NepaliDate from "nepali-datetime";
 import Image from "next/image";
 import PdfDisplayer from "../PDFUploader/pdfDisplayer"; // Import the PdfDisplayer component
@@ -28,6 +28,7 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [pdfVisible, setPdfVisible] = useState<{ [key: number]: boolean }>({}); // State to track visibility of PdfDisplayer
   const router = useRouter();
 
   useEffect(() => {
@@ -88,6 +89,10 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
     router.push(`/events/detail/${eventId}`);
   };
 
+  const togglePdfVisibility = (eventId: number) => {
+    setPdfVisible((prev) => ({ ...prev, [eventId]: !prev[eventId] }));
+  };
+
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -121,11 +126,6 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               सुधार
-            </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              पि.डि.एफ
             </h5>
           </div>
         </div>
@@ -170,16 +170,27 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
               </button>
               <button
                 onClick={() => handleDeleteEvent(event.eventId)}
-                className="rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
+                className="mb-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
               >
                 <FaTrash />
+              </button>
+
+              {/* New button to toggle PdfDisplayer */}
+              <button
+                onClick={() => togglePdfVisibility(event.eventId)}
+                className="rounded bg-orange-600 px-4 py-2 text-white hover:bg-orange-700"
+              >
+                <FaFilePdf />
               </button>
             </div>
 
             {/* Include PdfDisplayer for each event */}
-            <div className="col-span-3 sm:col-span-4">
-              <PdfDisplayer /> {/* Render the PDF displayer for each event */}
-            </div>
+            {pdfVisible[event.eventId] && ( // Conditional rendering of PdfDisplayer
+              <div className="col-span-3 mt-4 sm:col-span-4">
+                <PdfDisplayer eventId={event.eventId} />{" "}
+                {/* Pass the eventId here */}
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -16,19 +16,26 @@ export class PdfUploadService {
     filePath: string,
     mimeType: string,
     fileSize: number,
+    eventId: number, // Add eventId parameter
   ): Promise<PdfUpload> {
     const newPdf = this.pdfUploadRepository.create({
       fileName,
       filePath,
       mimeType,
       fileSize,
+      eventId, // Set the eventId
     });
     return this.pdfUploadRepository.save(newPdf);
   }
 
-  // Method to get a list of all uploaded PDFs
+  // Method to get all uploaded PDFs
   async findAll(): Promise<PdfUpload[]> {
     return this.pdfUploadRepository.find();
+  }
+
+  // Method to get PDFs by eventId
+  async findByEventId(eventId: number): Promise<PdfUpload[]> {
+    return this.pdfUploadRepository.find({ where: { eventId } });
   }
 
   // Method to get a PDF by ID

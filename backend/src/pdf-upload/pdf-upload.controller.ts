@@ -4,6 +4,7 @@ import {
   Param,
   Post,
   Delete,
+  Body,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
@@ -29,8 +30,8 @@ export class PdfUploadController {
       storage: diskStorage({
         destination: './public/pdf',
         filename: (req, file, callback) => {
-          const sanitizedFileName = sanitizeFilename(file.originalname); // Sanitize the original filename
-          callback(null, sanitizedFileName); // Use the sanitized filename directly
+          const sanitizedFileName = sanitizeFilename(file.originalname);
+          callback(null, sanitizedFileName);
         },
       }),
       limits: {
@@ -38,23 +39,32 @@ export class PdfUploadController {
       },
     }),
   )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('eventId') eventId: number, // Use @Body to get eventId from request body
+  ) {
     if (!file) {
       throw new BadRequestException('File is not valid');
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BE_HOST || 'http://localhost:3003'; // Use environment variable
+    const baseUrl = process.env.NEXT_PUBLIC_BE_HOST || 'http://localhost:3003';
     return this.pdfUploadService.uploadPdf(
-      file.filename, // This is now the sanitized file name
-      `${baseUrl}/pdf/${file.filename}`, // Use environment variable
+      file.filename,
+      `${baseUrl}/pdf/${file.filename}`,
       file.mimetype,
       file.size,
+      eventId, // Now eventId is correctly received
     );
   }
 
   @Get()
   async findAll(): Promise<PdfUpload[]> {
     return this.pdfUploadService.findAll();
+  }
+
+  @Get('event/:eventId') // New endpoint to get PDFs by eventId
+  async findByEventId(@Param('eventId') eventId: number): Promise<PdfUpload[]> {
+    return this.pdfUploadService.findByEventId(eventId);
   }
 
   @Get(':id')

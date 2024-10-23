@@ -3,7 +3,7 @@
 import { ApexOptions } from "apexcharts";
 import React from "react";
 import dynamic from "next/dynamic";
-import PdfDisplayer from "../PDFUploader/pdfDisplayer";
+import SocialLinkDisplayer from "../videoLinks/videolinkDisplayer";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -93,9 +93,9 @@ const ChartTwo: React.FC = () => {
       <div className="mb-4 justify-between gap-4 sm:flex">
         <div>
           <h4 className="text-xl font-semibold text-black dark:text-white">
-            पि डि एफ
+            सोसल मिडिया लिंकहरु
           </h4>
-          <PdfDisplayer />
+          <SocialLinkDisplayer />
         </div>
       </div>
     </div>

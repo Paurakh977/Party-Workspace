@@ -23,6 +23,9 @@ export class PdfUpload {
   @Column({ type: 'int', nullable: true })
   fileSize: number; // File size in bytes
 
+  @Column({ type: 'int', nullable: true })
+  eventId: number; // Add this line to associate with an event
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -53,7 +53,7 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
             upcoming.push(event);
           }
         });
-        setEvents(upcoming.slice(0, 4)); // Get the last 5 past events
+        setEvents(upcoming.slice(0, 4)); // Get the last 4 upcoming events
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -84,7 +84,7 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   };
 
   const handleViewEvent = (eventId: number) => {
-    console.log("Updating event with ID:", eventId);
+    console.log("Viewing event with ID:", eventId);
     router.push(`/events/detail/${eventId}`);
   };
 
@@ -97,7 +97,7 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        भएका कार्यक्रम
+        हुने कार्यक्रम
       </h4>
       <span onClick={() => router.push("/events/list")}>
         सबै कार्यक्रमहरू हेर्नुहोस्
@@ -177,7 +177,8 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
             </div>
             {/* Include PdfDisplayer for each event */}
             <div className="col-span-3 sm:col-span-4">
-              <PdfDisplayer /> {/* Render the PDF displayer for each event */}
+              <PdfDisplayer eventId={event.eventId} />{" "}
+              {/* Pass eventId as prop */}
             </div>
           </div>
         ))}

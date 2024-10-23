@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaFilePdf } from "react-icons/fa"; // Include FaFilePdf for PDF button
 import NepaliDate from "nepali-datetime";
 import Image from "next/image";
-import PdfDisplayer from "../PDFUploader/pdfDisplayer";
+import PdfDisplayer from "../PDFUploader/pdfDisplayer"; // Import PdfDisplayer
 
 interface Event {
   eventId: number;
@@ -28,6 +28,7 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [pdfVisible, setPdfVisible] = useState<{ [key: number]: boolean }>({}); // State to track visibility of PdfDisplayer
   const router = useRouter();
 
   useEffect(() => {
@@ -42,14 +43,11 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
         );
 
         const now = new NepaliDate();
-        const pastEvents: any[] = [];
         const upcoming: any[] = [];
 
         eventsResponse.data.forEach((event) => {
           const eventDate = new NepaliDate(event.eventDate);
           if (eventDate.getDate() > now.getDate()) {
-            pastEvents.push(event);
-          } else {
             upcoming.push(event);
           }
         });
@@ -86,6 +84,10 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   const handleViewEvent = (eventId: number) => {
     console.log("Viewing event with ID:", eventId);
     router.push(`/events/detail/${eventId}`);
+  };
+
+  const togglePdfVisibility = (eventId: number) => {
+    setPdfVisible((prev) => ({ ...prev, [eventId]: !prev[eventId] }));
   };
 
   if (loading) return <p>Loading data...</p>;
@@ -175,11 +177,22 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
                 <FaTrash />
               </button>
             </div>
-            {/* Include PdfDisplayer for each event */}
-            <div className="col-span-3 sm:col-span-4">
-              <PdfDisplayer eventId={event.eventId} />{" "}
-              {/* Pass eventId as prop */}
+            {/* Button to toggle PdfDisplayer */}
+            <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
+              <button
+                onClick={() => togglePdfVisibility(event.eventId)}
+                className="rounded bg-orange-600 px-4 py-2 text-white hover:bg-orange-700"
+              >
+                <FaFilePdf />
+              </button>
             </div>
+            {/* Include PdfDisplayer for each event */}
+            {pdfVisible[event.eventId] && ( // Conditional rendering of PdfDisplayer
+              <div className="col-span-3 sm:col-span-4">
+                <PdfDisplayer eventId={event.eventId} />{" "}
+                {/* Pass eventId as prop */}
+              </div>
+            )}
           </div>
         ))}
       </div>

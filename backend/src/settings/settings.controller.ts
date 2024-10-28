@@ -231,23 +231,9 @@ export class SettingsController {
   ): Promise<Settings> {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
 
+    // Validation for files
     if (iconFile && !allowedTypes.includes(iconFile.mimetype)) {
       throw new BadRequestException('Invalid icon file type');
-    }
-    if (carousel1File && !allowedTypes.includes(carousel1File.mimetype)) {
-      throw new BadRequestException('Invalid carousel1 file type');
-    }
-    if (carousel2File && !allowedTypes.includes(carousel2File.mimetype)) {
-      throw new BadRequestException('Invalid carousel2 file type');
-    }
-    if (carousel3File && !allowedTypes.includes(carousel3File.mimetype)) {
-      throw new BadRequestException('Invalid carousel3 file type');
-    }
-    if (carousel4File && !allowedTypes.includes(carousel4File.mimetype)) {
-      throw new BadRequestException('Invalid carousel4 file type');
-    }
-    if (carousel5File && !allowedTypes.includes(carousel5File.mimetype)) {
-      throw new BadRequestException('Invalid carousel5 file type');
     }
 
     // Find the existing setting
@@ -256,9 +242,9 @@ export class SettingsController {
       throw new BadRequestException('Setting not found');
     }
 
-    // Update the icon and carousel fields if files are uploaded
+    // Update fields only if the file is uploaded
     if (iconFile) {
-      setting.icon = iconFile.filename;
+      setting.icon = iconFile.filename; // Set the new file name
     }
     if (carousel1File) {
       setting.carousel1 = carousel1File.filename;
@@ -276,6 +262,7 @@ export class SettingsController {
       setting.carousel5 = carousel5File.filename;
     }
 
+    // Save the updated setting
     return this.settingsService.update(settingId, setting);
   }
 
@@ -300,19 +287,19 @@ export class SettingsController {
         ? `http://localhost:3003/images/logo/${setting.icon}`
         : null,
       carousel1: setting.carousel1
-        ? `http://localhost:3003/images/logo/${setting.carousel1}`
+        ? `http://localhost:3003/images/carousel/${setting.carousel1}`
         : null,
       carousel2: setting.carousel2
-        ? `http://localhost:3003/images/logo/${setting.carousel2}`
+        ? `http://localhost:3003/images/carousel/${setting.carousel2}`
         : null,
       carousel3: setting.carousel3
-        ? `http://localhost:3003/images/logo/${setting.carousel3}`
+        ? `http://localhost:3003/images/carousel/${setting.carousel3}`
         : null,
       carousel4: setting.carousel4
-        ? `http://localhost:3003/images/logo/${setting.carousel4}`
+        ? `http://localhost:3003/images/carousel/${setting.carousel4}`
         : null,
       carousel5: setting.carousel5
-        ? `http://localhost:3003/images/logo/${setting.carousel5}`
+        ? `http://localhost:3003/images/carousel/${setting.carousel5}`
         : null,
     };
   }

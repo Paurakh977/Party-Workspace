@@ -36,7 +36,13 @@ export class Events {
   venue: string;
 
   @Column()
+  eventSpeaker: string;
+
+  @Column()
   eventOrganizer: string;
+
+  @Column({ nullable: true })
+  eventType: string;
 
   @Column({ nullable: true })
   remarks: string;

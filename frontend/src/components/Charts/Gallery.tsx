@@ -3,28 +3,36 @@
 import React from "react";
 import Slider from "react-slick";
 import Image from "next/image"; // Import the Image component
+import ImageFetchLoader from "../ImageFetchLoader";
 
 const Gallery: React.FC = () => {
-  // Sample images for the gallery
+  // Fetch images for the gallery
+  const carousel = ImageFetchLoader();
+
+  // Check if carousel data is loaded
+  if (!carousel) {
+    return <div>Loading...</div>; // Show loading state if carousel data isn't ready
+  }
+
   const images = [
     {
-      src: "/images/congress/NC0.jpg",
+      src: carousel.carousel1,
       alt: "Gallery Image 1",
     },
     {
-      src: "/images/congress/NC1.jpg",
+      src: carousel.carousel2,
       alt: "Gallery Image 2",
     },
     {
-      src: "/images/congress/NC4.jpg",
+      src: carousel.carousel3,
       alt: "Gallery Image 3",
     },
     {
-      src: "/images/congress/NC5.jpg",
+      src: carousel.carousel4,
       alt: "Gallery Image 4",
     },
     {
-      src: "/images/congress/NC8.jpg",
+      src: carousel.carousel5,
       alt: "Gallery Image 5",
     },
   ];
@@ -49,14 +57,27 @@ const Gallery: React.FC = () => {
         <Slider {...settings}>
           {images.map((image, index) => (
             <div key={index} className="flex justify-center">
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={1000} // Specify the width
-                height={400} // Specify the height
-                className=""
-                style={{ objectFit: "cover" }} // Maintain aspect ratio
-              />
+              {image.src ? ( // Check if the image.src is valid
+                <Image
+                  src={image.src} // Directly use the URL from the carousel data
+                  alt={image.alt}
+                  width={1000} // Specify the width
+                  height={400} // Specify the height
+                  className=""
+                  style={{ objectFit: "cover" }} // Maintain aspect ratio
+                />
+              ) : (
+                <div
+                  className="flex items-center justify-center"
+                  style={{
+                    width: "1000px",
+                    height: "400px",
+                    backgroundColor: "#f0f0f0",
+                  }}
+                >
+                  <span>No Image Available</span>
+                </div>
+              )}
             </div>
           ))}
         </Slider>

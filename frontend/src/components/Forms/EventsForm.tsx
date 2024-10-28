@@ -18,7 +18,9 @@ const EventsForm: React.FC = () => {
   const [municipality, setMunicipality] = useState<string>("");
   const [ward, setWard] = useState<string>("");
   const [venue, setVenue] = useState<string>("");
+  const [eventSpeaker, setEventSpeaker] = useState<string>("");
   const [eventOrganizer, setEventOrganizer] = useState<string>("");
+  const [eventType, setEventType] = useState<string>("");
 
   const [remarks, setRemarks] = useState<string>("");
 
@@ -56,7 +58,9 @@ const EventsForm: React.FC = () => {
       municipality: municipality || null,
       ward: ward || null,
       venue: venue || null,
+      eventSpeaker,
       eventOrganizer: eventOrganizer || null,
+      eventType,
       remarks: remarks || null,
     };
 
@@ -203,6 +207,23 @@ const EventsForm: React.FC = () => {
               className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
               htmlFor="eventOrganizer"
             >
+              कार्यक्रम वक्ता तथा प्रशिक्षक:
+            </label>
+            <textarea
+              id="eventOrganizer"
+              value={eventSpeaker}
+              onChange={(e) => setEventSpeaker(e.target.value)}
+              className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
+              placeholder="कार्यक्रमको वक्ता तथा प्रशिक्षक"
+            />
+          </div>
+
+          {/* Remarks Field */}
+          <div className="mb-5.5">
+            <label
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="eventOrganizer"
+            >
               कार्यक्रम आयोजक:
             </label>
             <textarea
@@ -212,6 +233,28 @@ const EventsForm: React.FC = () => {
               className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
               placeholder="कार्यक्रमको आयोजकउल्लेख गर्नुहोस्"
             />
+          </div>
+
+          {/* Event Type Field */}
+          <div className="mb-5.5">
+            <label
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+              htmlFor="eventType"
+            >
+              कार्यक्रम प्रकार:
+            </label>
+            <select
+              id="eventType"
+              value={eventType}
+              onChange={(e) => setEventType(e.target.value)}
+              className="bg-gray-50 w-full rounded border px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white"
+            >
+              <option value="">कार्यक्रम प्रकार चयन गर्नुहोस्</option>
+              <option value="खुल्ला सभा">खुल्ला सभा</option>
+              <option value="भेटघाट">भेटघाट</option>
+              <option value="प्रशिक्षण">प्रशिक्षण</option>
+              <option value="अन्य">अन्य</option>
+            </select>
           </div>
 
           {/* Remarks Field */}

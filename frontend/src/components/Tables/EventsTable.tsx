@@ -17,7 +17,9 @@ interface Event {
   municipality?: string;
   ward?: string;
   venue?: string;
+  eventSpeaker: string;
   eventOrganizer: string;
+  eventType: string;
   remarks: string;
 }
 
@@ -58,7 +60,9 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
 
   const handleDeleteEvent = async (eventId: number) => {
     try {
-      await axios.delete(process.env.NEXT_PUBLIC_BE_HOST + `/events/${eventId}`);
+      await axios.delete(
+        process.env.NEXT_PUBLIC_BE_HOST + `/events/${eventId}`,
+      );
       setEvents((prevEvents) =>
         prevEvents.filter((event) => event.eventId !== eventId),
       );
@@ -102,11 +106,17 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
                 कार्यक्रमको समय
               </th>
+              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
+                कार्यक्रमको प्रकार
+              </th>
               <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
                 ठेगाना
               </th>
               <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
                 स्थान
+              </th>
+              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
+                कार्यक्रम वक्ता तथा प्रशिक्षक
               </th>
               <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
                 कार्यक्रमको आयोजक
@@ -147,10 +157,16 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
                     {event.eventTime}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
+                    {event.eventType}
+                  </td>
+                  <td className="border-2 px-4 py-2 text-center text-black">
                     {formatAddress(event)}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
                     {event.venue || "-"}
+                  </td>
+                  <td className="border-2 px-4 py-2 text-center text-black">
+                    {event.eventSpeaker}
                   </td>
                   <td className="border-2 px-4 py-2 text-center text-black">
                     {event.eventOrganizer}

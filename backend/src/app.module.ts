@@ -46,6 +46,10 @@ import { SocialLinksModule } from './social-links/social-links.module';
       serveRoot: '/images/logo/',
     }),
     ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public/images/carousel'),
+      serveRoot: '/images/carousel/',
+    }),
+    ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public/pdf'),
       serveRoot: '/pdf/',
     }),

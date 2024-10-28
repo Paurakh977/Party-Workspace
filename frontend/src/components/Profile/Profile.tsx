@@ -23,37 +23,38 @@ const ProfileComponent = () => {
     event: React.ChangeEvent<HTMLInputElement>,
     key: string,
   ) => {
-    event.preventDefault();
+    // event.preventDefault();
 
     if (event.target.files) {
-      setFile(event.target.files[0]);
-    }
+      const selectedFile = event.target.files[0];
+      if (!selectedFile) {
+        setErrorMessage("Please select a file to upload.");
+        return;
+      }
+      setFile(selectedFile); // Move this line after validation
 
-    if (!file) {
-      setErrorMessage("Please select a file to upload.");
-      return;
-    }
+      const formData = new FormData();
+      formData.append(key, selectedFile);
 
-    const formData = new FormData();
-    formData.append(key, file);
-
-    try {
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_HOST}/settings/1`, // Adjust the URL as needed
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
+      try {
+        const response = await axios.put(
+          `${process.env.NEXT_PUBLIC_BE_HOST}/settings/1`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
           },
-        },
-      );
+        );
 
-      setSuccessMessage("File uploaded successfully!");
-      setErrorMessage(null); // Clear any previous errors
-      console.log(response.data); // Handle response data as needed
-    } catch (error) {
-      setErrorMessage("Error uploading file. Please try again.");
-      console.error("Error uploading file:", error);
+        setSuccessMessage("File uploaded successfully!");
+        setErrorMessage(null);
+        setFile(null); // Reset file state
+        console.log(response.data);
+      } catch (error) {
+        setErrorMessage("Error uploading file. Please try again.");
+        console.error("Error uploading file:", error);
+      }
     }
   };
 
@@ -181,7 +182,7 @@ const ProfileComponent = () => {
                   />
                 )}
                 <label
-                  htmlFor="profile"
+                  htmlFor="icon"
                   className="absolute bottom-0 right-0 flex h-8.5 w-8.5 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-opacity-90 sm:bottom-2 sm:right-2"
                 >
                   <svg

@@ -15,8 +15,11 @@ export async function middleware(request: NextRequest) {
     "/home",
     "/tables/membersTable",
     "/tables/committeesTable",
+    "/tables/socialLinks",
     "/forms/membersForm",
     "/forms/eventsForm",
+    "/forms/video-links",
+    "/forms/pdfs",
     "/events/input",
     "/events/list",
     "/messages/input",
@@ -101,6 +104,7 @@ function isDynamicAdminRoute(pathname: string): boolean {
     /^\/tables\/selectedMembersTable\/\d+$/,
     /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,
     /^\/search-result\?mobileNumber=[^&]*$/,
+    /^\/forms\/updateVideolinkForm\/\d+$/,
   ];
   return dynamicRoutes.some((route) => route.test(pathname));
 }
@@ -116,6 +120,7 @@ function isDynamicSuperAdminRoute(pathname: string): boolean {
     /^\/tables\/selectedMembersTable\/\d+(?:\/\d+)?$/,
     /^\/forms\/updateUsersForm\/\d+$/,
     /^\/search-result\?mobileNumber=[^&]*$/,
+    /^\/forms\/updateVideolinkForm\/\d+$/,
   ];
   return dynamicRoutes.some((route) => route.test(pathname));
 }

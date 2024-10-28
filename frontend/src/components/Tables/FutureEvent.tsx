@@ -28,7 +28,7 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [pdfVisible, setPdfVisible] = useState<{ [key: number]: boolean }>({}); // State to track visibility of PdfDisplayer
+  const [pdfVisible, setPdfVisible] = useState<{ [key: number]: boolean }>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -43,15 +43,32 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
         );
 
         const now = new NepaliDate();
-        const upcoming: any[] = [];
+        const upcoming: Event[] = [];
 
+        // Filter for upcoming events (event date and time is greater than 'now')
         eventsResponse.data.forEach((event) => {
-          const eventDate = new NepaliDate(event.eventDate);
-          if (eventDate.getDate() > now.getDate()) {
+          const fullDateTimeString = `${event.eventDate} ${event.eventTime}`; // Combine date and time
+          const eventDateTime = new NepaliDate(fullDateTimeString); // Create NepaliDate object
+
+          if (eventDateTime.getTime() > now.getTime()) {
+            // Use getTime() to compare full date-time values
             upcoming.push(event);
           }
         });
-        setEvents(upcoming.slice(0, 4)); // Get the last 4 upcoming events
+
+        // Sort upcoming events in ascending order by date and time
+        const sortedUpcoming = upcoming.sort((a, b) => {
+          const dateTimeA = new NepaliDate(
+            `${a.eventDate} ${a.eventTime}`,
+          ).getTime();
+          const dateTimeB = new NepaliDate(
+            `${b.eventDate} ${b.eventTime}`,
+          ).getTime();
+          return dateTimeA - dateTimeB;
+        });
+
+        // Limit to 5 nearest upcoming events
+        setEvents(sortedUpcoming.slice(0, 5));
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -77,12 +94,10 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   };
 
   const handleUpdateEvent = (eventId: number) => {
-    console.log("Updating event with ID:", eventId);
     router.push(`/forms/updateEventsForm/${eventId}`);
   };
 
   const handleViewEvent = (eventId: number) => {
-    console.log("Viewing event with ID:", eventId);
     router.push(`/events/detail/${eventId}`);
   };
 
@@ -93,7 +108,6 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-  // If singleEvent is provided, display only that event
   const eventsToDisplay = singleEvent ? [singleEvent] : events;
 
   return (
@@ -101,35 +115,21 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
         हुने कार्यक्रम
       </h4>
-      <span onClick={() => router.push("/events/list")}>
+      <span
+        onClick={() => router.push("/events/list")}
+        style={{ cursor: "pointer" }} // Change the mouse pointer to a clicker
+      >
         सबै कार्यक्रमहरू हेर्नुहोस्
       </span>
 
       <div className="flex flex-col px-4">
         <div className="grid grid-cols-3 rounded-sm bg-gray-2 px-4 dark:bg-meta-4 sm:grid-cols-4">
-          <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base"></h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              कार्यक्रमको शिर्षक
-            </h5>
-          </div>
+          <div className="p-2.5 xl:p-5"></div>
+          <div className="p-2.5 text-center xl:p-5">कार्यक्रमको शिर्षक</div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              कार्यक्रमको मिति
-            </h5>
+            कार्यक्रमको मिति
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              सुधार
-            </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              पि.डि.एफ
-            </h5>
-          </div>
+          <div className="p-2.5 text-center xl:p-5">सुधार</div>
         </div>
 
         {eventsToDisplay.map((event, index) => (
@@ -142,20 +142,18 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
             key={event.eventId}
           >
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
-                <Image
-                  src="/images/ncIcon.png"
-                  alt="event image"
-                  width={100}
-                  height={100}
-                />
-              </p>
+              <Image
+                src="/images/ncIcon.png"
+                alt="event image"
+                width={100}
+                height={100}
+              />
             </div>
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{event.eventHeading}</p>
+              {event.eventHeading}
             </div>
             <div className="hidden justify-center p-2.5 text-center sm:flex xl:p-5">
-              <p className="text-black dark:text-white">{event.eventDate}</p>
+              {event.eventDate}
             </div>
             <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
               <button
@@ -177,7 +175,6 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
                 <FaTrash />
               </button>
             </div>
-            {/* Button to toggle PdfDisplayer */}
             <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
               <button
                 onClick={() => togglePdfVisibility(event.eventId)}
@@ -186,11 +183,9 @@ const FutureEvents = ({ singleEvent }: { singleEvent?: Event }) => {
                 <FaFilePdf />
               </button>
             </div>
-            {/* Include PdfDisplayer for each event */}
-            {pdfVisible[event.eventId] && ( // Conditional rendering of PdfDisplayer
+            {pdfVisible[event.eventId] && (
               <div className="col-span-3 sm:col-span-4">
-                <PdfDisplayer eventId={event.eventId} />{" "}
-                {/* Pass eventId as prop */}
+                <PdfDisplayer eventId={event.eventId} />
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SocialLinks } from './social-links.entity';
@@ -15,32 +15,33 @@ export class SocialLinksService {
   }
 
   async findById(id: number): Promise<SocialLinks> {
-    return this.socialLinksRepository.findOne({ where: { id } });
+    const socialLink = await this.socialLinksRepository.findOne({
+      where: { id },
+    });
+    if (!socialLink) {
+      throw new NotFoundException('Social Link not found');
+    }
+    return socialLink;
   }
 
-  async create(linkName: string, link: string): Promise<SocialLinks> {
-    const newLink = this.socialLinksRepository.create({ linkName, link });
+  async create(data: Partial<SocialLinks>): Promise<SocialLinks> {
+    const newLink = this.socialLinksRepository.create(data);
     return this.socialLinksRepository.save(newLink);
   }
 
-  async update(
-    id: number,
-    linkName: string,
-    link: string,
-  ): Promise<SocialLinks> {
-    const socialLink = await this.findById(id);
+  async update(id: number, data: Partial<SocialLinks>): Promise<SocialLinks> {
+    const socialLink = await this.findById(id); // This will throw if not found
 
-    if (!socialLink) {
-      throw new Error('Social Link not found');
-    }
-
-    socialLink.linkName = linkName;
-    socialLink.link = link;
+    // Update the social link with new data
+    Object.assign(socialLink, data);
 
     return this.socialLinksRepository.save(socialLink);
   }
 
   async delete(id: number): Promise<void> {
-    await this.socialLinksRepository.delete(id);
+    const result = await this.socialLinksRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('Social Link not found');
+    }
   }
 }

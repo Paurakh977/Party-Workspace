@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 
+interface Province {
+  id: string;
+  name: string;
+}
+
 interface District {
   id: string;
   name: string;
 }
 
 interface Municipality {
-  id: string;
-  name: string;
-}
-
-interface Ward {
   id: string;
   name: string;
 }
@@ -69,7 +69,6 @@ const fetchAddress = async (): Promise<FetchAddressResponse> => {
       fetch("/all-countries.json"),
     ]);
 
-    // Check if the response is okay before parsing
     if (!ptdResponse.ok) {
       const errorText = await ptdResponse.text();
       throw new Error(`Error fetching provinces to districts: ${errorText}`);
@@ -123,7 +122,7 @@ const fetchAddress = async (): Promise<FetchAddressResponse> => {
 
 const AddressInput: React.FC<AddressInputProps> = ({
   onAddressChange,
-  initialCountry = "", // Default country is "अन्य"
+  initialCountry = "",
   initialProvince = "",
   initialDistrict = "",
   initialMunicipality = "",
@@ -164,38 +163,51 @@ const AddressInput: React.FC<AddressInputProps> = ({
       setAllProvinces(addressData.allProvinces);
       setAllCountries(addressData.allCountries);
 
-      if (
-        initialProvince &&
-        addressData.provinceToDistrictsMap[initialProvince]
-      ) {
-        setLocalDistricts(
-          addressData.provinceToDistrictsMap[initialProvince]?.districts || [],
-        );
-      }
-      if (
-        initialDistrict &&
-        addressData.districtsToMunicipalitiesMap[initialDistrict]
-      ) {
-        setLocalMunicipalities(
-          addressData.districtsToMunicipalitiesMap[initialDistrict]
-            ?.municipalities || [],
-        );
-      }
-      if (
-        initialMunicipality &&
-        addressData.municipalitiesToWardsMap[initialMunicipality]
-      ) {
-        setLocalWards(
-          addressData.municipalitiesToWardsMap[initialMunicipality]?.wards ||
-            [],
-        );
+      // Initialize the state based on the initial values provided
+      if (initialCountry) {
+        setCountry(initialCountry);
+
+        if (initialProvince) {
+          setProvince(initialProvince);
+          const districts =
+            addressData.provinceToDistrictsMap[initialProvince]?.districts ||
+            [];
+          setLocalDistricts(districts);
+
+          if (initialDistrict) {
+            setDistrict(initialDistrict);
+            const municipalities =
+              addressData.districtsToMunicipalitiesMap[initialDistrict]
+                ?.municipalities || [];
+            setLocalMunicipalities(municipalities);
+
+            if (initialMunicipality) {
+              setMunicipality(initialMunicipality);
+              const wards =
+                addressData.municipalitiesToWardsMap[initialMunicipality]
+                  ?.wards || [];
+              setLocalWards(wards);
+
+              if (initialWard) {
+                setWard(initialWard);
+              }
+            }
+          }
+        }
       }
     };
+
     initializeAddressData();
-  }, [initialProvince, initialDistrict, initialMunicipality]);
+  }, [
+    initialCountry,
+    initialProvince,
+    initialDistrict,
+    initialMunicipality,
+    initialWard,
+  ]);
 
   useEffect(() => {
-    // Update the address change when country or other address components change
+    // Send IDs to the backend
     onAddressChange({
       country,
       province,
@@ -205,58 +217,75 @@ const AddressInput: React.FC<AddressInputProps> = ({
     });
   }, [country, province, district, municipality, ward]);
 
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCountry = e.target.value;
+    setCountry(selectedCountry);
+
+    // Reset state when country changes
+    setProvince("");
+    setDistrict("");
+    setMunicipality("");
+    setWard("");
+    setLocalDistricts([]);
+    setLocalMunicipalities([]);
+    setLocalWards([]);
+
+    if (selectedCountry === "154") {
+      // Assuming '154' is Nepal
+      // Additional logic for when Nepal is selected if needed
+    }
+  };
+
+  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedProvince = e.target.value;
+    setProvince(selectedProvince);
+
+    // Set local districts based on selected province
+    setLocalDistricts(
+      provinceToDistrictsMap[selectedProvince]?.districts || [],
+    );
+    setDistrict("");
+    setMunicipality("");
+    setWard("");
+    setLocalMunicipalities([]);
+    setLocalWards([]);
+  };
+
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedDistrict = e.target.value;
+    setDistrict(selectedDistrict);
+
+    // Set local municipalities based on selected district
+    setLocalMunicipalities(
+      districtsToMunicipalitiesMap[selectedDistrict]?.municipalities || [],
+    );
+    setMunicipality("");
+    setWard("");
+    setLocalWards([]);
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex-1">
-        <label className="text-small mb-1 block">देशको नाम:</label>
-        <select
-          value={country}
-          onChange={(e) => {
-            const selectedCountry = e.target.value;
-            setCountry(selectedCountry);
-            // Clear other fields if the selected country is not "नेपाल"
-            if (selectedCountry === "154") {
-              // Nepal selected, proceed to show additional address inputs
-              // You might want to reset the other state variables here if necessary
-            } else {
-              // Reset all address inputs
-              setProvince("");
-              setDistrict("");
-              setMunicipality("");
-              setWard("");
-              setLocalDistricts([]);
-              setLocalMunicipalities([]);
-              setLocalWards([]);
-            }
-          }}
-        >
-          {allCountries.map((cntry) => (
-            <option key={cntry.id} value={cntry.id}>
-              {cntry.name}
-            </option>
-          ))}
-        </select>
+      {/* Country Dropdown on a separate line */}
+      <div className="flex">
+        <div className="flex-1">
+          <label className="text-small mb-1 block">देशको नाम:</label>
+          <select value={country} onChange={handleCountryChange}>
+            {allCountries.map((cntry) => (
+              <option key={cntry.id} value={cntry.id}>
+                {cntry.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {country === "154" && ( // Show the rest of the address fields if Nepal is selected
+      {/* Province and District Dropdowns */}
+      {country === "154" && (
         <div className="flex space-x-4">
           <div className="flex-1">
             <label className="text-small mb-1 block">प्रदेश:</label>
-            <select
-              value={province}
-              onChange={(e) => {
-                const selectedProvince = e.target.value;
-                setProvince(selectedProvince);
-                setLocalDistricts(
-                  provinceToDistrictsMap[selectedProvince]?.districts || [],
-                );
-                setDistrict("");
-                setMunicipality("");
-                setWard("");
-                setLocalMunicipalities([]);
-                setLocalWards([]);
-              }}
-            >
+            <select value={province} onChange={handleProvinceChange}>
               <option value="">प्रदेश छान्नुहोस्</option>
               {allProvinces.map((prov) => (
                 <option key={prov.id} value={prov.id}>
@@ -270,20 +299,10 @@ const AddressInput: React.FC<AddressInputProps> = ({
             <label className="text-small mb-1 block">जिल्ला:</label>
             <select
               value={district}
-              onChange={(e) => {
-                const selectedDistrict = e.target.value;
-                setDistrict(selectedDistrict);
-                setLocalMunicipalities(
-                  districtsToMunicipalitiesMap[selectedDistrict]
-                    ?.municipalities || [],
-                );
-                setMunicipality("");
-                setWard("");
-                setLocalWards([]);
-              }}
+              onChange={handleDistrictChange}
               disabled={!province}
             >
-              <option value="">जिला छान्नुहोस्</option>
+              <option value="">जिल्ला छान्नुहोस्</option>
               {localDistricts.map((dist) => (
                 <option key={dist.id} value={dist.id}>
                   {dist.name}
@@ -291,9 +310,14 @@ const AddressInput: React.FC<AddressInputProps> = ({
               ))}
             </select>
           </div>
+        </div>
+      )}
 
+      {/* Municipality and Ward Dropdowns */}
+      {district && (
+        <div className="flex space-x-4">
           <div className="flex-1">
-            <label className="text-small mb-1 block">पालिका:</label>
+            <label className="text-small mb-1 block">नगरपालिका:</label>
             <select
               value={municipality}
               onChange={(e) => {
@@ -306,7 +330,7 @@ const AddressInput: React.FC<AddressInputProps> = ({
               }}
               disabled={!district}
             >
-              <option value="">पालिका छान्नुहोस्</option>
+              <option value="">नगरपालिका छान्नुहोस्</option>
               {localMunicipalities.map((mun) => (
                 <option key={mun.id} value={mun.id}>
                   {mun.name}
@@ -316,16 +340,16 @@ const AddressInput: React.FC<AddressInputProps> = ({
           </div>
 
           <div className="flex-1">
-            <label className="text-small mb-1 block">वडा:</label>
+            <label className="text-small mb-1 block">वार्ड:</label>
             <select
               value={ward}
               onChange={(e) => setWard(e.target.value)}
               disabled={!municipality}
             >
-              <option value="">वडा छान्नुहोस्</option>
-              {localWards.map((wardNum) => (
-                <option key={wardNum} value={wardNum}>
-                  {wardNum}
+              <option value="">वार्ड छान्नुहोस्</option>
+              {localWards.map((wardOption) => (
+                <option key={wardOption} value={wardOption}>
+                  {wardOption}
                 </option>
               ))}
             </select>

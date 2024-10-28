@@ -75,9 +75,6 @@ const PdfDisplayer: React.FC<PdfDisplayerProps> = ({ eventId }) => {
           </li>
         ))}
       </ul>
-
-      {/* Place the PDF uploader component below the list */}
-      <PdfUploader onUploadSuccess={fetchPdfs} eventId={eventId} />
     </div>
   );
 };

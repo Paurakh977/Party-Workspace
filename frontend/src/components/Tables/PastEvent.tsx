@@ -43,18 +43,32 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
         );
 
         const now = new NepaliDate();
-        const pastEvents: any[] = [];
-        const upcoming: any[] = [];
+        const pastEvents: Event[] = [];
 
+        // Filter for past events (event date and time is less than or equal to 'now')
         eventsResponse.data.forEach((event) => {
-          const eventDate = new NepaliDate(event.eventDate);
-          if (eventDate.getDate() > now.getDate()) {
+          const fullDateTimeString = `${event.eventDate} ${event.eventTime}`; // Combine date and time
+          const eventDateTime = new NepaliDate(fullDateTimeString); // Create NepaliDate object
+
+          if (eventDateTime.getTime() <= now.getTime()) {
+            // Use getTime() to compare full date-time values
             pastEvents.push(event);
-          } else {
-            upcoming.push(event);
           }
         });
-        setEvents(pastEvents); // Get the last 5 past events
+
+        // Sort past events by date and time in descending order, so the most recent is at the top
+        const sortedEvents = pastEvents.sort((a, b) => {
+          const dateTimeA = new NepaliDate(
+            `${a.eventDate} ${a.eventTime}`,
+          ).getTime();
+          const dateTimeB = new NepaliDate(
+            `${b.eventDate} ${b.eventTime}`,
+          ).getTime();
+          return dateTimeB - dateTimeA; // Sort in descending order
+        });
+
+        // Limit to the 5 most recent past events
+        setEvents(sortedEvents.slice(0, 5));
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -104,7 +118,10 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
         भएका कार्यक्रम
       </h4>
-      <span onClick={() => router.push("/events/list")}>
+      <span
+        onClick={() => router.push("/events/list")}
+        style={{ cursor: "pointer" }} // Change the mouse pointer to a clicker
+      >
         सबै कार्यक्रमहरू हेर्नुहोस्
       </span>
 

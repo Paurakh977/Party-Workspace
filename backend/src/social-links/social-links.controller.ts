@@ -6,6 +6,7 @@ import {
   Body,
   Delete,
   Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SocialLinks } from './social-links.entity';
 import { SocialLinksService } from './social-links.service';
@@ -20,29 +21,27 @@ export class SocialLinksController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: number): Promise<SocialLinks> {
+  async findById(@Param('id', ParseIntPipe) id: number): Promise<SocialLinks> {
     return this.socialLinkService.findById(id);
   }
 
   @Post()
   async create(
-    @Body('linkName') linkName: string,
-    @Body('link') link: string,
+    @Body() socialLinkData: Partial<SocialLinks>, // Accept all fields as part of the body
   ): Promise<SocialLinks> {
-    return this.socialLinkService.create(linkName, link);
+    return this.socialLinkService.create(socialLinkData);
   }
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
-    @Body('linkName') linkName: string,
-    @Body('link') link: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() socialLinkData: Partial<SocialLinks>, // Accept all fields for update
   ): Promise<SocialLinks> {
-    return this.socialLinkService.update(id, linkName, link);
+    return this.socialLinkService.update(id, socialLinkData);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<void> {
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.socialLinkService.delete(id);
   }
 }

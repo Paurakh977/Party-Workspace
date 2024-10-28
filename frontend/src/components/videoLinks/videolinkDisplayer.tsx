@@ -1,20 +1,33 @@
 "use client";
-import SocialLinkUploader from "./videolinkUpload";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaMinus, FaPlus } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import NepaliDate from "nepali-datetime"; // Import NepaliDate for date comparison
 
 interface SocialLink {
   id: number;
   linkName: string;
   link: string;
+  linkDate: string;
+  linkPublisher: string;
+  country: string;
+  province: string;
+  district: string;
+  ward: string;
 }
+
+// Utility function to compare social link dates
+const compareDates = (linkA: SocialLink, linkB: SocialLink) => {
+  const dateA = new NepaliDate(linkA.linkDate).getTime();
+  const dateB = new NepaliDate(linkB.linkDate).getTime();
+  return dateB - dateA; // Descending order
+};
 
 const SocialLinkDisplayer: React.FC = () => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUploaderVisible, setUploaderVisible] = useState<boolean>(false); // State for toggling uploader visibility
+  const router = useRouter();
 
   const fetchSocialLinks = async () => {
     try {
@@ -34,14 +47,6 @@ const SocialLinkDisplayer: React.FC = () => {
     fetchSocialLinks();
   }, []);
 
-  const handleUploadSuccess = () => {
-    fetchSocialLinks(); // Re-fetch the links after a successful upload
-  };
-
-  const toggleUploaderVisibility = () => {
-    setUploaderVisible((prev) => !prev); // Toggle the visibility state
-  };
-
   if (loading) {
     return <p>Loading social links...</p>;
   }
@@ -50,11 +55,23 @@ const SocialLinkDisplayer: React.FC = () => {
     return <p style={{ color: "red" }}>{error}</p>;
   }
 
+  // Sort links by linkDate in descending order
+  const latestLinks = socialLinks
+    .filter((link) => !isNaN(new NepaliDate(link.linkDate).getTime())) // Ensure valid date
+    .sort(compareDates)
+    .slice(-10); // Get the last 10 entries
+
   return (
     <>
+      <span
+        onClick={() => router.push("/tables/socialLinks")}
+        style={{ cursor: "pointer" }} // Change the mouse pointer to a clicker
+      >
+        सबै कार्यक्रमहरू हेर्नुहोस्
+      </span>
       <div>
         <ul className="list-disc pl-5">
-          {socialLinks.map((socialLink) => (
+          {latestLinks.map((socialLink) => (
             <li key={socialLink.id} className="text-lg">
               <a
                 href={socialLink.link}
@@ -68,24 +85,6 @@ const SocialLinkDisplayer: React.FC = () => {
           ))}
         </ul>
       </div>
-      <button
-        onClick={toggleUploaderVisibility} // Button to toggle the uploader
-        className="mb-4 flex items-center rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600" // Added flex and items-center
-      >
-        {isUploaderVisible ? (
-          <FaMinus className="mr-2" />
-        ) : (
-          <FaPlus className="mr-2" />
-        )}
-        {isUploaderVisible ? "Hide New Link" : "Add New Link"}{" "}
-        {/* Button text changes based on visibility */}
-      </button>
-
-      {isUploaderVisible && ( // Conditionally render the SocialLinkUploader based on visibility
-        <div className="mt-4">
-          <SocialLinkUploader onUploadSuccess={handleUploadSuccess} />
-        </div>
-      )}
     </>
   );
 };

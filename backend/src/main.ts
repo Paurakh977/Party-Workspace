@@ -3,10 +3,27 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
+  console.log('=== Starting Server ===');
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  app.enableCors();
+  
+  console.log('All environment variables:');
+  console.log('PORT:', configService.get('PORT'));
+  console.log('DB_HOST:', configService.get('DB_HOST'));
+  console.log('DB_USERNAME:', configService.get('DB_USERNAME'));
+  console.log('DB_NAME:', configService.get('DB_NAME'));
+  console.log('DB_PASSWORD:', configService.get('DB_PASSWORD') ? '[SET]' : '[NOT SET]');
+  
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
 
-  await app.listen(configService.get('PORT') || 3003);
+  const port = configService.get('PORT', 3003);
+  console.log(`Server starting on port ${port}...`);
+  await app.listen(port);
+  console.log(`Server is running on http://localhost:${port}`);
 }
 bootstrap();

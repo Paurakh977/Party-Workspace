@@ -25,7 +25,7 @@ const Settings = () => {
     // Fetch data from committees API
     const fetchCommittees = async () => {
       try {
-        const response = await fetch("http://localhost:3000/committees");
+        const response = await fetch(process.env.NEXT_PUBLIC_BE_HOST + "/committees");
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -50,7 +50,7 @@ const Settings = () => {
     // Check if there are any sub-committees available
     const fetchSubCommittees = async () => {
       try {
-        const response = await fetch("http://localhost:3000/sub-committee");
+        const response = await fetch(process.env.NEXT_PUBLIC_BE_HOST + "/sub-committees");
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -89,7 +89,7 @@ const Settings = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/committees", {
+      const response = await fetch(process.env.NEXT_PUBLIC_BE_HOST + "/committees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +119,7 @@ const Settings = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/sub-committees", {
+      const response = await fetch(process.env.NEXT_PUBLIC_BE_HOST + "/sub-committees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

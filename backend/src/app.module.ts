@@ -15,7 +15,7 @@ import { MessagesModule } from './messages/messages.module';
 import { MembersFinderModule } from './members-finder/members-finder.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SettingsModule } from './settings/settings.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -30,16 +30,49 @@ import { SocialLinksModule } from './social-links/social-links.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
+      validate: (config) => {
+        // Only require host, username and database name
+        const requiredEnvVars = ['DB_HOST', 'DB_USERNAME', 'DB_NAME'];
+        const missingVars = requiredEnvVars.filter(envVar => !config[envVar]);
+        
+        if (missingVars.length > 0) {
+          throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+        }
+        return config;
+      },
     }),
-    TypeOrmModule.forRoot({
-      type: 'mariadb',
-      host: process.env.DB_HOST || 'localhost',
-      port: 3306,
-      username: process.env.DB_USERNAME || 'nccCamp',
-      password: process.env.DB_PASSWORD || 'mT9ugB8hRE@ent<>?#',
-      database: process.env.DB_NAME || 'nc_campaign',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        console.log('=== Environment Variables Debug ===');
+        console.log('DB_HOST:', configService.get('DB_HOST'));
+        console.log('DB_USERNAME:', configService.get('DB_USERNAME'));
+        console.log('DB_NAME:', configService.get('DB_NAME'));
+        console.log('DB_PASSWORD:', configService.get('DB_PASSWORD') ? '[SET]' : '[NOT SET]');
+        console.log('PORT:', configService.get('PORT'));
+        console.log('==================================');
+
+        const dbConfig: any = {
+          type: 'mariadb' as const,
+          host: configService.get('DB_HOST'),
+          port: 3306,
+          username: configService.get('DB_USERNAME'),
+          database: configService.get('DB_NAME'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: true,
+        };
+        
+        // Only add password if it's set in environment variables
+        const password = configService.get('DB_PASSWORD');
+        if (password) {
+          dbConfig.password = password;
+        }
+        
+        console.log('Database configuration:', JSON.stringify(dbConfig, null, 2));
+        return dbConfig;
+      },
+      inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public/images/logo'),

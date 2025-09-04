@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PdfUploader from "./pdfUploader";
+import { FaTrash, FaEye } from "react-icons/fa";
 
 interface PdfUpload {
   id: number;
@@ -48,12 +49,44 @@ const PdfDisplayer: React.FC<PdfDisplayerProps> = ({ eventId }) => {
     window.open(filePath, "_blank"); // Open the PDF in a new tab
   };
 
+  const handleDeletePdf = async (pdfId: number) => {
+    if (confirm("Are you sure you want to delete this PDF?")) {
+      try {
+        await axios.delete(`${process.env.NEXT_PUBLIC_BE_HOST}/pdf-upload/${pdfId}`);
+        // Refresh the PDF list after deletion
+        fetchPdfs();
+      } catch (err) {
+        console.error("Error deleting PDF:", err);
+        alert("Error deleting PDF. Please try again.");
+      }
+    }
+  };
+
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="py-8">
+        <h4 className="mb-4 text-xl font-semibold text-black dark:text-white">
+          यस कार्यक्रमका पि.डि.एफहरु
+        </h4>
+        <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-meta-4 rounded-lg">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-3"></div>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Loading PDFs...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p style={{ color: "red" }}>{error}</p>;
+    return (
+      <div className="py-8">
+        <h4 className="mb-4 text-xl font-semibold text-black dark:text-white">
+          यस कार्यक्रमका पि.डि.एफहरु
+        </h4>
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -61,20 +94,49 @@ const PdfDisplayer: React.FC<PdfDisplayerProps> = ({ eventId }) => {
       <h4 className="mb-4 text-xl font-semibold text-black dark:text-white">
         यस कार्यक्रमका पि.डि.एफहरु
       </h4>
-
-      <ul className="list-disc space-y-2 pl-6">
+      
+      {pdfs.length === 0 ? (
+        <div className="p-4 bg-gray-50 dark:bg-meta-4 rounded-lg border border-stroke">
+          <p className="text-sm text-gray-600 dark:text-gray-300 text-center">
+            No PDFs uploaded for this event yet.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
         {pdfs.map((pdf) => (
-          <li key={pdf.id} className="text-black dark:text-white">
-            <button
-              type="button"
-              onClick={() => handleViewPdf(pdf.filePath)}
-              className="underline hover:text-blue-600"
-            >
-              {pdf.fileName}
-            </button>
-          </li>
+          <div
+            key={pdf.id}
+            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-meta-4 rounded-lg border border-stroke hover:shadow-md transition-shadow"
+          >
+            <div className="flex-1 min-w-0 mr-4">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {pdf.fileName}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => handleViewPdf(pdf.filePath)}
+                className="flex items-center px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                title="View PDF"
+              >
+                <FaEye className="mr-1" />
+                View
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeletePdf(pdf.id)}
+                className="flex items-center px-3 py-1.5 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                title="Delete PDF"
+              >
+                <FaTrash className="mr-1" />
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
-      </ul>
+        </div>
+      )}
     </div>
   );
 };

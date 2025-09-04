@@ -33,6 +33,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onUploadSuccess }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [description, setDescription] = useState<string>(""); // PDF description
 
   // Fetch events
   useEffect(() => {
@@ -92,6 +93,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onUploadSuccess }) => {
     setPreviewUrl(null);
     setError(null);
     setSuccessMessage(null);
+    setDescription(""); // Reset description
     
     // Reset file input
     const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
@@ -113,6 +115,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onUploadSuccess }) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("eventId", eventId.toString()); // Ensure this is sent in the body
+    formData.append("description", description); // Add description to form data
 
     setUploading(true);
     setSuccessMessage(null);
@@ -168,6 +171,27 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onUploadSuccess }) => {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Description Input */}
+        <div className="mb-5.5">
+          <label
+            className="mb-3 block text-sm font-medium text-black dark:text-white"
+            htmlFor="description"
+          >
+            PDF विवरण (वैकल्पिक)
+          </label>
+          <textarea
+            id="description"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="यो PDF के बारेमा छ भन्नुहोस्..."
+            className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary resize-none"
+          />
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            PDF को सामग्री र उद्देश्यको बारेमा छोटो विवरण दिनुहोस्
+          </p>
         </div>
 
         {/* PDF File Input */}

@@ -42,6 +42,7 @@ export class PdfUploadController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body('eventId') eventId: number, // Use @Body to get eventId from request body
+    @Body('description') description?: string, // Add description from request body
   ) {
     if (!file) {
       throw new BadRequestException('File is not valid');
@@ -54,6 +55,7 @@ export class PdfUploadController {
       file.mimetype,
       file.size,
       eventId, // Now eventId is correctly received
+      description, // Add description
     );
   }
 

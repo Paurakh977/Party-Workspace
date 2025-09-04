@@ -17,6 +17,7 @@ export class PdfUploadService {
     mimeType: string,
     fileSize: number,
     eventId: number, // Add eventId parameter
+    description?: string, // Add description parameter
   ): Promise<PdfUpload> {
     const newPdf = this.pdfUploadRepository.create({
       fileName,
@@ -24,6 +25,7 @@ export class PdfUploadService {
       mimeType,
       fileSize,
       eventId, // Set the eventId
+      description, // Set the description
     });
     return this.pdfUploadRepository.save(newPdf);
   }

@@ -26,6 +26,9 @@ export class PdfUpload {
   @Column({ type: 'int', nullable: true })
   eventId: number; // Add this line to associate with an event
 
+  @Column({ type: 'text', nullable: true })
+  description: string; // Description of what the PDF is about
+
   @CreateDateColumn()
   createdAt: Date;
 

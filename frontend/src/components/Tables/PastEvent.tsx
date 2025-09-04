@@ -45,14 +45,38 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
         const now = new NepaliDate();
         const pastEvents: Event[] = [];
 
+        console.log("PastEvent - Current time:", now.toString(), "Timestamp:", now.getTime());
+
         // Filter for past events (event date and time is less than or equal to 'now')
         eventsResponse.data.forEach((event) => {
-          const fullDateTimeString = `${event.eventDate} ${event.eventTime}`; // Combine date and time
-          const eventDateTime = new NepaliDate(fullDateTimeString); // Create NepaliDate object
+          try {
+            const fullDateTimeString = `${event.eventDate} ${event.eventTime}`; // Combine date and time
+            const eventDateTime = new NepaliDate(fullDateTimeString); // Create NepaliDate object
 
-          if (eventDateTime.getTime() <= now.getTime()) {
-            // Use getTime() to compare full date-time values
-            pastEvents.push(event);
+            // Compare timestamps - if event is in the past
+            console.log(`PastEvent - Event: ${event.eventHeading}`, {
+              eventDate: event.eventDate,
+              eventTime: event.eventTime,
+              fullDateTimeString,
+              eventTimestamp: eventDateTime.getTime(),
+              nowTimestamp: now.getTime(),
+              isPast: eventDateTime.getTime() <= now.getTime()
+            });
+            
+            if (eventDateTime.getTime() <= now.getTime()) {
+              pastEvents.push(event);
+            }
+          } catch (error) {
+            console.error("Error parsing date for event:", event, error);
+            // If date parsing fails, compare just dates as fallback
+            try {
+              const eventDate = new NepaliDate(event.eventDate);
+              if (eventDate.getTime() < now.getTime()) {
+                pastEvents.push(event);
+              }
+            } catch (fallbackError) {
+              console.error("Fallback date parsing also failed:", fallbackError);
+            }
           }
         });
 
@@ -114,102 +138,188 @@ const PastEvents = ({ singleEvent }: { singleEvent?: Event }) => {
   const eventsToDisplay = singleEvent ? [singleEvent] : events;
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        भएका कार्यक्रम
-      </h4>
-      <span
-        onClick={() => router.push("/events/list")}
-        style={{ cursor: "pointer" }} // Change the mouse pointer to a clicker
-      >
-        सबै कार्यक्रमहरू हेर्नुहोस्
-      </span>
-
-      <div className="flex flex-col px-4">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 px-4 dark:bg-meta-4 sm:grid-cols-4">
-          <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base"></h5>
+    <div className="rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark overflow-hidden">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-primary to-primary/80 px-6 py-4" style={{backgroundColor: '#3b82f6'}}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="text-xl font-semibold text-white" style={{color: 'white'}}>सम्पन्न कार्यक्रमहरू</h4>
+              <p className="text-white/80 text-sm" style={{color: 'white'}}>{eventsToDisplay.length} वटा कार्यक्रम</p>
+            </div>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              कार्यक्रमको शिर्षक
-            </h5>
-          </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              कार्यक्रमको मिति
-            </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              सुधार
-            </h5>
-          </div>
-        </div>
-
-        {eventsToDisplay.map((event, index) => (
-          <div
-            className={`grid grid-cols-3 sm:grid-cols-4 ${
-              index === eventsToDisplay.length - 1
-                ? ""
-                : "border-b border-stroke dark:border-strokedark"
-            }`}
-            key={event.eventId}
+          <button
+            onClick={() => router.push("/events/list")}
+            className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors text-sm font-medium"
+            style={{color: 'white', backgroundColor: 'rgba(255,255,255,0.2)'}}
           >
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
-                <Image
-                  src="/images/ncIcon.png"
-                  alt="event image"
-                  width={100}
-                  height={100}
-                />
-              </p>
-            </div>
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{event.eventHeading}</p>
-            </div>
-            <div className="hidden justify-center p-2.5 text-center sm:flex xl:p-5">
-              <p className="text-black dark:text-white">{event.eventDate}</p>
-            </div>
-            <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
-              <button
-                onClick={() => handleViewEvent(event.eventId)}
-                className="mb-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-              >
-                <FaEye />
-              </button>
-              <button
-                onClick={() => handleUpdateEvent(event.eventId)}
-                className="mb-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-              >
-                <FaEdit />
-              </button>
-              <button
-                onClick={() => handleDeleteEvent(event.eventId)}
-                className="mb-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
-              >
-                <FaTrash />
-              </button>
+            सबै हेर्नुहोस्
+          </button>
+        </div>
+      </div>
 
-              {/* New button to toggle PdfDisplayer */}
-              <button
-                onClick={() => togglePdfVisibility(event.eventId)}
-                className="rounded bg-orange-600 px-4 py-2 text-white hover:bg-orange-700"
-              >
-                <FaFilePdf />
-              </button>
+      {/* Events List */}
+      <div className="p-6">
+        {eventsToDisplay.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-meta-4 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
             </div>
-
-            {/* Include PdfDisplayer for each event */}
-            {pdfVisible[event.eventId] && ( // Conditional rendering of PdfDisplayer
-              <div className="col-span-3 mt-4 sm:col-span-4">
-                <PdfDisplayer eventId={event.eventId} />{" "}
-                {/* Pass the eventId here */}
-              </div>
-            )}
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">कुनै सम्पन्न कार्यक्रम छैन</h3>
+            <p className="text-gray-500 dark:text-gray-400">अहिलेसम्म कुनै कार्यक्रम सम्पन्न भएको छैन।</p>
           </div>
-        ))}
+        ) : (
+          <div className="space-y-4">
+            {eventsToDisplay.map((event, index) => (
+              <div key={event.eventId} className="group">
+                {/* Event Card */}
+                <div className="bg-gray-50 dark:bg-meta-4 rounded-xl border border-stroke dark:border-strokedark hover:shadow-lg transition-all duration-300 overflow-hidden">
+                  <div className="p-6">
+                    {/* Status Badge */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-4 flex-1 min-w-0">
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center relative">
+                            <Image
+                              src="/images/ncIcon.png"
+                              alt="event image"
+                              width={40}
+                              height={40}
+                              className="rounded-lg grayscale opacity-70"
+                            />
+                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg font-semibold text-black dark:text-white truncate">
+                              {event.eventHeading}
+                            </h3>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                              सम्पन्न
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700 dark:text-gray-300">
+                            <span className="flex items-center">
+                              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                              </svg>
+                              {event.eventDate}
+                            </span>
+                            <span className="flex items-center">
+                              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                              </svg>
+                              {event.eventTime}
+                            </span>
+                            {event.address && (
+                              <span className="flex items-center">
+                                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                </svg>
+                                {event.address}
+                              </span>
+                            )}
+                          </div>
+                          {event.eventOrganizer && (
+                            <div className="mt-2">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+                                आयोजक: {event.eventOrganizer}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Event Details */}
+                    {event.eventDetails && (
+                      <div className="mb-4 p-3 bg-white dark:bg-boxdark rounded-lg border border-stroke dark:border-strokedark">
+                        <p className="text-sm text-black dark:text-white leading-relaxed">
+                          {event.eventDetails}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Event Summary (if available) */}
+                    {event.remarks && (
+                      <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                        <div className="flex items-start">
+                          <svg className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          <div>
+                            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">टिप्पणी</p>
+                            <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">{event.remarks}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleViewEvent(event.eventId)}
+                        className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                        title="विवरण हेर्नुहोस्"
+                      >
+                        <FaEye className="mr-1.5" />
+                        विवरण
+                      </button>
+                      <button
+                        onClick={() => handleUpdateEvent(event.eventId)}
+                        className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+                        title="सम्पादन गर्नुहोस्"
+                      >
+                        <FaEdit className="mr-1.5" />
+                        सम्पादन
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEvent(event.eventId)}
+                        className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-lg"
+                        title="मेटाउनुहोस्"
+                        style={{backgroundColor: '#dc2626', color: 'white'}}
+                      >
+                        <FaTrash className="mr-1.5" />
+                        मेटाउनुहोस्
+                      </button>
+                      <button
+                        onClick={() => togglePdfVisibility(event.eventId)}
+                        className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                          pdfVisible[event.eventId]
+                            ? 'bg-orange-600 text-white hover:bg-orange-700'
+                            : 'bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:hover:bg-orange-900/30'
+                        }`}
+                        title="PDF दस्तावेजहरू"
+                      >
+                        <FaFilePdf className="mr-1.5" />
+                        दस्तावेजहरू
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* PDF Section */}
+                {pdfVisible[event.eventId] && (
+                  <div className="mt-4 bg-gray-50 dark:bg-meta-4/50 rounded-xl p-4">
+                    <PdfDisplayer eventId={event.eventId} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

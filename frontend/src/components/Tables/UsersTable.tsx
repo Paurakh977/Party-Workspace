@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import ResponsiveTable, { TableColumn, PaginationData } from "./ResponsiveTable";
 
 interface User {
   userId: number;
@@ -15,9 +16,25 @@ interface User {
 const UsersTable = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const router = useRouter();
 
   const [users, setUsers] = useState<User[]>([]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setPagination(prev => ({ ...prev, page }));
+  }, []);
+
+  const handleSearch = useCallback((search: string) => {
+    setSearchTerm(search);
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,69 +74,103 @@ const UsersTable = () => {
     router.push(`/forms/updateUsersForm/${userId}`);
   };
 
+  // Define table columns
+  const columns: TableColumn<User>[] = [
+    {
+      key: 'username',
+      label: 'प्रयोगकर्ता',
+      searchable: true,
+      className: 'font-medium',
+    },
+    {
+      key: 'role',
+      label: 'रोल',
+      searchable: true,
+    },
+    {
+      key: 'credits',
+      label: 'क्रेडिट',
+      sortable: true,
+    },
+    {
+      key: 'actions',
+      label: 'सुधार',
+      render: (_, user) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleUpdateUser(user.userId)}
+            className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600 text-sm"
+            title="सम्पादन गर्नुहोस्"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDeleteUser(user.userId)}
+            className="rounded bg-rose-500 px-3 py-1 text-white hover:bg-rose-600 text-sm"
+            title="मेटाउनुहोस्"
+          >
+            <FaTrash />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  // Mobile card rendering
+  const renderMobileCard = (user: User, index: number) => (
+    <div className="space-y-3">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-medium text-black dark:text-white">
+            {user.username}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {user.role}
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleUpdateUser(user.userId)}
+            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600 text-xs"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDeleteUser(user.userId)}
+            className="rounded bg-rose-500 px-2 py-1 text-white hover:bg-rose-600 text-xs"
+          >
+            <FaTrash />
+          </button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-2 text-sm">
+        <div>
+          <span className="font-medium text-gray-600 dark:text-gray-400">क्रेडिट: </span>
+          <span className="text-black dark:text-white">{user.credits}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="overflow-x-auto">
-      <div className="border-gray-700 dark:border-gray-700 min-w-fit rounded-sm border bg-rose-100 p-6 px-5 pb-2.5 pt-6 shadow dark:bg-boxdark sm:rounded-lg sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6  text-xl font-semibold text-black dark:text-white">
-          <span className="bg-lime-600">प्रयोगकर्ता तालिका</span>
-        </h4>
-        <table className="min-w-fit table-auto">
-          <thead className="dark:bg-gray-700">
-            <tr className="bg-slate-400">
-              <th className="border-gray-700 w-2 border-2 px-4 py-2 font-bold text-black">
-                क्रम संख्या
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                प्रयोगकर्ता
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                रोल
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                क्रेडिट
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                सुधार
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr key={user.userId}>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {index + 1}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {user.username}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {user.role}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {user.credits}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center">
-                  <button
-                    onClick={() => handleUpdateUser(user.userId)}
-                    className="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteUser(user.userId)}
-                    className="mr-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="w-full">
+      <ResponsiveTable
+        data={users}
+        columns={columns}
+        loading={loading}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchValue={searchTerm}
+        title="प्रयोगकर्ता तालिका"
+        keyExtractor={(user) => user.userId.toString()}
+        mobileCardRender={renderMobileCard}
+        emptyMessage="कुनै प्रयोगकर्ता भेटिएन"
+      />
     </div>
   );
 };

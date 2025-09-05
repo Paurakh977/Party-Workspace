@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa"; // Importing icons for buttons
+import ResponsiveTable, { TableColumn, PaginationData } from "./ResponsiveTable";
 
 interface SocialLink {
   id: number;
@@ -46,6 +47,22 @@ const SocialLinkDisplayer: React.FC = () => {
   const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const handlePageChange = useCallback((page: number) => {
+    setPagination(prev => ({ ...prev, page }));
+  }, []);
+
+  const handleSearch = useCallback((search: string) => {
+    setSearchTerm(search);
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, []);
 
   const fetchAddressData = async () => {
     try {
@@ -135,95 +152,136 @@ const SocialLinkDisplayer: React.FC = () => {
     return countryName;
   };
 
+  // Define table columns
+  const columns: TableColumn<SocialLink>[] = [
+    {
+      key: 'linkName',
+      label: 'लिङ्क नाम',
+      searchable: true,
+      className: 'font-medium',
+    },
+    {
+      key: 'link',
+      label: 'लिङ्क',
+      render: (value) => (
+        <a
+          href={value}
+          className="text-blue-600 hover:underline text-sm break-all"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {value}
+        </a>
+      ),
+      mobileHidden: true,
+    },
+    {
+      key: 'linkPublisher',
+      label: 'प्रकाशित गर्ने',
+      searchable: true,
+    },
+    {
+      key: 'linkDate',
+      label: 'मिति',
+      sortable: true,
+    },
+    {
+      key: 'address',
+      label: 'ठेगाना',
+      render: (_, socialLink) => formatAddress(socialLink),
+      mobileHidden: true,
+    },
+    {
+      key: 'actions',
+      label: 'क्रियाकलाप',
+      render: (_, socialLink) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleUpdateSocialLink(socialLink.id)}
+            className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600 text-sm"
+            title="सम्पादन गर्नुहोस्"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDeleteSocialLink(socialLink.id)}
+            className="rounded bg-rose-500 px-3 py-1 text-white hover:bg-rose-600 text-sm"
+            title="मेटाउनुहोस्"
+          >
+            <FaTrash />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  // Mobile card rendering
+  const renderMobileCard = (socialLink: SocialLink, index: number) => (
+    <div className="space-y-3">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-medium text-black dark:text-white">
+            {socialLink.linkName}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {socialLink.linkPublisher} • {socialLink.linkDate}
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleUpdateSocialLink(socialLink.id)}
+            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600 text-xs"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDeleteSocialLink(socialLink.id)}
+            className="rounded bg-rose-500 px-2 py-1 text-white hover:bg-rose-600 text-xs"
+          >
+            <FaTrash />
+          </button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-2 text-sm">
+        <div>
+          <span className="font-medium text-gray-600 dark:text-gray-400">लिङ्क: </span>
+          <a
+            href={socialLink.link}
+            className="text-blue-600 hover:underline break-all"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {socialLink.link}
+          </a>
+        </div>
+        
+        <div>
+          <span className="font-medium text-gray-600 dark:text-gray-400">ठेगाना: </span>
+          <span className="text-black dark:text-white">{formatAddress(socialLink)}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) return <p>Loading social links...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="overflow-x-auto">
-      <div className="border-gray-700 dark:border-gray-700 min-w-[1500px] rounded-sm border bg-rose-100 p-6 px-5 pb-2.5 pt-6 shadow dark:bg-boxdark sm:rounded-lg sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-          <span className="bg-lime-600">सामाजिक लिङ्क तालिका</span>
-        </h4>
-        <table className="min-w-full table-auto">
-          <thead className="dark:bg-gray-700">
-            <tr className="bg-slate-400">
-              <th className="border-gray-700 w-2 border-2 px-4 py-2 font-bold text-black">
-                क्रम संख्या
-              </th>
-              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                लिङ्क नाम
-              </th>
-              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                लिङ्क
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                प्रकाशित गर्ने
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                मिति
-              </th>
-              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                ठेगाना
-              </th>
-              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
-                क्रियाकलाप
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {socialLinks.map((socialLink, index) => (
-              <tr
-                key={socialLink.id}
-                className={`${
-                  index === socialLinks.length - 1
-                    ? ""
-                    : "border-gray-700 border-b"
-                } hover:bg-gray-50`}
-              >
-                <td className="border-2 px-4 py-2 text-center text-black">
-                  {index + 1}
-                </td>
-                <td className="border-2 px-4 py-2 text-center text-black">
-                  {socialLink.linkName}
-                </td>
-                <td className="border-2 px-4 py-2 text-center text-black">
-                  <a
-                    href={socialLink.link}
-                    className="text-blue-600 hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {socialLink.link}
-                  </a>
-                </td>
-                <td className="border-2 px-4 py-2 text-center text-black">
-                  {socialLink.linkPublisher}
-                </td>
-                <td className="border-2 px-4 py-2 text-center text-black">
-                  {socialLink.linkDate}
-                </td>
-                <td className="border-2 px-4 py-2 text-center text-black">
-                  {formatAddress(socialLink)}
-                </td>
-                <td className="border-2 px-4 py-2 text-center">
-                  <button
-                    onClick={() => handleUpdateSocialLink(socialLink.id)}
-                    className="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteSocialLink(socialLink.id)}
-                    className="mr-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="w-full">
+      <ResponsiveTable
+        data={socialLinks}
+        columns={columns}
+        loading={loading}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchValue={searchTerm}
+        title="सामाजिक लिङ्क तालिका"
+        keyExtractor={(socialLink) => socialLink.id.toString()}
+        mobileCardRender={renderMobileCard}
+        emptyMessage="कुनै सामाजिक लिङ्क भेटिएन"
+      />
     </div>
   );
 };

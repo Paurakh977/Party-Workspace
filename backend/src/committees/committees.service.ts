@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { Committees } from './committees.entity';
+import { PaginationQuery, PaginatedResult } from './committees.controller';
 
 @Injectable()
 export class CommitteesService {
@@ -12,6 +13,33 @@ export class CommitteesService {
 
   findAll(): Promise<Committees[]> {
     return this.committeesRepository.find();
+  }
+
+  async findAllPaginated(query: PaginationQuery): Promise<PaginatedResult<Committees>> {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.committeesRepository.createQueryBuilder('committee');
+
+    if (query.search) {
+      queryBuilder.where('committee.committeeName LIKE :search', {
+        search: `%${query.search}%`,
+      });
+    }
+
+    const [data, total] = await queryBuilder
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   findOne(committeeId: number): Promise<Committees> {

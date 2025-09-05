@@ -11,12 +11,35 @@ import {
 import { Members } from './members.entity';
 import { MembersService } from './members.service';
 
+export interface MembersPaginationQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  committeeId?: number;
+  subCommitteeId?: number;
+  province?: string;
+  district?: string;
+  municipality?: string;
+  country?: string;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 @Controller('members')
 export class MembersController {
   constructor(private membersService: MembersService) {}
 
   @Get()
-  findAll(): Promise<Members[]> {
+  findAll(@Query() query: MembersPaginationQuery): Promise<PaginatedResult<Members> | Members[]> {
+    if (query.page || query.limit || query.search || query.committeeId || query.subCommitteeId || query.province || query.district || query.municipality || query.country) {
+      return this.membersService.findAllPaginated(query);
+    }
     return this.membersService.findAll();
   }
 

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import RoleChecker from "../Role/role-checker";
+import ResponsiveTable, { TableColumn, PaginationData } from "./ResponsiveTable";
 
 interface Committee {
   committeeId: number;
@@ -112,8 +113,14 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
 
   const [applyFilters, setApplyFilters] = useState<boolean>(false);
-
   const [filteredMembers, setFilteredMembers] = useState<Member[]>(members);
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const router = useRouter();
 
@@ -150,47 +157,114 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     XLSX.writeFile(workbook, "MembersData.xlsx");
   };
 
+  const fetchMembers = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+      });
+
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+
+      if (selectedCommitteeId) {
+        params.append('committeeId', selectedCommitteeId.toString());
+      }
+
+      if (selectedSubCommitteeId) {
+        params.append('subCommitteeId', selectedSubCommitteeId.toString());
+      }
+
+      if (selectedProvince) {
+        params.append('province', selectedProvince);
+      }
+
+      if (selectedDistrict) {
+        params.append('district', selectedDistrict);
+      }
+
+      if (selectedMunicipality) {
+        params.append('municipality', selectedMunicipality);
+      }
+
+      if (selectedCountry) {
+        params.append('country', selectedCountry);
+      }
+
+      const membersResponse = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_HOST}/members?${params.toString()}`
+      );
+
+      if (membersResponse.data.data) {
+        // Paginated response
+        setFilteredMembers(membersResponse.data.data);
+        setPagination({
+          page: membersResponse.data.page,
+          limit: membersResponse.data.limit,
+          total: membersResponse.data.total,
+          totalPages: membersResponse.data.totalPages,
+        });
+      } else {
+        // Legacy response (all data)
+        setFilteredMembers(membersResponse.data);
+        setMembers(membersResponse.data);
+      }
+    } catch (error) {
+      console.error("Error fetching members:", error);
+      setError("Failed to load members data.");
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    pagination.page,
+    pagination.limit,
+    searchTerm,
+    selectedCommitteeId,
+    selectedSubCommitteeId,
+    selectedProvince,
+    selectedDistrict,
+    selectedMunicipality,
+    selectedCountry,
+  ]);
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStaticData = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        // Fetch all static data that doesn't need pagination
+        const [
+          countriesResponse,
+          provincesResponse,
+          districtsResponse,
+          municipalitiesResponse,
+          committeesResponse,
+          levelsResponse,
+          subLevelsResponse,
+        ] = await Promise.all([
+          axios.get<Country[]>(process.env.NEXT_PUBLIC_BE_HOST + "/country"),
+          axios.get<Province[]>(process.env.NEXT_PUBLIC_BE_HOST + "/province"),
+          axios.get<District[]>(process.env.NEXT_PUBLIC_BE_HOST + "/district"),
+          axios.get<Municipality[]>(process.env.NEXT_PUBLIC_BE_HOST + "/municipality"),
+          axios.get<Committee[]>(process.env.NEXT_PUBLIC_BE_HOST + "/committees"),
+          axios.get<Level[]>(process.env.NEXT_PUBLIC_BE_HOST + "/levels"),
+          axios.get<SubLevel[]>(process.env.NEXT_PUBLIC_BE_HOST + "/sub-level"),
+        ]);
 
-        const countriesResponse = await axios.get<Country[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/country",
-        );
         setCountries(countriesResponse.data);
-
-        const provincesResponse = await axios.get<Province[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/province",
-        );
         setProvinces(provincesResponse.data);
-
-        const districtsResponse = await axios.get<District[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/district",
-        );
         setDistricts(districtsResponse.data);
-
-        const municipalitiesResponse = await axios.get<Municipality[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/municipality",
-        );
         setMunicipalities(municipalitiesResponse.data);
-
-        // Fetch committees
-        const committeesResponse = await axios.get<Committee[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/committees",
-        );
         setCommittees(committeesResponse.data);
 
-        // Fetch levels data
-        const levelsResponse = await axios.get<Level[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/levels",
-        );
         const levelsData = levelsResponse.data.reduce(
           (acc, level) => ({ ...acc, [level.levelId]: level.levelName }),
           {} as Record<number, string>,
         );
         setLevels(levelsData);
+        setSubLevels(subLevelsResponse.data);
 
         // Fetch sub-committees for each committee
         const subCommitteesData = await Promise.all(
@@ -212,12 +286,6 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         );
         setSubCommittees(mergedSubCommittees);
 
-        // Fetch sub-levels data
-        const subLevelsResponse = await axios.get<SubLevel[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/sub-level",
-        );
-        setSubLevels(subLevelsResponse.data);
-
         // Fetch structures data
         const structuresResponses = await Promise.all(
           committeesResponse.data.flatMap(async (committee) => {
@@ -229,7 +297,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               const committeeStructures = committeeStructuresResponse.data;
 
               const subCommitteesStructuresResponses = await Promise.all(
-                (subCommittees[committee.committeeId] || []).map(async (sub) =>
+                (mergedSubCommittees[committee.committeeId] || []).map(async (sub) =>
                   axios.get<Structure[]>(
                     process.env.NEXT_PUBLIC_BE_HOST +
                       `/structures/subcommittee/${sub.subCommitteeId}`,
@@ -270,23 +338,18 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
           {} as Record<number, string>,
         );
         setPositions(positionsData);
-
-        // Fetch members data
-        const membersResponse = await axios.get<Member[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/members",
-        );
-        setMembers(membersResponse.data);
-        setFilteredMembers(membersResponse.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load data.");
-      } finally {
-        setLoading(false);
+        console.error("Error fetching static data:", error);
+        setError("Failed to load static data.");
       }
     };
 
-    fetchData();
+    fetchStaticData();
   }, []);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   useEffect(() => {
     if (!applyFilters) return;
@@ -400,6 +463,15 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     return countryName; // If none of the above exist, just return the country name
   };
 
+  const handlePageChange = useCallback((page: number) => {
+    setPagination(prev => ({ ...prev, page }));
+  }, []);
+
+  const handleSearch = useCallback((search: string) => {
+    setSearchTerm(search);
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, []);
+
   const handleDeleteMember = async (memberId: number) => {
     try {
       await axios.delete(
@@ -418,9 +490,6 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     router.push(`/forms/updateMembersForm/${memberId}`);
     // router.push()
   };
-
-  if (loading) return <p>Loading data...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
 
   const handleCommitteeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     // const committeeId = parseInt(e.target.value);
@@ -462,36 +531,186 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     setApplyFilters(true); // Apply filters when button is clicked
   };
 
+  if (loading) return <p>Loading data...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
+  // Define table columns
+  const columns: TableColumn<Member>[] = [
+    {
+      key: 'memberName',
+      label: 'नामथर',
+      searchable: true,
+      className: 'font-medium',
+    },
+    {
+      key: 'address',
+      label: 'ठेगाना',
+      render: (_, member) => formatAddress(member),
+      mobileHidden: false,
+    },
+    {
+      key: 'mobileNumber',
+      label: 'मोबाइल नम्बर',
+      searchable: true,
+    },
+    {
+      key: 'email',
+      label: 'ईमेल',
+      searchable: true,
+      mobileHidden: true,
+    },
+    {
+      key: 'representative',
+      label: 'प्रतिनिधि',
+      mobileHidden: true,
+    },
+    {
+      key: 'committee',
+      label: 'समिति',
+      render: (_, member) => 
+        committees.find(c => c.committeeId === member.committeeId)?.committeeName || '-',
+    },
+    {
+      key: 'subCommittee',
+      label: 'उप-समिति',
+      render: (_, member) => 
+        member.subCommitteeId
+          ? subCommittees[member.committeeId]?.find(sub => sub.subCommitteeId === member.subCommitteeId)?.subCommitteeName || '-'
+          : '-',
+      mobileHidden: true,
+    },
+    {
+      key: 'level',
+      label: 'तह',
+      render: (_, member) => getLevelNames(member.committeeId, member.subCommitteeId || null),
+      mobileHidden: true,
+    },
+    {
+      key: 'position',
+      label: 'पद',
+      render: (_, member) => getPositionNames(member.positionId),
+      mobileHidden: true,
+    },
+    {
+      key: 'remarks',
+      label: 'कैफियत',
+      mobileHidden: true,
+    },
+    {
+      key: 'actions',
+      label: 'सुधार',
+      render: (_, member) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleUpdateMember(member.memberId)}
+            className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600 text-sm"
+            title="सम्पादन गर्नुहोस्"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDeleteMember(member.memberId)}
+            className="rounded bg-rose-500 px-3 py-1 text-white hover:bg-rose-600 text-sm"
+            title="मेटाउनुहोस्"
+          >
+            <FaTrash />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  // Mobile card rendering
+  const renderMobileCard = (member: Member, index: number) => (
+    <div className="space-y-3">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-medium text-black dark:text-white">
+            {member.memberName}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {member.mobileNumber}
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleUpdateMember(member.memberId)}
+            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600 text-xs"
+          >
+            <FaEdit />
+          </button>
+          <button
+            onClick={() => handleDeleteMember(member.memberId)}
+            className="rounded bg-rose-500 px-2 py-1 text-white hover:bg-rose-600 text-xs"
+          >
+            <FaTrash />
+          </button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-2 text-sm">
+        <div>
+          <span className="font-medium text-gray-600 dark:text-gray-400">ठेगाना: </span>
+          <span className="text-black dark:text-white">{formatAddress(member)}</span>
+        </div>
+        
+        <div>
+          <span className="font-medium text-gray-600 dark:text-gray-400">समिति: </span>
+          <span className="text-black dark:text-white">
+            {committees.find(c => c.committeeId === member.committeeId)?.committeeName || '-'}
+          </span>
+        </div>
+        
+        {member.subCommitteeId && (
+          <div>
+            <span className="font-medium text-gray-600 dark:text-gray-400">उप-समिति: </span>
+            <span className="text-black dark:text-white">
+              {subCommittees[member.committeeId]?.find(sub => sub.subCommitteeId === member.subCommitteeId)?.subCommitteeName || '-'}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   const membersToDisplay = singleMember ? [singleMember] : filteredMembers;
 
   return (
-    <div className="overflow-x-auto">
-      <div className="mb-4">
-        {/* Committee and Sub-committee filter */}
-        <label className="mr-4">समिति द्वारा फिल्टर गर्नुहोस्:</label>
-        <select
-          value={selectedCommitteeId ?? ""}
-          onChange={handleCommitteeChange}
-          className="rounded border p-2"
-        >
-          <option value="">सबै समिति</option>
-          {committees.map((committee) => (
-            <option key={committee.committeeId} value={committee.committeeId}>
-              {committee.committeeName}
-            </option>
-          ))}
-        </select>
+    <div className="w-full">
+      {/* Advanced Filters */}
+      <div className="mb-6 p-4 bg-gray-50 dark:bg-meta-4 rounded-lg">
+        <h5 className="text-lg font-medium mb-4 text-black dark:text-white">फिल्टर विकल्पहरू</h5>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {/* Committee Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              समिति
+            </label>
+            <select
+              value={selectedCommitteeId ?? ""}
+              onChange={handleCommitteeChange}
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
+            >
+              <option value="">सबै समिति</option>
+              {committees.map((committee) => (
+                <option key={committee.committeeId} value={committee.committeeId}>
+                  {committee.committeeName}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {selectedCommitteeId &&
-          subCommittees[selectedCommitteeId]?.length > 0 && (
-            <>
-              <label className="ml-4 mr-4">
-                उप-समिति द्वारा फिल्टर गर्नुहोस्:
+          {/* Sub-committee Filter */}
+          {selectedCommitteeId && subCommittees[selectedCommitteeId]?.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                उप-समिति
               </label>
               <select
                 value={selectedSubCommitteeId ?? ""}
                 onChange={handleSubCommitteeChange}
-                className="rounded border p-2"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
               >
                 <option value="">सबै उप-समिति</option>
                 {subCommittees[selectedCommitteeId].map((subCommittee) => (
@@ -503,242 +722,146 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
                   </option>
                 ))}
               </select>
-            </>
+            </div>
           )}
 
-        {/* Filters for Address (Country), Province, District, Municipality */}
-        <label className="ml-4 mr-4">देश द्वारा फिल्टर गर्नुहोस्:</label>
-        <select
-          value={selectedCountry ?? ""}
-          onChange={handleAddressChange}
-          className="rounded border p-2"
-        >
-          <option value="">सबै देश</option>
-          {countries
-            .filter((country) =>
-              members.some(
-                (member) => parseInt(member.country) === country.countryId,
-              ),
-            )
-            .map((country) => (
-              <option key={country.countryId} value={country.countryId}>
-                {country.countryName}
-              </option>
-            ))}
-        </select>
-
-        <label className="ml-4 mr-4">प्रदेश द्वारा फिल्टर गर्नुहोस्:</label>
-        <select
-          value={selectedProvince ?? ""}
-          onChange={handleProvinceChange}
-          className="rounded border p-2"
-        >
-          <option value="">सबै प्रदेश</option>
-          {provinces
-            .filter((province) =>
-              members.some(
-                (member) => parseInt(member.province) === province.provinceId,
-              ),
-            )
-            .map((province) => (
-              <option key={province.provinceId} value={province.provinceId}>
-                {province.provinceName}
-              </option>
-            ))}
-        </select>
-
-        <label className="ml-4 mr-4">जिल्ला द्वारा फिल्टर गर्नुहोस्:</label>
-        <select
-          value={selectedDistrict ?? ""}
-          onChange={handleDistrictChange}
-          className="rounded border p-2"
-        >
-          <option value="">सबै जिल्ला</option>
-          {districts
-            .filter((district) =>
-              members.some(
-                (member) => parseInt(member.district) === district.districtId,
-              ),
-            )
-            .map((district) => (
-              <option key={district.districtId} value={district.districtId}>
-                {district.districtName}
-              </option>
-            ))}
-        </select>
-
-        <label className="ml-4 mr-4">नगरपालिका द्वारा फिल्टर गर्नुहोस्:</label>
-        <select
-          value={selectedMunicipality ?? ""}
-          onChange={handleMunicipalityChange}
-          className="rounded border p-2"
-        >
-          <option value="">सबै नगरपालिका</option>
-          {municipalities
-            .filter((municipality) =>
-              members.some(
-                (member) =>
-                  parseInt(member.municipality) === municipality.municipalityId,
-              ),
-            )
-            .map((municipality) => (
-              <option
-                key={municipality.municipalityId}
-                value={municipality.municipalityId}
-              >
-                {municipality.municipalityName}
-              </option>
-            ))}
-        </select>
-
-        <label className="ml-4 mr-4">वडा द्वारा फिल्टर गर्नुहोस्:</label>
-        <select
-          value={selectedWard ?? ""}
-          onChange={handleWardChange}
-          className="rounded border p-2"
-        >
-          <option value="">सबै वडा</option>
-          {members.length > 0 &&
-            Array.from(new Set(members.map((member) => member.ward))).map(
-              (ward) => (
-                <option key={ward} value={ward}>
-                  {ward}
+          {/* Country Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              देश
+            </label>
+            <select
+              value={selectedCountry ?? ""}
+              onChange={handleAddressChange}
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
+            >
+              <option value="">सबै देश</option>
+              {countries.map((country) => (
+                <option key={country.countryId} value={country.countryId}>
+                  {country.countryName}
                 </option>
-              ),
-            )}
-        </select>
+              ))}
+            </select>
+          </div>
 
-        <button
-          onClick={handleFilter}
-          className="ml-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-        >
-          Filter
-        </button>
-      </div>
+          {/* Province Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              प्रदेश
+            </label>
+            <select
+              value={selectedProvince ?? ""}
+              onChange={handleProvinceChange}
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
+            >
+              <option value="">सबै प्रदेश</option>
+              {provinces.map((province) => (
+                <option key={province.provinceId} value={province.provinceId}>
+                  {province.provinceName}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {role === "superadmin" && (
-        <div className="mb-4">
-          <button
-            onClick={exportToExcel}
-            className="mb-4 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-          >
-            <FaFileExcel className="mr-2" />
-            <span>Export to Excel</span>
-          </button>
+          {/* District Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              जिल्ला
+            </label>
+            <select
+              value={selectedDistrict ?? ""}
+              onChange={handleDistrictChange}
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
+            >
+              <option value="">सबै जिल्ला</option>
+              {districts.map((district) => (
+                <option key={district.districtId} value={district.districtId}>
+                  {district.districtName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Municipality Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              नगरपालिका
+            </label>
+            <select
+              value={selectedMunicipality ?? ""}
+              onChange={handleMunicipalityChange}
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
+            >
+              <option value="">सबै नगरपालिका</option>
+              {municipalities.map((municipality) => (
+                <option
+                  key={municipality.municipalityId}
+                  value={municipality.municipalityId}
+                >
+                  {municipality.municipalityName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Ward Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              वडा
+            </label>
+            <select
+              value={selectedWard ?? ""}
+              onChange={handleWardChange}
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
+            >
+              <option value="">सबै वडा</option>
+              {Array.from(new Set(members.map((member) => member.ward)))
+                .filter(Boolean)
+                .map((ward) => (
+                  <option key={ward} value={ward}>
+                    {ward}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Filter Button */}
+          <div className="flex items-end">
+            <button
+              onClick={handleFilter}
+              className="w-full rounded bg-primary px-4 py-2 text-white hover:bg-primary/90 text-sm font-medium"
+            >
+              फिल्टर लागू गर्नुहोस्
+            </button>
+          </div>
         </div>
-      )}
-
-      <div className="border-gray-700 dark:border-gray-700 min-w-[1500px] rounded-sm border bg-rose-100 p-6 px-5 pb-2.5 pt-6 shadow dark:bg-boxdark sm:rounded-lg sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6  text-xl font-semibold text-black dark:text-white">
-          <span className="bg-lime-600">सदस्य तालिका</span>
-        </h4>
-        <table className="min-w-full table-auto">
-          <thead className="dark:bg-gray-700">
-            <tr className="bg-slate-400">
-              {/* Table headers */}
-              <th className="border-gray-700 w-2 border-2 px-4 py-2 font-bold text-black">
-                क्रम संख्या
-              </th>
-              <th className="border-gray-700 w-45 border-2 px-4 py-2 font-bold text-black">
-                नामथर
-              </th>
-              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                ठेगाना
-              </th>
-              <th className="border-gray-700 w-30 border-2 px-4 py-2 font-bold text-black">
-                मोबाइल नम्बर
-              </th>
-              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                ईमेल
-              </th>
-              <th className="border-gray-700 w-50 border-2 px-4 py-2 font-bold text-black">
-                प्रतिनिधि
-              </th>
-              <th className="border-gray-700 w-25 border-2 px-4 py-2 font-bold text-black">
-                समिति
-              </th>
-              <th className="border-gray-700 w-35 border-2 px-4 py-2 font-bold text-black">
-                उप-समिति
-              </th>
-              <th className="border-gray-700 w-45 border-2 px-4 py-2 font-bold text-black">
-                तह
-              </th>
-              <th className="border-gray-700 w-35 border-2 px-4 py-2 font-bold text-black">
-                पद
-              </th>
-              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
-                कैफियत
-              </th>
-              <th className="border-gray-700 w-20 border-2 px-4 py-2 font-bold text-black">
-                सुधार
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {membersToDisplay.map((member, index) => (
-              <tr key={member.memberId}>
-                {/* Table rows */}
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {index + 1}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {member.memberName}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {formatAddress(member)}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {member.mobileNumber}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {member.email}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {member.representative}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {committees.find(
-                    (committee) => committee.committeeId === member.committeeId,
-                  )?.committeeName || "-"}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {member.subCommitteeId
-                    ? subCommittees[member.committeeId]?.find(
-                        (sub) => sub.subCommitteeId === member.subCommitteeId,
-                      )?.subCommitteeName || "-"
-                    : "-"}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {getLevelNames(
-                    member.committeeId,
-                    member.subCommitteeId || null,
-                  )}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center text-black">
-                  {getPositionNames(member.positionId)}
-                </td>
-                <td className="border-2 px-4 py-2 text-center text-black">
-                  {member.remarks}
-                </td>
-                <td className="border-gray-700 border-2 px-4 py-2 text-center">
-                  <button
-                    onClick={() => handleUpdateMember(member.memberId)}
-                    className="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteMember(member.memberId)}
-                    className="mr-2 rounded bg-rose-500 px-4 py-2 text-white hover:bg-rose-600"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
+
+      {/* Responsive Table */}
+      <ResponsiveTable
+        data={membersToDisplay}
+        columns={columns}
+        loading={loading}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        onSearch={handleSearch}
+        searchValue={searchTerm}
+        title="सदस्य तालिका"
+        keyExtractor={(member) => member.memberId.toString()}
+        mobileCardRender={renderMobileCard}
+        emptyMessage="कुनै सदस्य भेटिएन"
+        actions={
+          role === "superadmin" ? (
+            <button
+              onClick={exportToExcel}
+              className="flex items-center space-x-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 text-sm font-medium"
+            >
+              <FaFileExcel />
+              <span>Excel निर्यात</span>
+            </button>
+          ) : undefined
+        }
+      />
     </div>
   );
 };

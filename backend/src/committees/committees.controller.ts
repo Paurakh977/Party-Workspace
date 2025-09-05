@@ -6,16 +6,34 @@ import {
   Body,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CommitteesService } from './committees.service';
 import { Committees } from './committees.entity';
+
+export interface PaginationQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 @Controller('committees')
 export class CommitteesController {
   constructor(private readonly committeesService: CommitteesService) {}
 
   @Get()
-  findAll(): Promise<Committees[]> {
+  findAll(@Query() query: PaginationQuery): Promise<PaginatedResult<Committees> | Committees[]> {
+    if (query.page || query.limit || query.search) {
+      return this.committeesService.findAllPaginated(query);
+    }
     return this.committeesService.findAll();
   }
 

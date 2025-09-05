@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import AddressInput from "@/components/Address/address";
+import MapLocationSelector from "@/components/Maps/MapLocationSelector";
 import { NepaliDatePicker } from "nepali-datepicker-reactjs";
 import "nepali-datepicker-reactjs/dist/index.css";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,8 @@ interface Event {
   venue?: string;
   eventOrganizer: string;
   remarks: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
@@ -42,6 +45,8 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
   const [venue, setVenue] = useState<string>("");
   const [eventOrganizer, setEventOrganizer] = useState<string>("");
   const [remarks, setRemarks] = useState<string>("");
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
 
   // Handle date change from the Nepali Date Picker
   const handleDateChange = (value: string) => {
@@ -61,6 +66,24 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
     setDistrict(newAddress.district || "");
     setMunicipality(newAddress.municipality || "");
     setWard(newAddress.ward || "");
+  };
+
+  // Handle location changes from MapLocationSelector component
+  const handleLocationChange = (location: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    district?: string;
+  }) => {
+    setLatitude(location.latitude);
+    setLongitude(location.longitude);
+    // Optionally update address and district from map selection
+    if (location.address) {
+      setAddress(location.address);
+    }
+    if (location.district) {
+      setDistrict(location.district);
+    }
   };
 
   // Fetch the event data when the component mounts or when the eventId changes
@@ -87,6 +110,8 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
           setVenue(eventData.venue || "");
           setEventOrganizer(eventData.eventOrganizer || "");
           setRemarks(eventData.remarks || "");
+          setLatitude(eventData.latitude);
+          setLongitude(eventData.longitude);
         } catch (error) {
           console.error("Error fetching event:", error);
         }
@@ -112,6 +137,8 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
       venue: venue || null,
       eventOrganizer: eventOrganizer || null,
       remarks: remarks || null,
+      latitude: latitude || null,
+      longitude: longitude || null,
     };
 
     try {
@@ -244,6 +271,27 @@ const UpdateEventsForm: React.FC<UpdateEventsFormProps> = ({ eventId }) => {
               }
               className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary focus:outline-none dark:bg-meta-4 dark:text-white"
             />
+          </div>
+
+          {/* Location Selection Field */}
+          <div className="mb-5.5">
+            <label
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+            >
+              कार्यक्रमको स्थान (नक्सामा चिन्ह लगाउनुहोस्):
+            </label>
+            {event && (
+              <MapLocationSelector
+                value={{
+                  latitude: latitude,
+                  longitude: longitude,
+                  address: address,
+                  district: district
+                }}
+                onChange={handleLocationChange}
+                autoSaveLocation={false}
+              />
+            )}
           </div>
 
           {/* Event Organizer Field */}

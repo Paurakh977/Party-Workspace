@@ -46,4 +46,10 @@ export class Events {
 
   @Column({ nullable: true })
   remarks: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
+  latitude: number;
+
+  @Column({ type: 'decimal', precision: 11, scale: 8, nullable: true })
+  longitude: number;
 }

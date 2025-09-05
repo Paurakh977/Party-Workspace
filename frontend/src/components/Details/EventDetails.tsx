@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AddressInput from "@/components/Address/address"; // Assuming this component can display addresses without editing
+import MapLocationSelector from "@/components/Maps/MapLocationSelector";
 import { useRouter } from "next/navigation";
 
 interface ViewEventPageProps {
@@ -21,6 +22,8 @@ interface Event {
   venue?: string;
   eventOrganizer: string;
   remarks: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 const ViewEventPage: React.FC<ViewEventPageProps> = ({ eventId }) => {
@@ -130,6 +133,27 @@ const ViewEventPage: React.FC<ViewEventPageProps> = ({ eventId }) => {
             {event.venue}
           </p>
         </div>
+
+        {/* Location Map Display */}
+        {event.latitude && event.longitude && (
+          <div className="mb-5.5">
+            <label className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white">
+              कार्यक्रमको स्थान (नक्सामा):
+            </label>
+            <div className="bg-gray-50 rounded border p-3">
+              <MapLocationSelector
+                value={{
+                  latitude: event.latitude,
+                  longitude: event.longitude,
+                  address: event.address,
+                  district: event.district
+                }}
+                onChange={() => {}} // Read-only mode
+                autoSaveLocation={false}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="mb-5.5">
           <label className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent, use } from "react";
 import axios from "axios";
 import AddressInput from "../Address/address";
+import MapLocationSelector from "../Maps/MapLocationSelector";
 import { NepaliDatePicker } from "nepali-datepicker-reactjs";
 import "nepali-datepicker-reactjs/dist/index.css";
 import { useRouter } from "next/navigation";
@@ -21,6 +22,8 @@ const EventsForm: React.FC = () => {
   const [eventSpeaker, setEventSpeaker] = useState<string>("");
   const [eventOrganizer, setEventOrganizer] = useState<string>("");
   const [eventType, setEventType] = useState<string>("");
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
 
   const [remarks, setRemarks] = useState<string>("");
 
@@ -44,6 +47,24 @@ const EventsForm: React.FC = () => {
     setWard(newAddress.ward || "");
   };
 
+  // Handle location changes from MapLocationSelector component
+  const handleLocationChange = (location: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    district?: string;
+  }) => {
+    setLatitude(location.latitude);
+    setLongitude(location.longitude);
+    // Optionally update address and district from map selection
+    if (location.address) {
+      setAddress(location.address);
+    }
+    if (location.district) {
+      setDistrict(location.district);
+    }
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -62,6 +83,8 @@ const EventsForm: React.FC = () => {
       eventOrganizer: eventOrganizer || null,
       eventType,
       remarks: remarks || null,
+      latitude: latitude || null,
+      longitude: longitude || null,
     };
 
     try {
@@ -198,6 +221,25 @@ const EventsForm: React.FC = () => {
                 setVenue(e.target.value)
               }
               className="bg-gray-50 w-full rounded border  px-4.5 py-3 text-black shadow focus:border-primary  focus:outline-none dark:bg-meta-4 dark:text-white"
+            />
+          </div>
+
+          {/* Location Selection Field */}
+          <div className="mb-5.5">
+            <label
+              className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white"
+            >
+              कार्यक्रमको स्थान (नक्सामा चिन्ह लगाउनुहोस्):
+            </label>
+            <MapLocationSelector
+              value={{
+                latitude: latitude,
+                longitude: longitude,
+                address: address,
+                district: district
+              }}
+              onChange={handleLocationChange}
+              autoSaveLocation={false}
             />
           </div>
 

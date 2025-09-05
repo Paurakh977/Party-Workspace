@@ -23,6 +23,7 @@
     "jsvectormap": "^1.6.0",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
+    "lucide-react": "^0.542.0",
     "nepali-datepicker-reactjs": "^1.1.7",
     "nepali-datetime": "^1.2.1",
     "next": "^14.2.4",

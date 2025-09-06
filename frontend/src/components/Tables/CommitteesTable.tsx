@@ -342,6 +342,7 @@ const CommitteesTable = () => {
         keyExtractor={(committee) => committee.committeeId.toString()}
         mobileCardRender={renderMobileCard}
         emptyMessage="कुनै समिति भेटिएन"
+        showSerialNumber={true}
       />
     </div>
   );

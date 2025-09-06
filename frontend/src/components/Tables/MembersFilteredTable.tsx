@@ -102,71 +102,116 @@ const MembersFilteredTable = ({
 
   const router = useRouter();
 
-  const exportToExcel = () => {
-    // Prepare data for the export
-    const exportData = filteredMembers.map((member) => ({
-      "Member Name": member.memberName,
-      Address: formatAddress(member),
-      "Mobile Number": member.mobileNumber,
-      Email: member.email,
-      Representative: member.representative,
-      Committee:
-        committees.find(
-          (committee) => committee.committeeId === member.committeeId,
-        )?.committeeName || "-",
-      "Sub-Committee": member.subCommitteeId
-        ? subCommittees[member.committeeId]?.find(
-            (sub) => sub.subCommitteeId === member.subCommitteeId,
-          )?.subCommitteeName || "-"
-        : "-",
-      Level: getLevelNames(member.committeeId, member.subCommitteeId || null),
-      Position: getPositionNames(member.positionId),
-      Remarks: member.remarks,
-    }));
+  const exportToExcel = async (exportAll = false) => {
+    try {
+      let membersToExport = filteredMembers;
+      
+      if (exportAll) {
+        // Fetch all members for export
+        const params = new URLSearchParams();
+        
+        if (searchTerm) {
+          params.append('search', searchTerm);
+        }
+        if (selectedCommitteeId) {
+          params.append('committeeId', selectedCommitteeId.toString());
+        }
+        if (selectedSubCommitteeId) {
+          params.append('subCommitteeId', selectedSubCommitteeId.toString());
+        }
+        if (selectedProvince) {
+          params.append('province', selectedProvince);
+        }
+        if (selectedDistrict) {
+          params.append('district', selectedDistrict);
+        }
+        if (selectedMunicipality) {
+          params.append('municipality', selectedMunicipality);
+        }
+        if (selectedAddress) {
+          params.append('country', selectedAddress);
+        }
+        
+        // Set a large limit to get all data
+        params.append('limit', '10000');
+        params.append('page', '1');
 
-    // Generate the file name based on the selected filters
-    let fileName = "MembersData";
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_HOST}/members?${params.toString()}`
+        );
+        
+        membersToExport = response.data.data || response.data;
+      }
 
-    if (selectedCommitteeId) {
-      const committeeName =
-        committees.find((c) => c.committeeId === selectedCommitteeId)
-          ?.committeeName || "Committee";
-      fileName += `_${committeeName}`;
+      // Prepare data for the export
+      const exportData = membersToExport.map((member, index) => ({
+        "S.N": index + 1,
+        "Member Name": member.memberName,
+        Address: formatAddress(member),
+        "Mobile Number": member.mobileNumber,
+        Email: member.email,
+        Representative: member.representative,
+        Committee:
+          committees.find(
+            (committee) => committee.committeeId === member.committeeId,
+          )?.committeeName || "-",
+        "Sub-Committee": member.subCommitteeId
+          ? subCommittees[member.committeeId]?.find(
+              (sub) => sub.subCommitteeId === member.subCommitteeId,
+            )?.subCommitteeName || "-"
+          : "-",
+        Level: getLevelNames(member.committeeId, member.subCommitteeId || null),
+        Position: getPositionNames(member.positionId),
+        Remarks: member.remarks,
+      }));
+
+      // Generate the file name based on the selected filters
+      let fileName = exportAll ? "AllMembersData" : "MembersData";
+
+      if (selectedCommitteeId) {
+        const committeeName =
+          committees.find((c) => c.committeeId === selectedCommitteeId)
+            ?.committeeName || "Committee";
+        fileName += `_${committeeName}`;
+      }
+
+      if (selectedSubCommitteeId) {
+        const subCommitteeName =
+          subCommittees[selectedCommitteeId]?.find(
+            (sub) => sub.subCommitteeId === selectedSubCommitteeId,
+          )?.subCommitteeName || "SubCommittee";
+        fileName += `_${subCommitteeName}`;
+      }
+
+      if (selectedProvince) {
+        fileName += `_${selectedProvince}`;
+      }
+      if (selectedDistrict) {
+        fileName += `_${selectedDistrict}`;
+      }
+      if (selectedMunicipality) {
+        fileName += `_${selectedMunicipality}`;
+      }
+      if (selectedWard) {
+        fileName += `_Ward${selectedWard}`;
+      }
+
+      // Final file name with .xlsx extension
+      fileName += ".xlsx";
+
+      // Create a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // Create a new workbook and append the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Members");
+
+      // Export the workbook with the dynamic file name
+      XLSX.writeFile(workbook, fileName);
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      alert("Error exporting data. Please try again.");
     }
-
-    if (selectedSubCommitteeId) {
-      const subCommitteeName =
-        subCommittees[selectedCommitteeId]?.find(
-          (sub) => sub.subCommitteeId === selectedSubCommitteeId,
-        )?.subCommitteeName || "SubCommittee";
-      fileName += `_${subCommitteeName}`;
-    }
-
-    if (selectedProvince) {
-      fileName += `_${selectedProvince}`;
-    }
-    if (selectedDistrict) {
-      fileName += `_${selectedDistrict}`;
-    }
-    if (selectedMunicipality) {
-      fileName += `_${selectedMunicipality}`;
-    }
-    if (selectedWard) {
-      fileName += `_Ward${selectedWard}`;
-    }
-
-    // Final file name with .xlsx extension
-    fileName += ".xlsx";
-
-    // Create a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-
-    // Create a new workbook and append the worksheet
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Members");
-
-    // Export the workbook with the dynamic file name
-    XLSX.writeFile(workbook, fileName);
   };
 
   const fetchMembers = useCallback(async () => {
@@ -769,15 +814,27 @@ const MembersFilteredTable = ({
         keyExtractor={(member) => member.memberId.toString()}
         mobileCardRender={renderMobileCard}
         emptyMessage="कुनै सदस्य भेटिएन"
+        showSerialNumber={true}
         actions={
           role === "superadmin" ? (
-            <button
-              onClick={exportToExcel}
-              className="flex items-center space-x-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 text-sm font-medium"
-            >
-              <FaFileExcel />
-              <span>Excel निर्यात</span>
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => exportToExcel(false)}
+                className="flex items-center space-x-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 text-sm font-medium"
+                title="Current page data export"
+              >
+                <FaFileExcel />
+                <span>Current Page</span>
+              </button>
+              <button
+                onClick={() => exportToExcel(true)}
+                className="flex items-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 text-sm font-medium"
+                title="All data export"
+              >
+                <FaFileExcel />
+                <span>All Data</span>
+              </button>
+            </div>
           ) : undefined
         }
       />

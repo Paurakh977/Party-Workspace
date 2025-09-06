@@ -43,25 +43,6 @@ interface Position {
   positionName: string;
 }
 
-interface Country {
-  countryId: number;
-  countryName: string;
-}
-
-interface Province {
-  provinceId: number;
-  provinceName: string;
-}
-
-interface District {
-  districtId: number;
-  districtName: string;
-}
-
-interface Municipality {
-  municipalityId: number;
-  municipalityName: string;
-}
 
 interface Member {
   memberId: number;
@@ -72,7 +53,7 @@ interface Member {
   committeeId: number;
   subCommitteeId?: number;
   positionId?: number;
-  country: string;
+  address: string;
   province: string;
   district: string;
   municipality: string;
@@ -82,10 +63,6 @@ interface Member {
 
 const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const role = RoleChecker();
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [subCommittees, setSubCommittees] = useState<
     Record<number, SubCommittee[]>
@@ -109,11 +86,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   const [selectedMunicipality, setSelectedMunicipality] = useState<
     string | null
   >(null);
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
 
-  const [applyFilters, setApplyFilters] = useState<boolean>(false);
-  const [filteredMembers, setFilteredMembers] = useState<Member[]>(members);
   const [pagination, setPagination] = useState<PaginationData>({
     page: 1,
     limit: 10,
@@ -124,37 +99,85 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   const router = useRouter();
 
-  const exportToExcel = () => {
-    // Prepare data for the export
-    const exportData = filteredMembers.map((member) => ({
-      "Member Name": member.memberName,
-      Address: formatAddress(member),
-      "Mobile Number": member.mobileNumber,
-      Email: member.email,
-      Representative: member.representative,
-      Committee:
-        committees.find(
-          (committee) => committee.committeeId === member.committeeId,
-        )?.committeeName || "-",
-      "Sub-Committee": member.subCommitteeId
-        ? subCommittees[member.committeeId]?.find(
-            (sub) => sub.subCommitteeId === member.subCommitteeId,
-          )?.subCommitteeName || "-"
-        : "-",
-      Level: getLevelNames(member.committeeId, member.subCommitteeId || null),
-      Position: getPositionNames(member.positionId),
-      Remarks: member.remarks,
-    }));
+  const exportToExcel = async (exportAll = false) => {
+    try {
+      let membersToExport = filteredMembers;
+      
+      if (exportAll) {
+        // Fetch all members for export
+        const params = new URLSearchParams();
+        
+        if (searchTerm) {
+          params.append('search', searchTerm);
+        }
+        if (selectedCommitteeId) {
+          params.append('committeeId', selectedCommitteeId.toString());
+        }
+        if (selectedSubCommitteeId) {
+          params.append('subCommitteeId', selectedSubCommitteeId.toString());
+        }
+        if (selectedProvince) {
+          params.append('province', selectedProvince);
+        }
+        if (selectedDistrict) {
+          params.append('district', selectedDistrict);
+        }
+        if (selectedMunicipality) {
+          params.append('municipality', selectedMunicipality);
+        }
+        if (selectedAddress) {
+          params.append('country', selectedAddress);
+        }
+        
+        // Set a large limit to get all data
+        params.append('limit', '10000');
+        params.append('page', '1');
 
-    // Create a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_HOST}/members?${params.toString()}`
+        );
+        
+        membersToExport = response.data.data || response.data;
+      }
 
-    // Create a new workbook and append the worksheet
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Members");
+      // Prepare data for the export
+      const exportData = membersToExport.map((member, index) => ({
+        "S.N": index + 1,
+        "Member Name": member.memberName,
+        Address: formatAddress(member),
+        "Mobile Number": member.mobileNumber,
+        Email: member.email,
+        Representative: member.representative,
+        Committee:
+          committees.find(
+            (committee) => committee.committeeId === member.committeeId,
+          )?.committeeName || "-",
+        "Sub-Committee": member.subCommitteeId
+          ? subCommittees[member.committeeId]?.find(
+              (sub) => sub.subCommitteeId === member.subCommitteeId,
+            )?.subCommitteeName || "-"
+          : "-",
+        Level: getLevelNames(member.committeeId, member.subCommitteeId || null),
+        Position: getPositionNames(member.positionId),
+        Remarks: member.remarks,
+      }));
 
-    // Export the workbook
-    XLSX.writeFile(workbook, "MembersData.xlsx");
+      // Create a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // Create a new workbook and append the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Members");
+
+      // Generate filename based on export type
+      const fileName = exportAll ? "AllMembersData.xlsx" : "MembersData.xlsx";
+
+      // Export the workbook
+      XLSX.writeFile(workbook, fileName);
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      alert("Error exporting data. Please try again.");
+    }
   };
 
   const fetchMembers = useCallback(async () => {
@@ -191,8 +214,8 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         params.append('municipality', selectedMunicipality);
       }
 
-      if (selectedCountry) {
-        params.append('country', selectedCountry);
+      if (selectedAddress) {
+        params.append('country', selectedAddress);
       }
 
       const membersResponse = await axios.get(
@@ -201,7 +224,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
       if (membersResponse.data.data) {
         // Paginated response
-        setFilteredMembers(membersResponse.data.data);
+        setMembers(membersResponse.data.data);
         setPagination({
           page: membersResponse.data.page,
           limit: membersResponse.data.limit,
@@ -210,7 +233,6 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         });
       } else {
         // Legacy response (all data)
-        setFilteredMembers(membersResponse.data);
         setMembers(membersResponse.data);
       }
     } catch (error) {
@@ -228,35 +250,23 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     selectedProvince,
     selectedDistrict,
     selectedMunicipality,
-    selectedCountry,
+    selectedAddress,
   ]);
 
   useEffect(() => {
     const fetchStaticData = async () => {
       try {
-        // Fetch all static data that doesn't need pagination
+        // Fetch only the data needed for display (committees, levels, positions)
         const [
-          countriesResponse,
-          provincesResponse,
-          districtsResponse,
-          municipalitiesResponse,
           committeesResponse,
           levelsResponse,
           subLevelsResponse,
         ] = await Promise.all([
-          axios.get<Country[]>(process.env.NEXT_PUBLIC_BE_HOST + "/country"),
-          axios.get<Province[]>(process.env.NEXT_PUBLIC_BE_HOST + "/province"),
-          axios.get<District[]>(process.env.NEXT_PUBLIC_BE_HOST + "/district"),
-          axios.get<Municipality[]>(process.env.NEXT_PUBLIC_BE_HOST + "/municipality"),
           axios.get<Committee[]>(process.env.NEXT_PUBLIC_BE_HOST + "/committees"),
           axios.get<Level[]>(process.env.NEXT_PUBLIC_BE_HOST + "/levels"),
           axios.get<SubLevel[]>(process.env.NEXT_PUBLIC_BE_HOST + "/sub-level"),
         ]);
 
-        setCountries(countriesResponse.data);
-        setProvinces(provincesResponse.data);
-        setDistricts(districtsResponse.data);
-        setMunicipalities(municipalitiesResponse.data);
         setCommittees(committeesResponse.data);
 
         const levelsData = levelsResponse.data.reduce(
@@ -351,60 +361,39 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
     fetchMembers();
   }, [fetchMembers]);
 
-  useEffect(() => {
-    if (!applyFilters) return;
+  // Client-side filtering logic (same as MembersFilteredTable)
+  const filteredMembers = members.filter((member) => {
+    const committeeMatch = selectedCommitteeId
+      ? member.committeeId === selectedCommitteeId
+      : true;
+    const subCommitteeMatch = selectedSubCommitteeId
+      ? member.subCommitteeId === selectedSubCommitteeId
+      : true;
+    const provinceMatch = selectedProvince
+      ? member.province === selectedProvince
+      : true;
+    const districtMatch = selectedDistrict
+      ? member.district === selectedDistrict
+      : true;
+    const municipalityMatch = selectedMunicipality
+      ? member.municipality === selectedMunicipality
+      : true;
+    const addressMatch = selectedAddress
+      ? member.address === selectedAddress
+      : true;
+    const wardMatch = selectedWard ? member.ward === selectedWard : true;
 
-    // Logic for applying filters
-    const filtered = singleMember
-      ? [singleMember]
-      : members.filter((member) => {
-          const committeeMatch = selectedCommitteeId
-            ? member.committeeId === selectedCommitteeId
-            : true;
-          const subCommitteeMatch = selectedSubCommitteeId
-            ? member.subCommitteeId === selectedSubCommitteeId
-            : true;
-          const provinceMatch = selectedProvince
-            ? member.province === selectedProvince
-            : true;
-          const districtMatch = selectedDistrict
-            ? member.district === selectedDistrict
-            : true;
-          const municipalityMatch = selectedMunicipality
-            ? member.municipality === selectedMunicipality
-            : true;
-          const countryMatch = selectedCountry
-            ? member.country === selectedCountry
-            : true;
-          const wardMatch = selectedWard ? member.ward === selectedWard : true;
+    return (
+      committeeMatch &&
+      subCommitteeMatch &&
+      provinceMatch &&
+      districtMatch &&
+      municipalityMatch &&
+      addressMatch &&
+      wardMatch
+    );
+  });
 
-          return (
-            committeeMatch &&
-            subCommitteeMatch &&
-            provinceMatch &&
-            districtMatch &&
-            municipalityMatch &&
-            countryMatch &&
-            wardMatch
-          );
-        });
-
-    setFilteredMembers(filtered);
-
-    // Move setApplyFilters(false) here, to reset after applying the filters
-    setApplyFilters(false);
-  }, [
-    applyFilters,
-    singleMember,
-    members,
-    selectedCommitteeId,
-    selectedSubCommitteeId,
-    selectedProvince,
-    selectedDistrict,
-    selectedMunicipality,
-    selectedCountry,
-    selectedWard,
-  ]);
 
   // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
@@ -431,36 +420,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   // Helper function to format address
   const formatAddress = (member: Member): string => {
-    const { municipality, ward, district, province, country } = member;
-
-    // Retrieve proper names from the corresponding arrays using the current context
-    const countryName =
-      countries.find((c) => c.countryId === parseInt(country))?.countryName ||
-      "";
-    const provinceName =
-      provinces.find((p) => p.provinceId === parseInt(province))
-        ?.provinceName || "";
-    const districtName =
-      districts.find((d) => d.districtId === parseInt(district))
-        ?.districtName || "";
-    const municipalityName =
-      municipalities.find((m) => m.municipalityId === parseInt(municipality))
-        ?.municipalityName || "";
-
-    // Check for each part of the address from the most specific to the least
-    if (municipalityName && ward) {
-      return `${municipalityName} - ${ward}, ${districtName} जिल्ला, ${provinceName} प्रदेश, ${countryName}`;
-    }
-    if (municipalityName) {
-      return `${municipalityName}, ${districtName} जिल्ला, ${provinceName} प्रदेश, ${countryName}`;
-    }
-    if (districtName) {
-      return `${districtName} जिल्ला, ${provinceName} प्रदेश, ${countryName}`;
-    }
-    if (provinceName) {
-      return `${provinceName} प्रदेश, ${countryName}`;
-    }
-    return countryName; // If none of the above exist, just return the country name
+    const { municipality, ward, district, province, address } = member;
+    if (!address) return `${municipality} - ${ward}, ${district}`;
+    return `${municipality} - ${ward}, ${district} जिल्ला, ${province} प्रदेश, ${address}`;
   };
 
   const handlePageChange = useCallback((page: number) => {
@@ -506,30 +468,33 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCountry(e.target.value);
+    setSelectedAddress(e.target.value);
   };
 
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProvince(e.target.value || null);
+    setSelectedDistrict(null); // Reset district when province changes
+    setSelectedMunicipality(null); // Reset municipality when province changes
+    setSelectedWard(null); // Reset ward when province changes
   };
 
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDistrict(e.target.value || null);
+    setSelectedMunicipality(null); // Reset municipality when district changes
+    setSelectedWard(null); // Reset ward when district changes
   };
 
   const handleMunicipalityChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setSelectedMunicipality(e.target.value || null);
+    setSelectedWard(null); // Reset ward when municipality changes
   };
 
   const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedWard(e.target.value || null);
   };
 
-  const handleFilter = () => {
-    setApplyFilters(true); // Apply filters when button is clicked
-  };
 
   if (loading) return <p>Loading data...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -731,16 +696,18 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               देश
             </label>
             <select
-              value={selectedCountry ?? ""}
+              value={selectedAddress ?? ""}
               onChange={handleAddressChange}
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै देश</option>
-              {countries.map((country) => (
-                <option key={country.countryId} value={country.countryId}>
-                  {country.countryName}
-                </option>
-              ))}
+              {Array.from(new Set(members.map((member) => member.address)))
+                .filter(Boolean)
+                .map((address) => (
+                  <option key={address} value={address}>
+                    {address}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -755,11 +722,13 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै प्रदेश</option>
-              {provinces.map((province) => (
-                <option key={province.provinceId} value={province.provinceId}>
-                  {province.provinceName}
-                </option>
-              ))}
+              {Array.from(new Set(members.map((member) => member.province)))
+                .filter(Boolean)
+                .map((province) => (
+                  <option key={province} value={province}>
+                    {province}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -774,11 +743,17 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै जिल्ला</option>
-              {districts.map((district) => (
-                <option key={district.districtId} value={district.districtId}>
-                  {district.districtName}
-                </option>
-              ))}
+              {Array.from(new Set(
+                members
+                  .filter((member) => !selectedProvince || member.province === selectedProvince)
+                  .map((member) => member.district)
+              ))
+                .filter(Boolean)
+                .map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -793,14 +768,20 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै नगरपालिका</option>
-              {municipalities.map((municipality) => (
-                <option
-                  key={municipality.municipalityId}
-                  value={municipality.municipalityId}
-                >
-                  {municipality.municipalityName}
-                </option>
-              ))}
+              {Array.from(new Set(
+                members
+                  .filter((member) => 
+                    (!selectedProvince || member.province === selectedProvince) &&
+                    (!selectedDistrict || member.district === selectedDistrict)
+                  )
+                  .map((member) => member.municipality)
+              ))
+                .filter(Boolean)
+                .map((municipality) => (
+                  <option key={municipality} value={municipality}>
+                    {municipality}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -815,7 +796,15 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै वडा</option>
-              {Array.from(new Set(members.map((member) => member.ward)))
+              {Array.from(new Set(
+                members
+                  .filter((member) => 
+                    (!selectedProvince || member.province === selectedProvince) &&
+                    (!selectedDistrict || member.district === selectedDistrict) &&
+                    (!selectedMunicipality || member.municipality === selectedMunicipality)
+                  )
+                  .map((member) => member.ward)
+              ))
                 .filter(Boolean)
                 .map((ward) => (
                   <option key={ward} value={ward}>
@@ -825,15 +814,6 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
             </select>
           </div>
 
-          {/* Filter Button */}
-          <div className="flex items-end">
-            <button
-              onClick={handleFilter}
-              className="w-full rounded bg-primary px-4 py-2 text-white hover:bg-primary/90 text-sm font-medium"
-            >
-              फिल्टर लागू गर्नुहोस्
-            </button>
-          </div>
         </div>
       </div>
 
@@ -850,15 +830,27 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         keyExtractor={(member) => member.memberId.toString()}
         mobileCardRender={renderMobileCard}
         emptyMessage="कुनै सदस्य भेटिएन"
+        showSerialNumber={true}
         actions={
           role === "superadmin" ? (
-            <button
-              onClick={exportToExcel}
-              className="flex items-center space-x-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 text-sm font-medium"
-            >
-              <FaFileExcel />
-              <span>Excel निर्यात</span>
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => exportToExcel(false)}
+                className="flex items-center space-x-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 text-sm font-medium"
+                title="Current page data export"
+              >
+                <FaFileExcel />
+                <span>Current Page</span>
+              </button>
+              <button
+                onClick={() => exportToExcel(true)}
+                className="flex items-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 text-sm font-medium"
+                title="All data export"
+              >
+                <FaFileExcel />
+                <span>All Data</span>
+              </button>
+            </div>
           ) : undefined
         }
       />

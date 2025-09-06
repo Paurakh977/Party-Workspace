@@ -281,6 +281,7 @@ const SocialLinkDisplayer: React.FC = () => {
         keyExtractor={(socialLink) => socialLink.id.toString()}
         mobileCardRender={renderMobileCard}
         emptyMessage="कुनै सामाजिक लिङ्क भेटिएन"
+        showSerialNumber={true}
       />
     </div>
   );

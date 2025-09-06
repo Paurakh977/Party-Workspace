@@ -170,6 +170,7 @@ const UsersTable = () => {
         keyExtractor={(user) => user.userId.toString()}
         mobileCardRender={renderMobileCard}
         emptyMessage="कुनै प्रयोगकर्ता भेटिएन"
+        showSerialNumber={true}
       />
     </div>
   );

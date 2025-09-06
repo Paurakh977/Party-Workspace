@@ -244,6 +244,7 @@ const EventsTable = ({ singleEvent }: { singleEvent?: Event }) => {
         keyExtractor={(event) => event.eventId.toString()}
         mobileCardRender={renderMobileCard}
         emptyMessage="कुनै कार्यक्रम भेटिएन"
+        showSerialNumber={true}
       />
     </div>
   );

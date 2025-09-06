@@ -15,6 +15,39 @@ import { Messages } from './messages.entity';
 @Controller('messages')
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
+  
+  @Post('count-recipients')
+  async countRecipients(
+    @Body()
+    body: {
+      filters: {
+        committeeId?: number;
+        subCommitteeId?: number;
+        province?: string;
+        district?: string;
+        municipality?: string;
+        address?: string;
+      };
+    },
+  ): Promise<{ count: number }> {
+    try {
+      const { filters } = body;
+      const filteredMembers = await this.messagesService.getFilteredMembers(filters);
+      
+      // Count only valid mobile numbers
+      const validMembersCount = filteredMembers.filter(member => {
+        const mobile = member.mobileNumber;
+        return mobile && /^[\x00-\x7F]*$/.test(mobile) && mobile.length === 10;
+      }).length;
+      
+      return { count: validMembersCount };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to count recipients',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
   @Get()
   findAll(): Promise<Messages[]> {
@@ -33,12 +66,20 @@ export class MessagesController {
       message: Messages;
       receivers: string[];
       event_name: string;
+      filters?: {
+        committeeId?: number;
+        subCommitteeId?: number;
+        province?: string;
+        district?: string;
+        municipality?: string;
+        address?: string;
+      };
     },
   ): Promise<Messages[]> {
-    const { message, receivers, event_name } = body;
+    const { message, receivers, event_name, filters } = body;
     try {
       // Create the message and send the SMS
-      return await this.messagesService.create(message, receivers, event_name);
+      return await this.messagesService.create(message, receivers, event_name, filters);
     } catch (error) {
       // If SMS sending fails, throw an HTTP exception
       throw new HttpException(

@@ -84,6 +84,14 @@ const MessageForm: React.FC<MessageFormProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // New state for address filter dropdowns
+  const [allCountries, setAllCountries] = useState<{ name: string }[]>([]);
+  const [allProvinces, setAllProvinces] = useState<{ name: string }[]>([]);
+  const [provinceDistrictsMap, setProvinceDistrictsMap] = useState<Record<string, any>>({});
+  const [districtMunicipalitiesMap, setDistrictMunicipalitiesMap] = useState<Record<string, any>>({});
+  const [filteredDistricts, setFilteredDistricts] = useState<{ id: string; name: string }[]>([]);
+  const [filteredMunicipalities, setFilteredMunicipalities] = useState<{ id: string; name: string }[]>([]);
+
   const [selectedCommitteeId, setSelectedCommitteeId] = useState<number | null>(
     null,
   );
@@ -98,6 +106,45 @@ const MessageForm: React.FC<MessageFormProps> = ({
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
   const [recipientType, setRecipientType] = useState<string>("समिति/उप‍-समिति");
+
+  // Filter districts based on selected province
+  useEffect(() => {
+    if (selectedProvince && provinceDistrictsMap[selectedProvince]) {
+      const provinceData = provinceDistrictsMap[selectedProvince];
+      setFilteredDistricts(provinceData.districts || []);
+    } else {
+      // If no province selected, show all districts by flattening all province districts
+      const allDistricts: { id: string; name: string }[] = [];
+      Object.values(provinceDistrictsMap).forEach((province: any) => {
+        if (province.districts) {
+          allDistricts.push(...province.districts);
+        }
+      });
+      setFilteredDistricts(allDistricts);
+    }
+    // Reset district and municipality when province changes
+    setSelectedDistrict(null);
+    setSelectedMunicipality(null);
+    setFilteredMunicipalities([]);
+  }, [selectedProvince, provinceDistrictsMap]);
+
+  // Filter municipalities based on selected district
+  useEffect(() => {
+    if (selectedDistrict && filteredDistricts.length > 0) {
+      // Find the district ID based on the selected district name
+      const district = filteredDistricts.find(d => d.name === selectedDistrict);
+      if (district && districtMunicipalitiesMap[district.id]) {
+        const districtData = districtMunicipalitiesMap[district.id];
+        setFilteredMunicipalities(districtData.municipalities || []);
+      } else {
+        setFilteredMunicipalities([]);
+      }
+    } else {
+      setFilteredMunicipalities([]);
+    }
+    // Reset municipality when district changes
+    setSelectedMunicipality(null);
+  }, [selectedDistrict, districtMunicipalitiesMap, filteredDistricts]);
 
   const [charCount, setCharCount] = useState<number>(eventDetails.length);
 
@@ -202,12 +249,21 @@ const MessageForm: React.FC<MessageFormProps> = ({
           {} as Record<number, string>,
         );
         setPositions(positionsData);
+        
+        // Fetch address data from public JSON files for filters
+        const [countriesRes, provincesRes, provinceDistrictsRes, districtMunicipalitiesRes] =
+          await Promise.all([
+            axios.get("/all-countries.json"),
+            axios.get("/all-provinces.json"),
+            axios.get("/map-province-districts.json"),
+            axios.get("/map-districts-municipalities.json"),
+          ]);
 
-        // Fetch members data
-        const membersResponse = await axios.get<Member[]>(
-          process.env.NEXT_PUBLIC_BE_HOST + "/members",
-        );
-        setMembers(membersResponse.data);
+        setAllCountries(Array.isArray(countriesRes.data) ? countriesRes.data : []);
+        setAllProvinces(Array.isArray(provincesRes.data) ? provincesRes.data : []);
+        setProvinceDistrictsMap(provinceDistrictsRes.data || {});
+        setDistrictMunicipalitiesMap(districtMunicipalitiesRes.data || {});
+
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -246,35 +302,8 @@ const MessageForm: React.FC<MessageFormProps> = ({
     return messageCount;
   };
 
-  const filteredMembers = members.filter((member) => {
-    const committeeMatch = selectedCommitteeId
-      ? member.committeeId === selectedCommitteeId
-      : true;
-    const subCommitteeMatch = selectedSubCommitteeId
-      ? member.subCommitteeId === selectedSubCommitteeId
-      : true;
-    const provinceMatch = selectedProvince
-      ? member.province === selectedProvince
-      : true;
-    const districtMatch = selectedDistrict
-      ? member.district === selectedDistrict
-      : true;
-    const municipalityMatch = selectedMunicipality
-      ? member.municipality === selectedMunicipality
-      : true;
-    const addressMatch = selectedAddress
-      ? member.address === selectedAddress
-      : true;
-
-    return (
-      committeeMatch &&
-      subCommitteeMatch &&
-      provinceMatch &&
-      districtMatch &&
-      municipalityMatch &&
-      addressMatch
-    );
-  });
+  // We no longer need to filter members on the frontend
+  // The backend will handle filtering based on the criteria we send
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -297,50 +326,74 @@ const MessageForm: React.FC<MessageFormProps> = ({
       return;
     }
 
-    // Validate and format receivers
-    const receivers = filteredMembers
-      .filter((member) => {
-        const mobile = member.mobileNumber;
-
-        // Check if the mobile number is 10 digits and contains only ASCII characters
-        const isValidMobileNumber =
-          mobile && /^[\x00-\x7F]*$/.test(mobile) && mobile.length === 10;
-        return isValidMobileNumber;
-      })
-      .map((member) => `${member.memberName}-${member.mobileNumber}`);
-
-    // Calculate message cost and required credits
-    const messageCount = calculateMessageCount(text);
-    const recipients = receivers.length;
-    const adminCredits = CreditsChecker();
-    const cost = recipients * messageCount * 4;
-
-    if (adminCredits < cost) {
-      window.alert(
-        "तपाईँको खातामा पर्याप्त क्रेडिट छैन । कृपया क्रेडिट थप्नुहोस् ।",
-      );
-      return;
-    }
-
-    const payload = {
-      message: {
-        message: text, // The actual message text
-        event: eventName, // Add your eventName variable
-        receivers, // List of 'Name-MobileNumber' format strings
-        ip: userIP, // Add the retrieved IP address
-      },
-      receivers, // For backend, expects an array of strings
-      event_name: eventName, // Send the event name
+    // Create filters object based on selected criteria
+    const filters = {
+      ...(selectedCommitteeId ? { committeeId: selectedCommitteeId } : {}),
+      ...(selectedSubCommitteeId ? { subCommitteeId: selectedSubCommitteeId } : {}),
+      ...(selectedProvince ? { province: selectedProvince } : {}),
+      ...(selectedDistrict ? { district: selectedDistrict } : {}),
+      ...(selectedMunicipality ? { municipality: selectedMunicipality } : {}),
+      ...(selectedAddress ? { address: selectedAddress } : {}),
     };
 
+    // First, get a count of recipients to calculate credits
     try {
+      // Make a request to get the count of recipients matching the filters
+      const countResponse = await axios.post(
+        process.env.NEXT_PUBLIC_BE_HOST + "/messages/count-recipients",
+        { filters }
+      );
+      
+      const recipients = countResponse.data.count;
+      
+      // Calculate message cost and required credits
+      const messageCount = calculateMessageCount(text);
+      const adminCredits = CreditsChecker();
+      const cost = recipients * messageCount * 4;
+
+      if (recipients === 0) {
+        window.alert("कुनै प्राप्तकर्ता छनौट गरिएको छैन। कृपया फिल्टर परिवर्तन गर्नुहोस्।");
+        return;
+      }
+
+      if (adminCredits < cost) {
+        window.alert(
+          "तपाईँको खातामा पर्याप्त क्रेडिट छैन । कृपया क्रेडिट थप्नुहोस् ।",
+        );
+        return;
+      }
+
+      // Confirm with the user
+      const confirmSend = window.confirm(
+        `तपाईंले ${recipients} जना प्राप्तकर्तालाई सन्देश पठाउन लाग्नुभएको छ। के तपाईं निश्चित हुनुहुन्छ?`
+      );
+
+      if (!confirmSend) {
+        return;
+      }
+
+      const payload = {
+        message: {
+          message: text, // The actual message text
+          event: eventName, // Add your eventName variable
+          receivers: [], // Empty array as we're using filters now
+          ip: userIP, // Add the retrieved IP address
+        },
+        receivers: [], // Empty array as we're using filters now
+        event_name: eventName, // Send the event name
+        filters, // Send the filters to the backend
+      };
+
       console.log("Sending payload:", payload);
 
       await axios.post(process.env.NEXT_PUBLIC_BE_HOST + "/messages", payload);
 
       CreditsDeduct(cost); // Deduct credits if successful
+      
+      window.alert(`सन्देश सफलतापूर्वक ${recipients} जना प्राप्तकर्तालाई पठाइयो।`);
     } catch (error) {
       console.error("Error sending message:", error);
+      window.alert("सन्देश पठाउन समस्या भयो। कृपया फेरि प्रयास गर्नुहोस्।");
     }
   };
 
@@ -464,12 +517,9 @@ const MessageForm: React.FC<MessageFormProps> = ({
               className="rounded border p-2"
             >
               <option value="">सबै देश</option>
-              {members.length > 0 &&
-                Array.from(
-                  new Set(members.map((member) => member.address)),
-                ).map((address) => (
-                  <option key={address} value={address}>
-                    {address}
+              {allCountries.map((country) => (
+                  <option key={country.name} value={country.name}>
+                    {country.name}
                   </option>
                 ))}
             </select>
@@ -482,12 +532,9 @@ const MessageForm: React.FC<MessageFormProps> = ({
               className="rounded border p-2"
             >
               <option value="">सबै प्रदेश</option>
-              {members.length > 0 &&
-                Array.from(
-                  new Set(members.map((member) => member.province)),
-                ).map((province) => (
-                  <option key={province} value={province}>
-                    {province}
+              {allProvinces.map((province) => (
+                  <option key={province.name} value={province.name}>
+                    {province.name}
                   </option>
                 ))}
             </select>
@@ -498,14 +545,12 @@ const MessageForm: React.FC<MessageFormProps> = ({
               value={selectedDistrict ?? ""}
               onChange={handleDistrictChange}
               className="rounded border p-2"
+              disabled={!selectedProvince}
             >
               <option value="">सबै जिल्ला</option>
-              {members.length > 0 &&
-                Array.from(
-                  new Set(members.map((member) => member.district)),
-                ).map((district) => (
-                  <option key={district} value={district}>
-                    {district}
+              {filteredDistricts.map((district) => (
+                  <option key={district.id} value={district.name}>
+                    {district.name}
                   </option>
                 ))}
             </select>
@@ -518,14 +563,12 @@ const MessageForm: React.FC<MessageFormProps> = ({
               value={selectedMunicipality ?? ""}
               onChange={handleMunicipalityChange}
               className="rounded border p-2"
+              disabled={!selectedDistrict}
             >
               <option value="">सबै नगरपालिका</option>
-              {members.length > 0 &&
-                Array.from(
-                  new Set(members.map((member) => member.municipality)),
-                ).map((municipality) => (
-                  <option key={municipality} value={municipality}>
-                    {municipality}
+              {filteredMunicipalities.map((municipality) => (
+                  <option key={municipality.id} value={municipality.name}>
+                    {municipality.name}
                   </option>
                 ))}
             </select>

@@ -3,6 +3,7 @@
 import { ApexOptions } from "apexcharts";
 import React from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import SocialLinkDisplayer from "../videoLinks/videolinkDisplayer";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
@@ -77,6 +78,8 @@ interface ChartTwoState {
 }
 
 const ChartTwo: React.FC = () => {
+  const router = useRouter();
+  
   const series = [
     {
       name: "Sales",
@@ -91,10 +94,21 @@ const ChartTwo: React.FC = () => {
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
       <div className="mb-4 justify-between gap-4 sm:flex">
-        <div>
-          <h4 className="text-xl font-semibold text-black dark:text-white">
-            सोसल मिडिया लिंकहरु
-          </h4>
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-xl font-semibold text-black dark:text-white">
+              सोसल मिडिया लिंकहरु
+            </h4>
+            <button
+              onClick={() => router.push("/tables/socialLinks")}
+              className="inline-flex items-center px-3 py-1.5 text-sm bg-primary text-white hover:bg-primary/90 font-medium rounded-md transition-colors duration-200 shadow-sm hover:shadow-md"
+            >
+              <span>सबै हेर्नुहोस्</span>
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
           <SocialLinkDisplayer />
         </div>
       </div>

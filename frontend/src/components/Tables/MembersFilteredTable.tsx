@@ -219,9 +219,10 @@ const MembersFilteredTable = ({
       setLoading(true);
       setError(null);
 
+      // Fetch a large unpaginated dataset from the server, then paginate client-side
       const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
+        page: '1',
+        limit: '10000',
       });
 
       if (searchTerm) {
@@ -257,14 +258,8 @@ const MembersFilteredTable = ({
       );
 
       if (membersResponse.data.data) {
-        // Paginated response
+        // Some backends still return paginated envelopes; unwrap and paginate client-side
         setMembers(membersResponse.data.data);
-        setPagination({
-          page: membersResponse.data.page,
-          limit: membersResponse.data.limit,
-          total: membersResponse.data.total,
-          totalPages: membersResponse.data.totalPages,
-        });
       } else {
         // Legacy response (all data)
         setMembers(membersResponse.data);
@@ -276,8 +271,6 @@ const MembersFilteredTable = ({
       setLoading(false);
     }
   }, [
-    pagination.page,
-    pagination.limit,
     searchTerm,
     selectedCommitteeId,
     selectedSubCommitteeId,
@@ -426,6 +419,25 @@ const MembersFilteredTable = ({
       wardMatch
     );
   });
+
+  // Keep pagination metadata in sync with filtered results and limit
+  useEffect(() => {
+    setPagination((prev) => {
+      const newTotal = filteredMembers.length;
+      const newTotalPages = Math.max(1, Math.ceil(newTotal / prev.limit));
+      const newPage = Math.min(prev.page, newTotalPages);
+      return {
+        ...prev,
+        total: newTotal,
+        totalPages: newTotalPages,
+        page: newPage || 1,
+      };
+    });
+  }, [filteredMembers.length, setPagination, pagination.limit]);
+
+  const startIndex = (pagination.page - 1) * pagination.limit;
+  const endIndex = startIndex + pagination.limit;
+  const pagedMembers = filteredMembers.slice(startIndex, endIndex);
   // Helper function to get the level names based on committee and sub-committee
   const getLevelNames = (
     committeeId: number,
@@ -496,28 +508,40 @@ const MembersFilteredTable = ({
   ) => {
     const subCommitteeId = parseInt(e.target.value);
     setSelectedSubCommitteeId(subCommitteeId);
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedAddress(e.target.value);
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProvince(e.target.value || null);
+    setSelectedDistrict(null);
+    setSelectedMunicipality(null);
+    setSelectedWard(null);
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDistrict(e.target.value || null);
+    setSelectedMunicipality(null);
+    setSelectedWard(null);
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handleMunicipalityChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setSelectedMunicipality(e.target.value || null);
+    setSelectedWard(null);
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedWard(e.target.value || null);
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   if (loading) return <p>Loading data...</p>;
@@ -747,7 +771,11 @@ const MembersFilteredTable = ({
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै जिल्ला</option>
-              {Array.from(new Set(members.map((member) => member.district)))
+              {Array.from(new Set(
+                members
+                  .filter((member) => !selectedProvince || member.province === selectedProvince)
+                  .map((member) => member.district)
+              ))
                 .filter(Boolean)
                 .map((district) => (
                   <option key={district} value={district}>
@@ -768,7 +796,14 @@ const MembersFilteredTable = ({
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै नगरपालिका</option>
-              {Array.from(new Set(members.map((member) => member.municipality)))
+              {Array.from(new Set(
+                members
+                  .filter((member) => 
+                    (!selectedProvince || member.province === selectedProvince) &&
+                    (!selectedDistrict || member.district === selectedDistrict)
+                  )
+                  .map((member) => member.municipality)
+              ))
                 .filter(Boolean)
                 .map((municipality) => (
                   <option key={municipality} value={municipality}>
@@ -789,7 +824,15 @@ const MembersFilteredTable = ({
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark dark:text-white"
             >
               <option value="">सबै वडा</option>
-              {Array.from(new Set(members.map((member) => member.ward)))
+              {Array.from(new Set(
+                members
+                  .filter((member) => 
+                    (!selectedProvince || member.province === selectedProvince) &&
+                    (!selectedDistrict || member.district === selectedDistrict) &&
+                    (!selectedMunicipality || member.municipality === selectedMunicipality)
+                  )
+                  .map((member) => member.ward)
+              ))
                 .filter(Boolean)
                 .map((ward) => (
                   <option key={ward} value={ward}>
@@ -803,7 +846,7 @@ const MembersFilteredTable = ({
 
       {/* Responsive Table */}
       <ResponsiveTable
-        data={filteredMembers}
+        data={pagedMembers}
         columns={columns}
         loading={loading}
         pagination={pagination}

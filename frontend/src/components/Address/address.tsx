@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaChevronDown, FaMapMarkerAlt, FaBuilding, FaCity, FaGlobe } from "react-icons/fa";
 
 interface Province {
   id: string;
@@ -265,94 +266,164 @@ const AddressInput: React.FC<AddressInputProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {/* Country Dropdown on a separate line */}
       <div className="flex">
         <div className="flex-1">
-          <label className="text-small mb-1 block">देशको नाम:</label>
-          <select value={country} onChange={handleCountryChange}>
-            {allCountries.map((cntry) => (
-              <option key={cntry.id} value={cntry.id}>
-                {cntry.name}
-              </option>
-            ))}
-          </select>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+            <FaGlobe className="mr-2 text-primary" />
+            देशको नाम:
+          </label>
+          <div className="relative">
+            <select 
+              value={country} 
+              onChange={handleCountryChange}
+              className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                focus:ring-2 focus:ring-primary focus:border-transparent hover:border-gray-400 dark:hover:border-gray-500
+                transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+            >
+              <option value="" className="text-gray-500">देश छान्नुहोस्</option>
+              {allCountries.map((cntry) => (
+                <option key={cntry.id} value={cntry.id} className="text-gray-900 dark:text-white">
+                  {cntry.name}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+              <FaChevronDown className="h-4 w-4" />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Province and District Dropdowns */}
       {country === "154" && (
-        <div className="flex space-x-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex-1">
-            <label className="text-small mb-1 block">प्रदेश:</label>
-            <select value={province} onChange={handleProvinceChange}>
-              <option value="">प्रदेश छान्नुहोस्</option>
-              {allProvinces.map((prov) => (
-                <option key={prov.id} value={prov.id}>
-                  {prov.name}
-                </option>
-              ))}
-            </select>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-primary" />
+              प्रदेश:
+            </label>
+            <div className="relative">
+              <select 
+                value={province} 
+                onChange={handleProvinceChange}
+                className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                  focus:ring-2 focus:ring-primary focus:border-transparent hover:border-gray-400 dark:hover:border-gray-500
+                  transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+              >
+                <option value="" className="text-gray-500">प्रदेश छान्नुहोस्</option>
+                {allProvinces.map((prov) => (
+                  <option key={prov.id} value={prov.id} className="text-gray-900 dark:text-white">
+                    {prov.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                <FaChevronDown className="h-4 w-4" />
+              </div>
+            </div>
           </div>
 
           <div className="flex-1">
-            <label className="text-small mb-1 block">जिल्ला:</label>
-            <select
-              value={district}
-              onChange={handleDistrictChange}
-              disabled={!province}
-            >
-              <option value="">जिल्ला छान्नुहोस्</option>
-              {localDistricts.map((dist) => (
-                <option key={dist.id} value={dist.id}>
-                  {dist.name}
-                </option>
-              ))}
-            </select>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+              <FaBuilding className="mr-2 text-primary" />
+              जिल्ला:
+            </label>
+            <div className="relative">
+              <select
+                value={district}
+                onChange={handleDistrictChange}
+                disabled={!province}
+                className={`appearance-none w-full px-4 py-3 pr-10 border rounded-lg text-gray-900 dark:text-white
+                  transition-all duration-200 shadow-sm cursor-pointer
+                  ${!province 
+                    ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60' 
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-md focus:ring-2 focus:ring-primary focus:border-transparent'}
+                `}
+              >
+                <option value="" className="text-gray-500">जिल्ला छान्नुहोस्</option>
+                {localDistricts.map((dist) => (
+                  <option key={dist.id} value={dist.id} className="text-gray-900 dark:text-white">
+                    {dist.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                <FaChevronDown className="h-4 w-4" />
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Municipality and Ward Dropdowns */}
       {district && (
-        <div className="flex space-x-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex-1">
-            <label className="text-small mb-1 block">नगरपालिका:</label>
-            <select
-              value={municipality}
-              onChange={(e) => {
-                const selectedMunicipality = e.target.value;
-                setMunicipality(selectedMunicipality);
-                setLocalWards(
-                  municipalitiesToWardsMap[selectedMunicipality]?.wards || [],
-                );
-                setWard("");
-              }}
-              disabled={!district}
-            >
-              <option value="">नगरपालिका छान्नुहोस्</option>
-              {localMunicipalities.map((mun) => (
-                <option key={mun.id} value={mun.id}>
-                  {mun.name}
-                </option>
-              ))}
-            </select>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+              <FaCity className="mr-2 text-primary" />
+              नगरपालिका:
+            </label>
+            <div className="relative">
+              <select
+                value={municipality}
+                onChange={(e) => {
+                  const selectedMunicipality = e.target.value;
+                  setMunicipality(selectedMunicipality);
+                  setLocalWards(
+                    municipalitiesToWardsMap[selectedMunicipality]?.wards || [],
+                  );
+                  setWard("");
+                }}
+                disabled={!district}
+                className={`appearance-none w-full px-4 py-3 pr-10 border rounded-lg text-gray-900 dark:text-white
+                  transition-all duration-200 shadow-sm cursor-pointer
+                  ${!district 
+                    ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60' 
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-md focus:ring-2 focus:ring-primary focus:border-transparent'}
+                `}
+              >
+                <option value="" className="text-gray-500">नगरपालिका छान्नुहोस्</option>
+                {localMunicipalities.map((mun) => (
+                  <option key={mun.id} value={mun.id} className="text-gray-900 dark:text-white">
+                    {mun.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                <FaChevronDown className="h-4 w-4" />
+              </div>
+            </div>
           </div>
 
           <div className="flex-1">
-            <label className="text-small mb-1 block">वार्ड:</label>
-            <select
-              value={ward}
-              onChange={(e) => setWard(e.target.value)}
-              disabled={!municipality}
-            >
-              <option value="">वार्ड छान्नुहोस्</option>
-              {localWards.map((wardOption) => (
-                <option key={wardOption} value={wardOption}>
-                  {wardOption}
-                </option>
-              ))}
-            </select>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              वार्ड:
+            </label>
+            <div className="relative">
+              <select
+                value={ward}
+                onChange={(e) => setWard(e.target.value)}
+                disabled={!municipality}
+                className={`appearance-none w-full px-4 py-3 pr-10 border rounded-lg text-gray-900 dark:text-white
+                  transition-all duration-200 shadow-sm cursor-pointer
+                  ${!municipality 
+                    ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60' 
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-md focus:ring-2 focus:ring-primary focus:border-transparent'}
+                `}
+              >
+                <option value="" className="text-gray-500">वार्ड छान्नुहोस्</option>
+                {localWards.map((wardOption) => (
+                  <option key={wardOption} value={wardOption} className="text-gray-900 dark:text-white">
+                    {wardOption}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                <FaChevronDown className="h-4 w-4" />
+              </div>
+            </div>
           </div>
         </div>
       )}

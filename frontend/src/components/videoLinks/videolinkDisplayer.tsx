@@ -3,6 +3,17 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import NepaliDate from "nepali-datetime"; // Import NepaliDate for date comparison
+import { 
+  FaFacebook, 
+  FaYoutube, 
+  FaInstagram, 
+  FaWhatsapp, 
+  FaTiktok, 
+  FaLink,
+  FaTwitter,
+  FaLinkedin,
+  FaTelegram 
+} from "react-icons/fa";
 
 interface SocialLink {
   id: number;
@@ -22,6 +33,39 @@ const compareDates = (linkA: SocialLink, linkB: SocialLink) => {
   const dateA = new NepaliDate(linkA.linkDate).getTime();
   const dateB = new NepaliDate(linkB.linkDate).getTime();
   return dateB - dateA; // Descending order
+};
+
+// Function to detect social media platform from URL
+const getSocialMediaIcon = (url: string) => {
+  const lowerUrl = url.toLowerCase();
+  
+  if (lowerUrl.includes('facebook.com') || lowerUrl.includes('fb.com') || lowerUrl.includes('fb.me')) {
+    return { icon: FaFacebook, color: 'text-blue-600', bgColor: 'bg-blue-600/10' };
+  }
+  if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
+    return { icon: FaYoutube, color: 'text-red-600', bgColor: 'bg-red-600/10' };
+  }
+  if (lowerUrl.includes('instagram.com') || lowerUrl.includes('instagr.am')) {
+    return { icon: FaInstagram, color: 'text-pink-600', bgColor: 'bg-pink-600/10' };
+  }
+  if (lowerUrl.includes('whatsapp.com') || lowerUrl.includes('wa.me')) {
+    return { icon: FaWhatsapp, color: 'text-green-600', bgColor: 'bg-green-600/10' };
+  }
+  if (lowerUrl.includes('tiktok.com')) {
+    return { icon: FaTiktok, color: 'text-gray-900 dark:text-white', bgColor: 'bg-gray-900/10 dark:bg-white/10' };
+  }
+  if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) {
+    return { icon: FaTwitter, color: 'text-sky-500', bgColor: 'bg-sky-500/10' };
+  }
+  if (lowerUrl.includes('linkedin.com')) {
+    return { icon: FaLinkedin, color: 'text-blue-700', bgColor: 'bg-blue-700/10' };
+  }
+  if (lowerUrl.includes('telegram.org') || lowerUrl.includes('t.me')) {
+    return { icon: FaTelegram, color: 'text-blue-500', bgColor: 'bg-blue-500/10' };
+  }
+  
+  // Default icon for other links
+  return { icon: FaLink, color: 'text-primary', bgColor: 'bg-primary/10' };
 };
 
 const SocialLinkDisplayer: React.FC = () => {
@@ -60,7 +104,9 @@ const SocialLinkDisplayer: React.FC = () => {
   const latestLinks = socialLinks
     .filter((link) => !isNaN(new NepaliDate(link.linkDate).getTime())) // Ensure valid date
     .sort(compareDates)
-    .slice(-10); // Get the last 10 entries
+    .slice(0, 10); // Get the first 10 entries (most recent)
+  
+  const hasMoreLinks = socialLinks.length > 10;
 
   return (
     <div className="bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
@@ -68,13 +114,23 @@ const SocialLinkDisplayer: React.FC = () => {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             नयाँ सामाजिक लिंकहरू
+            {hasMoreLinks && (
+              <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                ({socialLinks.length} कुल)
+              </span>
+            )}
           </h3>
-          <button
-        onClick={() => router.push("/tables/socialLinks")}
-            className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            सबै हेर्नुहोस् →
-          </button>
+          {hasMoreLinks && (
+            <button
+              onClick={() => router.push("/tables/socialLinks")}
+              className="text-sm text-primary hover:text-primary/80 font-medium transition-colors flex items-center space-x-1"
+            >
+              <span>सबै हेर्नुहोस्</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
       
@@ -86,77 +142,80 @@ const SocialLinkDisplayer: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-          {latestLinks.map((socialLink) => (
-              <div
-                key={socialLink.id}
-                className="group p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary/30 hover:shadow-md transition-all duration-200"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-              <a
-                href={socialLink.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-lg font-medium text-gray-900 dark:text-white hover:text-primary transition-colors line-clamp-1"
-              >
-                {socialLink.linkName}
-              </a>
-                        
-                        {socialLink.description && (
-                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                            {socialLink.description}
-                          </p>
-                        )}
-                        
-                        <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
-                          {socialLink.linkPublisher && (
-                            <span className="flex items-center">
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                              {socialLink.linkPublisher}
-                            </span>
-                          )}
-                          {socialLink.linkDate && (
-                            <span className="flex items-center">
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              {socialLink.linkDate}
-                            </span>
-                          )}
-                        </div>
+          <div className="space-y-3">
+            {latestLinks.map((socialLink) => {
+              const socialIcon = getSocialMediaIcon(socialLink.link);
+              const IconComponent = socialIcon.icon;
+              
+              return (
+                <div
+                  key={socialLink.id}
+                  className="group p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary/30 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <div className={`w-10 h-10 ${socialIcon.bgColor} rounded-lg flex items-center justify-center`}>
+                        <IconComponent className={`w-5 h-5 ${socialIcon.color}`} />
                       </div>
-                      
-                      <div className="flex-shrink-0 ml-2">
-                        <a
-                          href={socialLink.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
-                        >
-                          खोल्नुहोस्
-                          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <a
+                            href={socialLink.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-base font-medium text-gray-900 dark:text-white hover:text-primary transition-colors line-clamp-1 block"
+                          >
+                            {socialLink.linkName}
+                          </a>
+                          
+                          {socialLink.description && (
+                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                              {socialLink.description}
+                            </p>
+                          )}
+                          
+                          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                            {socialLink.linkPublisher && (
+                              <span className="flex items-center">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                {socialLink.linkPublisher}
+                              </span>
+                            )}
+                            {socialLink.linkDate && (
+                              <span className="flex items-center">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                {socialLink.linkDate}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex-shrink-0 ml-2">
+                          <a
+                            href={socialLink.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+                          >
+                            खोल्नुहोस्
+                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

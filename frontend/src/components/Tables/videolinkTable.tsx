@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, Fragment, useMemo } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa"; // Importing icons for buttons
@@ -55,6 +55,7 @@ const SocialLinkDisplayer: React.FC = () => {
     totalPages: 0,
   });
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filteredSocialLinks, setFilteredSocialLinks] = useState<SocialLink[]>([]);
 
   const handlePageChange = useCallback((page: number) => {
     setPagination(prev => ({ ...prev, page }));
@@ -126,31 +127,73 @@ const SocialLinkDisplayer: React.FC = () => {
     fetchSocialLinks();
   }, []);
 
-  const formatAddress = (socialLink: SocialLink): string => {
-    const { country, province, district, municipality, ward } = socialLink;
-    const countryName =
-      countries.find((c) => c.countryId === parseInt(country))?.countryName ||
-      "";
-    const provinceName =
-      provinces.find((p) => p.provinceId === parseInt(province))
-        ?.provinceName || "";
-    const districtName =
-      districts.find((d) => d.districtId === parseInt(district))
-        ?.districtName || "";
-    const municipalityName =
-      municipalities.find((m) => m.municipalityId === parseInt(municipality))
-        ?.municipalityName || "";
+  // Filter social links based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredSocialLinks(socialLinks);
+    } else {
+      const filtered = socialLinks.filter((link) => {
+        const searchLower = searchTerm.toLowerCase();
+        const address = formatAddress(link);
+        return (
+          link.linkName?.toLowerCase().includes(searchLower) ||
+          link.linkPublisher?.toLowerCase().includes(searchLower) ||
+          link.description?.toLowerCase().includes(searchLower) ||
+          link.link?.toLowerCase().includes(searchLower) ||
+          address.full?.toLowerCase().includes(searchLower)
+        );
+      });
+      setFilteredSocialLinks(filtered);
+    }
+    
+    // Reset to page 1 when search changes
+    setPagination(prev => ({ ...prev, page: 1, total: socialLinks.length }));
+  }, [searchTerm, socialLinks, countries, provinces, districts, municipalities]);
 
+  const formatAddress = (socialLink: SocialLink): { full: string; parts: string[] } => {
+    const { country, province, district, municipality, ward } = socialLink;
+    
+    // Handle case where address data hasn't loaded yet
+    if (!countries.length || !provinces.length || !districts.length || !municipalities.length) {
+      return { full: "लोड हुँदै...", parts: ["लोड हुँदै..."] };
+    }
+    
+    const countryName = country
+      ? countries.find((c) => c.countryId === parseInt(country))?.countryName || ""
+      : "";
+    const provinceName = province
+      ? provinces.find((p) => p.provinceId === parseInt(province))?.provinceName || ""
+      : "";
+    const districtName = district
+      ? districts.find((d) => d.districtId === parseInt(district))?.districtName || ""
+      : "";
+    const municipalityName = municipality
+      ? municipalities.find((m) => m.municipalityId === parseInt(municipality))?.municipalityName || ""
+      : "";
+
+    const parts = [];
+    
     if (municipalityName && ward) {
-      return `${municipalityName} - ${ward}, ${districtName} जिल्ला, ${provinceName} प्रदेश, ${countryName}`;
+      parts.push(`वार्ड ${ward}, ${municipalityName}`);
+    } else if (municipalityName) {
+      parts.push(municipalityName);
     }
+    
     if (districtName) {
-      return `${districtName}, ${provinceName} प्रदेश, ${countryName}`;
+      parts.push(`${districtName} जिल्ला`);
     }
+    
     if (provinceName) {
-      return `${provinceName} प्रदेश, ${countryName}`;
+      parts.push(`${provinceName} प्रदेश`);
     }
-    return countryName;
+    
+    if (countryName) {
+      parts.push(countryName);
+    }
+    
+    const full = parts.join(', ');
+    
+    return { full, parts };
   };
 
   // Define table columns
@@ -204,7 +247,25 @@ const SocialLinkDisplayer: React.FC = () => {
     {
       key: 'address',
       label: 'ठेगाना',
-      render: (_, socialLink) => formatAddress(socialLink),
+      render: (_, socialLink) => {
+        const address = formatAddress(socialLink);
+        return (
+          <div className="max-w-xs">
+            <div className="text-sm text-gray-900 dark:text-white break-words">
+              {address.parts.length > 0 && address.parts[0] !== "" ? (
+                address.parts.map((part, index) => (
+                  <React.Fragment key={index}>
+                    {index > 0 && <br />}
+                    <span className="inline-block">{part}</span>
+                  </React.Fragment>
+                ))
+              ) : (
+                <span className="text-gray-400">-</span>
+              )}
+            </div>
+          </div>
+        );
+      },
       mobileHidden: true,
     },
     {
@@ -299,22 +360,40 @@ const SocialLinkDisplayer: React.FC = () => {
         
         <div>
           <span className="font-medium text-gray-600 dark:text-gray-400">ठेगाना: </span>
-          <span className="text-gray-900 dark:text-white">{formatAddress(socialLink)}</span>
+          <div className="text-gray-900 dark:text-white mt-1">
+            {formatAddress(socialLink).parts.map((part, index) => (
+              <React.Fragment key={index}>
+                {index > 0 && ', '}
+                <span className="inline-block">{part}</span>
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
-
-  if (loading) return <p>Loading social links...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  
+  // Get paginated data
+  const paginatedData = useMemo(() => {
+    const startIndex = (pagination.page - 1) * pagination.limit;
+    const endIndex = startIndex + pagination.limit;
+    return filteredSocialLinks.slice(startIndex, endIndex);
+  }, [filteredSocialLinks, pagination.page, pagination.limit]);
+  
+    if (loading) return <p>Loading social links...</p>;
+    if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="w-full">
       <ResponsiveTable
-        data={socialLinks}
+        data={paginatedData}
         columns={columns}
         loading={loading}
-        pagination={pagination}
+        pagination={{
+          ...pagination,
+          total: filteredSocialLinks.length,
+          totalPages: Math.ceil(filteredSocialLinks.length / pagination.limit)
+        }}
         onPageChange={handlePageChange}
         onSearch={handleSearch}
         searchValue={searchTerm}

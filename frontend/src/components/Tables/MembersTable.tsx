@@ -128,6 +128,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
         if (selectedAddress) {
           params.append('country', selectedAddress);
         }
+        if (selectedWard) {
+          params.append('ward', selectedWard);
+        }
         
         // Set a large limit to get all data
         params.append('limit', '10000');
@@ -496,8 +499,7 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
   };
 
 
-  if (loading) return <p>Loading data...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  // Note: Do not early-return on loading/error to preserve input focus.
 
   // Define table columns
   const columns: TableColumn<Member>[] = [
@@ -642,6 +644,9 @@ const MembersTable = ({ singleMember }: { singleMember?: Member }) => {
 
   return (
     <div className="w-full">
+      {error && (
+        <p className="mb-4 text-red-500">{error}</p>
+      )}
       {/* Advanced Filters */}
       <div className="mb-6 p-4 bg-gray-50 dark:bg-meta-4 rounded-lg">
         <h5 className="text-lg font-medium mb-4 text-black dark:text-white">फिल्टर विकल्पहरू</h5>

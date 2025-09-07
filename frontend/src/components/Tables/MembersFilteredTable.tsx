@@ -104,48 +104,19 @@ const MembersFilteredTable = ({
 
   const exportToExcel = async (exportAll = false) => {
     try {
-      let membersToExport = filteredMembers;
+      let membersToExport;
       
       if (exportAll) {
-        // Fetch all members for export
-        const params = new URLSearchParams();
-        
-        if (searchTerm) {
-          params.append('search', searchTerm);
-        }
-        if (selectedCommitteeId) {
-          params.append('committeeId', selectedCommitteeId.toString());
-        }
-        if (selectedSubCommitteeId) {
-          params.append('subCommitteeId', selectedSubCommitteeId.toString());
-        }
-        if (selectedProvince) {
-          params.append('province', selectedProvince);
-        }
-        if (selectedDistrict) {
-          params.append('district', selectedDistrict);
-        }
-        if (selectedMunicipality) {
-          params.append('municipality', selectedMunicipality);
-        }
-        if (selectedAddress) {
-          params.append('country', selectedAddress);
-        }
-        
-        // Set a large limit to get all data
-        params.append('limit', '10000');
-        params.append('page', '1');
-
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_HOST}/members?${params.toString()}`
-        );
-        
-        membersToExport = response.data.data || response.data;
+        // Export all filtered data (same as before)
+        membersToExport = filteredMembers;
+      } else {
+        // Export only current page data
+        membersToExport = pagedMembers;
       }
-
+  
       // Prepare data for the export
       const exportData = membersToExport.map((member, index) => ({
-        "S.N": index + 1,
+        "S.N": exportAll ? index + 1 : startIndex + index + 1, // Correct serial numbers
         "Member Name": member.memberName,
         Address: formatAddress(member),
         "Mobile Number": member.mobileNumber,
@@ -164,17 +135,17 @@ const MembersFilteredTable = ({
         Position: getPositionNames(member.positionId),
         Remarks: member.remarks,
       }));
-
+  
       // Generate the file name based on the selected filters
-      let fileName = exportAll ? "AllMembersData" : "MembersData";
-
+      let fileName = exportAll ? "AllFilteredMembersData" : `MembersData_Page${pagination.page}`;
+  
       if (selectedCommitteeId) {
         const committeeName =
           committees.find((c) => c.committeeId === selectedCommitteeId)
             ?.committeeName || "Committee";
         fileName += `_${committeeName}`;
       }
-
+  
       if (selectedSubCommitteeId) {
         const subCommitteeName =
           subCommittees[selectedCommitteeId]?.find(
@@ -182,7 +153,7 @@ const MembersFilteredTable = ({
           )?.subCommitteeName || "SubCommittee";
         fileName += `_${subCommitteeName}`;
       }
-
+  
       if (selectedProvince) {
         fileName += `_${selectedProvince}`;
       }
@@ -195,17 +166,17 @@ const MembersFilteredTable = ({
       if (selectedWard) {
         fileName += `_Ward${selectedWard}`;
       }
-
+  
       // Final file name with .xlsx extension
       fileName += ".xlsx";
-
+  
       // Create a worksheet
       const worksheet = XLSX.utils.json_to_sheet(exportData);
-
+  
       // Create a new workbook and append the worksheet
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Members");
-
+  
       // Export the workbook with the dynamic file name
       XLSX.writeFile(workbook, fileName);
     } catch (error) {
@@ -544,8 +515,7 @@ const MembersFilteredTable = ({
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  if (loading) return <p>Loading data...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  // Note: Do not early-return on loading/error to preserve input focus.
 
   // Define table columns
   const columns: TableColumn<Member>[] = [
@@ -689,6 +659,9 @@ const MembersFilteredTable = ({
   // If singleMember is provided, display only that member
   return (
     <div className="w-full">
+      {error && (
+        <p className="mb-4 text-red-500">{error}</p>
+      )}
       {/* Advanced Filters */}
       <div className="mb-6 p-4 bg-gray-50 dark:bg-meta-4 rounded-lg">
         <h5 className="text-lg font-medium mb-4 text-black dark:text-white">फिल्टर विकल्पहरू</h5>

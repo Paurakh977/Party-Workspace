@@ -18,6 +18,7 @@ const SocialLinkEditor: React.FC<SocialLinkEditorProps> = ({
   const [link, setLink] = useState<string>("");
   const [linkDate, setLinkDate] = useState<string>("");
   const [linkPublisher, setLinkPublisher] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [country, setCountry] = useState<string>("");
   const [province, setProvince] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
@@ -42,6 +43,7 @@ const SocialLinkEditor: React.FC<SocialLinkEditorProps> = ({
         setLink(data.link);
         setLinkDate(data.linkDate || "");
         setLinkPublisher(data.linkPublisher || "");
+        setDescription(data.description || "");
         setCountry(data.country || "");
         setProvince(data.province || "");
         setDistrict(data.district || "");
@@ -66,6 +68,7 @@ const SocialLinkEditor: React.FC<SocialLinkEditorProps> = ({
       link,
       linkDate,
       linkPublisher,
+      description,
       country,
       province,
       district,
@@ -183,6 +186,23 @@ const SocialLinkEditor: React.FC<SocialLinkEditorProps> = ({
             id="linkPublisher"
             value={linkPublisher}
             onChange={(e) => setLinkPublisher(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-5.5">
+          <label
+            className="mb-3 block text-sm font-medium text-black dark:text-white"
+            htmlFor="description"
+          >
+            विवरण
+          </label>
+          <textarea
+            className="w-full rounded border px-4.5 py-3 text-black dark:bg-meta-4 dark:text-white"
+            id="description"
+            rows={3}
+            placeholder="लिंकको छोटो विवरण लेख्नुहोस्"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 

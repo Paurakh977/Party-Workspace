@@ -31,4 +31,7 @@ export class SocialLinks {
 
   @Column({ nullable: true })
   ward: string;
+
+  @Column({ type: 'text', nullable: true })
+  description: string;
 }

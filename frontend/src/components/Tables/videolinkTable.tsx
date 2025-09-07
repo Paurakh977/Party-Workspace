@@ -11,6 +11,7 @@ interface SocialLink {
   link: string;
   linkDate: string;
   linkPublisher: string;
+  description: string;
   country: string;
   province: string;
   district: string;
@@ -159,6 +160,18 @@ const SocialLinkDisplayer: React.FC = () => {
       label: 'लिङ्क नाम',
       searchable: true,
       className: 'font-medium',
+      render: (value, socialLink) => (
+        <div>
+          <div className="font-medium text-gray-900 dark:text-white">
+            {value}
+          </div>
+          {socialLink.description && (
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+              {socialLink.description}
+            </div>
+          )}
+        </div>
+      ),
     },
     {
       key: 'link',
@@ -166,11 +179,14 @@ const SocialLinkDisplayer: React.FC = () => {
       render: (value) => (
         <a
           href={value}
-          className="text-blue-600 hover:underline text-sm break-all"
+          className="text-blue-600 hover:underline text-sm break-all inline-flex items-center"
           target="_blank"
           rel="noopener noreferrer"
         >
-          {value}
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          {value.length > 30 ? `${value.substring(0, 30)}...` : value}
         </a>
       ),
       mobileHidden: true,
@@ -198,17 +214,17 @@ const SocialLinkDisplayer: React.FC = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => handleUpdateSocialLink(socialLink.id)}
-            className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600 text-sm"
+            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
             title="सम्पादन गर्नुहोस्"
           >
-            <FaEdit />
+            <FaEdit className="w-3 h-3" />
           </button>
           <button
             onClick={() => handleDeleteSocialLink(socialLink.id)}
-            className="rounded bg-rose-500 px-3 py-1 text-white hover:bg-rose-600 text-sm"
+            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
             title="मेटाउनुहोस्"
           >
-            <FaTrash />
+            <FaTrash className="w-3 h-3" />
           </button>
         </div>
       ),
@@ -217,48 +233,73 @@ const SocialLinkDisplayer: React.FC = () => {
 
   // Mobile card rendering
   const renderMobileCard = (socialLink: SocialLink, index: number) => (
-    <div className="space-y-3">
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3">
       <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-medium text-black dark:text-white">
+        <div className="flex-1">
+          <h3 className="font-medium text-gray-900 dark:text-white text-lg">
             {socialLink.linkName}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {socialLink.linkPublisher} • {socialLink.linkDate}
-          </p>
+          {socialLink.description && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+              {socialLink.description}
+            </p>
+          )}
+          <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
+            {socialLink.linkPublisher && (
+              <span className="flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {socialLink.linkPublisher}
+              </span>
+            )}
+            {socialLink.linkDate && (
+              <span className="flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {socialLink.linkDate}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 ml-3">
           <button
             onClick={() => handleUpdateSocialLink(socialLink.id)}
-            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600 text-xs"
+            className="inline-flex items-center px-2 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+            title="सम्पादन गर्नुहोस्"
           >
-            <FaEdit />
+            <FaEdit className="w-3 h-3" />
           </button>
           <button
             onClick={() => handleDeleteSocialLink(socialLink.id)}
-            className="rounded bg-rose-500 px-2 py-1 text-white hover:bg-rose-600 text-xs"
+            className="inline-flex items-center px-2 py-1.5 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 transition-colors"
+            title="मेटाउनुहोस्"
           >
-            <FaTrash />
+            <FaTrash className="w-3 h-3" />
           </button>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 gap-2 text-sm">
+      <div className="space-y-2 text-sm">
         <div>
           <span className="font-medium text-gray-600 dark:text-gray-400">लिङ्क: </span>
           <a
             href={socialLink.link}
-            className="text-blue-600 hover:underline break-all"
+            className="text-blue-600 hover:underline break-all inline-flex items-center"
             target="_blank"
             rel="noopener noreferrer"
           >
-            {socialLink.link}
+            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            {socialLink.link.length > 40 ? `${socialLink.link.substring(0, 40)}...` : socialLink.link}
           </a>
         </div>
         
         <div>
           <span className="font-medium text-gray-600 dark:text-gray-400">ठेगाना: </span>
-          <span className="text-black dark:text-white">{formatAddress(socialLink)}</span>
+          <span className="text-gray-900 dark:text-white">{formatAddress(socialLink)}</span>
         </div>
       </div>
     </div>

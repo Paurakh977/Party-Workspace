@@ -159,56 +159,57 @@ const SocialLinkDisplayer: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <a
-                            href={socialLink.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-base font-medium text-gray-900 dark:text-white hover:text-primary transition-colors line-clamp-1 block"
-                          >
-                            {socialLink.linkName}
-                          </a>
-                          
-                          {socialLink.description && (
-                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                              {socialLink.description}
-                            </p>
-                          )}
-                          
-                          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="flex-1 min-w-0 pr-2">
+                      <div className="space-y-2">
+                        <a
+                          href={socialLink.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-base font-medium text-gray-900 dark:text-white hover:text-primary transition-colors line-clamp-1 block"
+                        >
+                          {socialLink.linkName}
+                        </a>
+                        
+                        {socialLink.description && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                            {socialLink.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0 text-xs text-gray-500 dark:text-gray-400">
                             {socialLink.linkPublisher && (
                               <span className="flex items-center">
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                {socialLink.linkPublisher}
+                                <span className="truncate">{socialLink.linkPublisher}</span>
                               </span>
                             )}
                             {socialLink.linkDate && (
                               <span className="flex items-center">
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 {socialLink.linkDate}
                               </span>
                             )}
                           </div>
-                        </div>
-                        
-                        <div className="flex-shrink-0 ml-2">
-                          <a
-                            href={socialLink.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
-                          >
-                            खोल्नुहोस्
-                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                          </a>
+                          
+                          <div className="flex-shrink-0">
+                            <a
+                              href={socialLink.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-2 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors whitespace-nowrap"
+                            >
+                              <span className="hidden xs:inline">खोल्नुहोस्</span>
+                              <span className="xs:hidden">खोल्नुहोस्</span>
+                              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -219,7 +220,7 @@ const SocialLinkDisplayer: React.FC = () => {
           </div>
         )}
       </div>
-      </div>
+    </div>
   );
 };
 

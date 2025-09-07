@@ -134,13 +134,11 @@ const SocialLinkDisplayer: React.FC = () => {
     } else {
       const filtered = socialLinks.filter((link) => {
         const searchLower = searchTerm.toLowerCase();
-        const address = formatAddress(link);
         return (
           link.linkName?.toLowerCase().includes(searchLower) ||
           link.linkPublisher?.toLowerCase().includes(searchLower) ||
           link.description?.toLowerCase().includes(searchLower) ||
-          link.link?.toLowerCase().includes(searchLower) ||
-          address.full?.toLowerCase().includes(searchLower)
+          link.link?.toLowerCase().includes(searchLower)
         );
       });
       setFilteredSocialLinks(filtered);
@@ -148,7 +146,7 @@ const SocialLinkDisplayer: React.FC = () => {
     
     // Reset to page 1 when search changes
     setPagination(prev => ({ ...prev, page: 1, total: socialLinks.length }));
-  }, [searchTerm, socialLinks, countries, provinces, districts, municipalities]);
+  }, [searchTerm, socialLinks]);
 
   const formatAddress = (socialLink: SocialLink): { full: string; parts: string[] } => {
     const { country, province, district, municipality, ward } = socialLink;
@@ -245,30 +243,6 @@ const SocialLinkDisplayer: React.FC = () => {
       sortable: true,
     },
     {
-      key: 'address',
-      label: 'ठेगाना',
-      render: (_, socialLink) => {
-        const address = formatAddress(socialLink);
-        return (
-          <div className="max-w-xs">
-            <div className="text-sm text-gray-900 dark:text-white break-words">
-              {address.parts.length > 0 && address.parts[0] !== "" ? (
-                address.parts.map((part, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 && <br />}
-                    <span className="inline-block">{part}</span>
-                  </React.Fragment>
-                ))
-              ) : (
-                <span className="text-gray-400">-</span>
-              )}
-            </div>
-          </div>
-        );
-      },
-      mobileHidden: true,
-    },
-    {
       key: 'actions',
       label: 'क्रियाकलाप',
       render: (_, socialLink) => (
@@ -356,18 +330,6 @@ const SocialLinkDisplayer: React.FC = () => {
             </svg>
             {socialLink.link.length > 40 ? `${socialLink.link.substring(0, 40)}...` : socialLink.link}
           </a>
-        </div>
-        
-        <div>
-          <span className="font-medium text-gray-600 dark:text-gray-400">ठेगाना: </span>
-          <div className="text-gray-900 dark:text-white mt-1">
-            {formatAddress(socialLink).parts.map((part, index) => (
-              <React.Fragment key={index}>
-                {index > 0 && ', '}
-                <span className="inline-block">{part}</span>
-              </React.Fragment>
-            ))}
-          </div>
         </div>
       </div>
     </div>

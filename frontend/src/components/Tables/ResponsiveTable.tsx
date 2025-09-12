@@ -154,14 +154,14 @@ export default function ResponsiveTable<T>({
 
     return (
       <div className="overflow-hidden rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto">
+        <div className="overflow-x-hidden">
+          <table className="w-full table-fixed">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 {allColumns.map((column) => (
                   <th
                     key={String(column.key)}
-                    className={`min-w-[120px] px-4 py-4 font-medium text-black dark:text-white ${
+                    className={`min-w-0 px-4 py-4 font-medium text-black dark:text-white whitespace-normal break-words ${
                       column.className || ""
                     } ${column.sortable ? "cursor-pointer hover:bg-gray-100 dark:hover:bg-meta-4" : ""}`}
                     onClick={column.sortable ? () => handleSort(String(column.key)) : undefined}
@@ -199,7 +199,7 @@ export default function ResponsiveTable<T>({
                         return (
                           <td
                             key="serialNumber"
-                            className="border-b border-[#eee] px-4 py-5 dark:border-strokedark text-center"
+                            className="border-b border-[#eee] px-4 py-5 dark:border-strokedark text-center whitespace-normal break-words align-top"
                           >
                             <div className="break-words">
                               {serialNumber}
@@ -212,7 +212,7 @@ export default function ResponsiveTable<T>({
                       return (
                         <td
                           key={String(column.key)}
-                          className={`border-b border-[#eee] px-4 py-5 dark:border-strokedark ${
+                          className={`border-b border-[#eee] px-4 py-5 dark:border-strokedark whitespace-normal break-words align-top ${
                             column.className || ""
                           }`}
                         >

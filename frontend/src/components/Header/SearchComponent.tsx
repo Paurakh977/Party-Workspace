@@ -2,23 +2,19 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaSearch } from "react-icons/fa";
+import { Search } from "lucide-react";
 
 const SearchComponent = () => {
   const [mobileNumber, setMobileNumber] = useState<string>("");
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSearch = () => {
     if (!mobileNumber.trim()) return;
-
     setLoading(true);
     setError(null);
-
     try {
-      console.log("Mobile number", mobileNumber);
-      // Navigate to the search-result page, passing the mobile number in the query
       router.push(`/search-result?mobileNumber=${mobileNumber}`);
     } catch (error) {
       setError("Failed to navigate to the search result page.");
@@ -34,31 +30,26 @@ const SearchComponent = () => {
   };
 
   return (
-    <div className="search-container">
-      <span className="border-gray-300 flex items-center rounded-lg border bg-white">
-        {/* Search Icon */}
-        <FaSearch className="text-gray-500 mx-2" />
-
-        {/* Search Input */}
+    <div className="w-full max-w-xl">
+      <div className="flex items-center rounded-full border border-gray-300 bg-white/90 px-3 py-2 shadow-sm ring-0 focus-within:border-gray-400 dark:border-gray-700 dark:bg-gray-800">
+        <Search className="h-4 w-4 text-gray-500" />
         <input
           type="text"
           value={mobileNumber}
           onChange={(e) => setMobileNumber(e.target.value)}
-          onKeyDown={handleKeyPress} // Trigger search on Enter key press
+          onKeyDown={handleKeyPress}
           placeholder="Enter mobile number"
-          className="search-input w-full px-3 py-2 focus:outline-none"
+          className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-gray-400"
         />
-
-        {/* Search Button */}
         <button
           onClick={handleSearch}
-          className="search-button rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none"
+          className="ml-2 inline-flex items-center rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary/90"
         >
           Search
         </button>
-      </span>
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      </div>
+      {loading && <p className="mt-1 text-xs text-gray-500">Loading...</p>}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 };

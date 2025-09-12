@@ -22,7 +22,7 @@ interface Event {
 const ChartThree: React.FC = () => {
   const [series, setSeries] = useState<number[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
-  const [totalEvents, setTotalEvents] = useState<number>(0); // Store totalEvents in state
+  const [totalEvents, setTotalEvents] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,29 +31,24 @@ const ChartThree: React.FC = () => {
           `${process.env.NEXT_PUBLIC_BE_HOST}/events/`,
         );
 
-        const provinceData = response.data; // This is an array of event objects
+        const provinceData = response.data;
 
-        // Create a mapping of province to count of events
         const provinceCount: Record<string, number> = provinceData.reduce(
           (acc: Record<string, number>, event: Event) => {
             if (event.province) {
-              acc[event.province] = (acc[event.province] || 0) + 1; // Count occurrences of each province
+              acc[event.province] = (acc[event.province] || 0) + 1;
             }
             return acc;
           },
           {} as Record<string, number>,
         );
 
-        // Convert the province count into two arrays for series and labels
-        const values = Object.values(provinceCount); // Count of events per province
-        const names = Object.keys(provinceCount); // Names of provinces
+        const values = Object.values(provinceCount);
+        const names = Object.keys(provinceCount);
 
         setSeries(values);
         setLabels(names);
-        setTotalEvents(values.reduce((sum, count) => sum + count, 0)); // Calculate total events
-
-        console.log("Series:", values);
-        console.log("Labels:", names);
+        setTotalEvents(values.reduce((sum, count) => sum + count, 0));
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
@@ -63,102 +58,97 @@ const ChartThree: React.FC = () => {
   }, []);
 
   if (series.length === 0 || labels.length === 0) {
-    return <div>No data available to display the chart.</div>;
+    return (
+      <div className="col-span-12 rounded-lg border border-stroke bg-white p-5 text-sm text-gray-600 shadow-sm dark:border-strokedark dark:bg-boxdark dark:text-gray-300 xl:col-span-5">
+        कुनै डेटा उपलब्ध छैन।
+      </div>
+    );
   }
 
   const options: ApexOptions = {
     chart: {
       fontFamily: "Satoshi, sans-serif",
       type: "donut",
+      toolbar: { show: false },
     },
-    colors: ["#3C50E0", "#6577F3", "#8FD0EF", "#0FADCF"],
-    legend: {
-      show: false,
-      position: "bottom",
-    },
+    colors: ["#3C50E0", "#6577F3", "#8FD0EF", "#0FADCF", "#22c55e", "#f59e0b"],
+    legend: { show: false },
     plotOptions: {
       pie: {
         donut: {
-          size: "65%",
+          size: "70%",
           background: "transparent",
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: "जम्मा",
+              fontSize: "14px",
+              color: "#6b7280",
+            },
+            value: {
+              fontSize: "14px",
+            },
+          },
         },
       },
     },
-    dataLabels: {
-      enabled: false,
-    },
+    dataLabels: { enabled: false },
     tooltip: {
+      theme: "dark",
       custom: ({ series, seriesIndex, dataPointIndex }) => {
         const provinceName = labels[dataPointIndex];
         const provinceCount = series[seriesIndex];
-
-        return `<div style="padding: 10px;">
-                  <strong>${provinceName}</strong>: ${provinceCount} (${((provinceCount / totalEvents) * 100).toFixed(2)}%)
+        return `<div style="padding:8px 10px;font-size:12px;">
+                  <strong>${provinceName}</strong>: ${provinceCount} (${((provinceCount / totalEvents) * 100).toFixed(1)}%)
                 </div>`;
       },
     },
     responsive: [
       {
-        breakpoint: 2600,
-        options: {
-          chart: {
-            width: 380,
-          },
-        },
+        breakpoint: 1536,
+        options: { chart: { width: "100%" } },
       },
       {
         breakpoint: 640,
         options: {
-          chart: {
-            width: 200,
-          },
+          chart: { width: "100%" },
+          plotOptions: { pie: { donut: { size: "68%" } } },
         },
       },
     ],
   };
 
   return (
-    <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-5">
-      <div className="mb-3 justify-between gap-4 sm:flex">
-        <div>
-          <h5 className="text-xl font-semibold text-black dark:text-white">
-            कार्यक्रमहरुको वितरण
-          </h5>
-        </div>
-        {/* ... other JSX elements ... */}
+    <div className="col-span-12 rounded-lg border border-stroke bg-white p-5 shadow-sm dark:border-strokedark dark:bg-boxdark sm:px-6 xl:col-span-5">
+      <div className="mb-3 flex items-center justify-between">
+        <h5 className="text-base font-semibold text-black dark:text-white">
+          कार्यक्रमहरुको वितरण
+        </h5>
       </div>
 
-      <div className="mb-2">
-        <div
-          id="chartThree"
-          className="mx-auto flex justify-center"
-          style={{ width: "400px", height: "400px" }}
-        >
+      <div className="mb-3">
+        <div id="chartThree" className="mx-auto flex w-full max-w-full justify-center">
           <ReactApexChart options={options} series={series} type="donut" />
         </div>
       </div>
 
-      <div className="-mx-8 flex flex-wrap items-center justify-center gap-y-3">
+      <div className="-mx-2 grid grid-cols-1 gap-y-2 px-2 text-sm sm:grid-cols-2">
         {labels.map((label, index) => (
-          <div key={index} className="w-full px-8 sm:w-1/2">
-            <div className="flex w-full items-center">
+          <div key={index} className="flex items-center justify-between">
+            <div className="flex items-center">
               <span
-                className="mr-2 block h-3 w-full max-w-3 rounded-full"
+                className="mr-2 block h-2.5 w-2.5 rounded-full"
                 style={{
                   backgroundColor:
-                    options.colors?.[index % options.colors.length] || "#000",
-                }} // Fallback color
+                    (options.colors && options.colors[index % options.colors.length]) || "#000",
+                }}
               ></span>
-
-              <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-                <span>{label}</span>
-                <span>
-                  {totalEvents > 0
-                    ? ((series[index] / totalEvents) * 100).toFixed(2) + "%"
-                    : "0%"}
-                </span>
-              </p>
+              <span className="text-gray-700 dark:text-gray-300">{label}</span>
             </div>
+            <span className="font-medium text-gray-900 dark:text-gray-100">
+              {series[index]} ({totalEvents > 0 ? ((series[index] / totalEvents) * 100).toFixed(1) : "0"}%)
+            </span>
           </div>
         ))}
       </div>

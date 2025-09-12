@@ -25,7 +25,7 @@ export default function DefaultLayout({
 
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
-            <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <div className="mx-auto w-full max-w-[1400px] px-4 py-4 md:px-6 md:py-6 2xl:px-8 2xl:py-8">
               {children}
             </div>
           </main>

@@ -22,8 +22,11 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true} className="bg-sky-200">
-        <div className=" dark:bg-boxdark-2 dark:text-bodydark">
+      <body
+        suppressHydrationWarning={true}
+        className="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-900 antialiased dark:from-gray-950 dark:to-gray-900 dark:text-gray-100"
+      >
+        <div className="dark:bg-boxdark-2 dark:text-bodydark">
           {loading ? <Loader /> : children}
         </div>
       </body>

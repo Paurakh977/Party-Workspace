@@ -114,7 +114,7 @@ const ECommerce: React.FC = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-8">
         <div
           onClick={() => {
             window.location.href = "/tables/committeesTable";
@@ -166,11 +166,20 @@ const ECommerce: React.FC = () => {
         </CardDataStats>
       </div>
 
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+      {/* Second row: Gallery (8 cols), Social links (4 cols) */}
+      <div className="mt-6 grid grid-cols-12 gap-4 md:gap-6 xl:gap-7.5 2xl:gap-8">
         <Gallery />
         <ChartTwo />
+      </div>
+
+      {/* Third row: Donut and Map side-by-side on xl */}
+      <div className="mt-6 grid grid-cols-12 gap-4 md:gap-6 xl:gap-7.5 2xl:gap-8">
         <ChartThree />
         <MapOne />
+      </div>
+
+      {/* Fourth row: events */}
+      <div className="mt-6 grid grid-cols-12 gap-4 md:gap-6 xl:gap-7.5 2xl:gap-8">
         <div className="col-span-12 xl:col-span-6">
           <PastEvents />
         </div>

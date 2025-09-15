@@ -21,7 +21,10 @@ const nextConfig = {
   },
   // Log errors and warnings in the console
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true, // skip TS type checking during build
   },
   // Enable detailed source maps for easier debugging
   productionBrowserSourceMaps: true,

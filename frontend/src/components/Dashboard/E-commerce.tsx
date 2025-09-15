@@ -166,16 +166,21 @@ const ECommerce: React.FC = () => {
         </CardDataStats>
       </div>
 
-      {/* Second row: Gallery (8 cols), Social links (4 cols) */}
+      {/* Minimalistic layout: Left column stacks (Gallery -> Donut+Map), Right column shows Social links */}
       <div className="mt-6 grid grid-cols-12 gap-4 md:gap-6 xl:gap-7.5 2xl:gap-8">
-        <Gallery />
-        <ChartTwo />
-      </div>
+        {/* Left side */}
+        <div className="col-span-12 xl:col-span-8 flex flex-col gap-4 md:gap-6 xl:gap-7.5 2xl:gap-8">
+          <Gallery />
+          <div className="grid grid-cols-12 gap-4 md:gap-6 xl:gap-7.5 2xl:gap-8">
+            <ChartThree />
+            <MapOne />
+          </div>
+        </div>
 
-      {/* Third row: Donut and Map side-by-side on xl */}
-      <div className="mt-6 grid grid-cols-12 gap-4 md:gap-6 xl:gap-7.5 2xl:gap-8">
-        <ChartThree />
-        <MapOne />
+        {/* Right side - Social links panel */}
+        <div className="col-span-12 xl:col-span-4">
+          <ChartTwo />
+        </div>
       </div>
 
       {/* Fourth row: events */}

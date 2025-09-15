@@ -25,6 +25,7 @@ import { ProvinceModule } from './province/province.module';
 import { DistrictModule } from './district/district.module';
 import { MunicipalityModule } from './municipality/municipality.module';
 import { SocialLinksModule } from './social-links/social-links.module';
+import { EventImagesModule } from './event-images/event-images.module';
 
 @Module({
   imports: [
@@ -83,6 +84,10 @@ import { SocialLinksModule } from './social-links/social-links.module';
       serveRoot: '/images/carousel/',
     }),
     ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public/images/events'),
+      serveRoot: '/images/events/',
+    }),
+    ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public/pdf'),
       serveRoot: '/pdf/',
     }),
@@ -106,6 +111,7 @@ import { SocialLinksModule } from './social-links/social-links.module';
     DistrictModule,
     MunicipalityModule,
     SocialLinksModule,
+    EventImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

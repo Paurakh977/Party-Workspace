@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import ImageFetchLoader from "../ImageFetchLoader";
+import axios from "axios";
 
 const PlaceholderImage = () => (
   <div className="relative w-full h-64 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg flex items-center justify-center group">
@@ -34,19 +35,43 @@ const Gallery: React.FC = () => {
   const carousel = ImageFetchLoader();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [eventImages, setEventImages] = useState<{ src: string; alt: string }[]>([]);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
 
   // Process images - this will be empty array if carousel is null
   const images = React.useMemo(() => {
+    if (eventImages.length > 0) {
+      return eventImages;
+    }
     if (!carousel) return [];
-    
     return [
       { src: carousel.carousel1, alt: "Gallery Image 1" },
       { src: carousel.carousel2, alt: "Gallery Image 2" },
       { src: carousel.carousel3, alt: "Gallery Image 3" },
       { src: carousel.carousel4, alt: "Gallery Image 4" },
       { src: carousel.carousel5, alt: "Gallery Image 5" },
-    ].filter(img => img.src);
-  }, [carousel]);
+    ].filter((img) => img.src);
+  }, [carousel, eventImages]);
+
+  useEffect(() => {
+    const fetchEventImages = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_HOST}/event-images`,
+        );
+        const mapped = Array.isArray(res.data)
+          ? res.data
+              .filter((it) => it?.filePath)
+              .map((it) => ({ src: it.filePath as string, alt: it.fileName as string }))
+          : [];
+        setEventImages(mapped);
+      } catch (e) {
+        setEventImages([]);
+      }
+    };
+    fetchEventImages();
+  }, []);
 
   const hasImages = images.length > 0;
 
@@ -110,22 +135,26 @@ const Gallery: React.FC = () => {
         ) : (
           <div className="relative group">
             {/* Main Image Container */}
-            <div className="relative w-full h-48 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+            <button
+              type="button"
+              onClick={() => {
+                setPreviewSrc(images[currentSlide]?.src || null);
+                setIsPreviewOpen(true);
+              }}
+              className="relative w-full h-56 md:h-64 xl:h-72 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 focus:outline-none"
+            >
               <Image
                 src={images[currentSlide]?.src || ""}
                 alt={images[currentSlide]?.alt || "Gallery image"}
                 fill
-                className="object-cover transition-all duration-500 ease-in-out"
+                className="object-contain transition-all duration-500 ease-in-out"
                 priority={currentSlide === 0}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                 }}
               />
-              
-              {/* Overlay gradient for better text visibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-            </div>
+            </button>
 
             {/* Navigation Arrows */}
             {images.length > 1 && (
@@ -179,6 +208,23 @@ const Gallery: React.FC = () => {
           </div>
         )}
       </div>
+      {isPreviewOpen && previewSrc && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <div className="relative w-full max-w-5xl h-[80vh] bg-black rounded-lg overflow-hidden">
+            <Image src={previewSrc} alt="preview" fill className="object-contain" />
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(false)}
+              className="absolute top-2 right-2 bg-white/90 text-black rounded px-2 py-1 text-xs"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

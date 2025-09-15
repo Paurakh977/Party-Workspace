@@ -3,6 +3,8 @@ import axios from "axios";
 import AddressInput from "@/components/Address/address"; // Assuming this component can display addresses without editing
 import MapLocationSelector from "@/components/Maps/MapLocationSelector";
 import { useRouter } from "next/navigation";
+import EventImageUploader from "@/components/Images/EventImageUploader";
+import EventImageGallery from "@/components/Images/EventImageGallery";
 
 interface ViewEventPageProps {
   eventId: number;
@@ -28,6 +30,7 @@ interface Event {
 
 const ViewEventPage: React.FC<ViewEventPageProps> = ({ eventId }) => {
   const [event, setEvent] = useState<Event | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fetch the event data when the component mounts or when the eventId changes
   useEffect(() => {
@@ -58,6 +61,19 @@ const ViewEventPage: React.FC<ViewEventPageProps> = ({ eventId }) => {
         </h3>
       </div>
       <div className="p-7">
+        {/* Event Images */}
+        <div className="mb-6">
+          <label className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white">
+            कार्यक्रमका तस्बिरहरु:
+          </label>
+          <EventImageGallery eventId={eventId} refreshKey={refreshKey} />
+          <div className="mt-3">
+            <EventImageUploader
+              eventId={eventId}
+              onUploaded={() => setRefreshKey((k) => k + 1)}
+            />
+          </div>
+        </div>
         <div className="mb-5.5">
           <label className="mb-3 block bg-sky-200 text-sm font-medium text-black dark:text-white">
             कार्यक्रमको शिर्षक:

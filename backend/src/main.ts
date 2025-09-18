@@ -18,7 +18,8 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'https://devncca.encrafttech.com',
-      'https://163.47.150.168:3000'
+      'https://163.47.150.168:3000',
+      'http://163.47.150.168:3000',
     ],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

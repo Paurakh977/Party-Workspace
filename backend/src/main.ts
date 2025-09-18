@@ -6,6 +6,14 @@ async function bootstrap() {
   console.log('=== Starting Server ===');
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // Normalize paths to avoid double-slash issues like //settings/... which can bypass CORS handling
+  app.use((req: any, _res: any, next: () => void) => {
+    if (typeof req.url === 'string' && req.url.includes('//')) {
+      req.url = req.url.replace(/\/{2,}/g, '/');
+    }
+    next();
+  });
   
   console.log('All environment variables:');
   console.log('PORT:', configService.get('PORT'));
@@ -22,7 +30,7 @@ async function bootstrap() {
       'http://163.47.150.168:3000',
     ],
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
   });
 

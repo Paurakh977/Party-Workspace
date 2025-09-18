@@ -33,7 +33,7 @@ const SignIn: React.FC = () => {
 
     try {
       const response = await axios.post(
-        process.env.NEXT_PUBLIC_BE_HOST + "/auth/login",
+        new URL('/auth/login', process.env.NEXT_PUBLIC_BE_HOST as string).toString(),
         payload,
       );
 

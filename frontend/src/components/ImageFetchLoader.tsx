@@ -18,9 +18,8 @@ const ImageFetchLoader = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BE_HOST + "/settings/get-full/1",
-        );
+        const url = new URL('/settings/get-full/1', process.env.NEXT_PUBLIC_BE_HOST as string).toString();
+        const response = await axios.get(url);
         setSettings(response.data);
       } catch (error) {
         setErrorMessage("Error fetching the image. Please try again.");

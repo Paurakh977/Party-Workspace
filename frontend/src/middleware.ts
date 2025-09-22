@@ -48,18 +48,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
+  // Skip middleware for all public/static assets including manifest, icons, service worker
+  const PUBLIC_FILE = /\.(?:.*)$|^\/manifest\.json$|^\/sw\.js$|^\/workbox-.*\.js$|^\/favicon\.ico$|^\/icons\//;
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/static/") ||
     pathname.startsWith("/public/") ||
     pathname.startsWith("/node_modules/") ||
     pathname.startsWith("/images/") ||
+    pathname.startsWith("/uploads") ||
+    PUBLIC_FILE.test(pathname) ||
     pathname.startsWith("/map-province-districts.json") ||
     pathname.startsWith("/map-districts-municipalities.json") ||
     pathname.startsWith("/map-municipalities-wards.json") ||
     pathname.startsWith("/all-provinces.json") ||
-    pathname.startsWith("/all-countries.json") ||
-    pathname.startsWith("/uploads")
+    pathname.startsWith("/all-countries.json")
   ) {
     return NextResponse.next();
   }

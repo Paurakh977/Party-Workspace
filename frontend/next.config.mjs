@@ -1,4 +1,15 @@
 /** @type {import('next').NextConfig} */
+
+import withPWAInit from "next-pwa";
+
+
+const withPWA = withPWAInit({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+});
+
+
 const nextConfig = {
   distDir: "dist",
   images: {
@@ -44,4 +55,5 @@ const nextConfig = {
   productionBrowserSourceMaps: true,
 };
 
-export default nextConfig;
+// export default nextConfig;
+export default withPWA(nextConfig);

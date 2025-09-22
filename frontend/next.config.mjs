@@ -11,6 +11,20 @@ const nextConfig = {
         protocol: "http",
         hostname: "localhost",
       },
+      // Allow production backend/static asset hosts
+      {
+        protocol: "https",
+        hostname: "devncca-be.encrafttech.com",
+      },
+      {
+        protocol: "https",
+        hostname: "devncca-be.encratf.com",
+      },
+      // Allow frontend domain in case absolute URLs are generated
+      {
+        protocol: "https",
+        hostname: "devncca.encrafttech.com",
+      },
     ],
   },
   // Enable React strict mode for debugging issues more easily

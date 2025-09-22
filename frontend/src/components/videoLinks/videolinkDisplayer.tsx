@@ -172,7 +172,7 @@ const SocialLinkDisplayer: React.FC = () => {
                             </p>
                           )}
                           
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div className="flex flex-col space-y-1 sm:flex-row sm:items-center sm:space-x-3 sm:space-y-0 text-xs text-gray-500 dark:text-gray-400">
                               {socialLink.linkPublisher && (
                                 <span className="flex items-center">
@@ -192,14 +192,14 @@ const SocialLinkDisplayer: React.FC = () => {
                               )}
                             </div>
                             
-                            <div className="flex-shrink-0">
+                            <div className="flex-shrink-0 self-start sm:self-auto">
                               <a
                                 href={socialLink.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors whitespace-nowrap"
+                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors whitespace-nowrap max-w-full"
                               >
-                                <span>खोल्नुहोस्</span>
+                                <span className="truncate">खोल्नुहोस्</span>
                                 <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>

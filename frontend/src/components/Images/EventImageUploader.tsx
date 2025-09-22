@@ -21,13 +21,7 @@ const EventImageUploader: React.FC<Props> = ({ eventId, onUploaded }) => {
         Array.from(e.target.files).forEach((file) => form.append("files", file));
         form.append("eventId", String(eventId));
 
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_BE_HOST}/event-images/uploads`,
-          form,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        );
+        await axios.post(new URL('/event-images/uploads', process.env.NEXT_PUBLIC_BE_HOST as string).toString(), form, { headers: { "Content-Type": "multipart/form-data" } });
         if (onUploaded) onUploaded();
         e.target.value = "";
       } catch (err: any) {

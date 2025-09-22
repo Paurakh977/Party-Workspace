@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import ImageFetchLoader from "../ImageFetchLoader";
 import axios from "axios";
+import { resolveImageUrl } from "@/utils/imageUrl";
 
 const PlaceholderImage = () => (
   <div className="w-full h-80 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -35,24 +36,22 @@ const Gallery: React.FC = () => {
     }
     if (!carousel) return [];
     return [
-      { src: carousel.carousel1, alt: "Gallery Image 1" },
-      { src: carousel.carousel2, alt: "Gallery Image 2" },
-      { src: carousel.carousel3, alt: "Gallery Image 3" },
-      { src: carousel.carousel4, alt: "Gallery Image 4" },
-      { src: carousel.carousel5, alt: "Gallery Image 5" },
+      { src: resolveImageUrl(carousel.carousel1), alt: "Gallery Image 1" },
+      { src: resolveImageUrl(carousel.carousel2), alt: "Gallery Image 2" },
+      { src: resolveImageUrl(carousel.carousel3), alt: "Gallery Image 3" },
+      { src: resolveImageUrl(carousel.carousel4), alt: "Gallery Image 4" },
+      { src: resolveImageUrl(carousel.carousel5), alt: "Gallery Image 5" },
     ].filter((img) => img.src);
   }, [carousel, eventImages]);
 
   useEffect(() => {
     const fetchEventImages = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_HOST}/event-images`,
-        );
+        const res = await axios.get(new URL('/event-images', process.env.NEXT_PUBLIC_BE_HOST as string).toString());
         const mapped = Array.isArray(res.data)
           ? res.data
               .filter((it) => it?.filePath)
-              .map((it) => ({ src: it.filePath as string, alt: it.fileName as string }))
+              .map((it) => ({ src: resolveImageUrl(it.filePath as string), alt: it.fileName as string }))
           : [];
         setEventImages(mapped);
       } catch (e) {

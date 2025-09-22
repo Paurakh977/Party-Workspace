@@ -27,6 +27,7 @@ import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import RoleChecker from "../Role/role-checker";
 import ImageFetchLoader from "../ImageFetchLoader";
+import { resolveImageUrl } from "@/utils/imageUrl";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -248,7 +249,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             <div className="flex items-center gap-3">
               {settings && settings.icon ? (
                 <Image
-                  src={settings.icon}
+                  src={resolveImageUrl(settings.icon)}
                   alt="Uploaded Icon"
                   width={32}
                   height={32}

@@ -6,6 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import ImageFetchLoader from "@/components/ImageFetchLoader";
+import { resolveImageUrl } from "@/utils/imageUrl";
 
 interface DecodedToken {
   userId: number;
@@ -67,7 +68,7 @@ const SignIn: React.FC = () => {
                 {settings && settings.icon && (
                   <Image
                     className="dark:block"
-                    src={settings.icon}
+                    src={resolveImageUrl(settings.icon)}
                     alt="Logo"
                     width={200}
                     height={60}

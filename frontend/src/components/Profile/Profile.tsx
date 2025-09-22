@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 
 const ProfileComponent = () => {
   const settings = ImageFetchLoader();
+  const { resolveImageUrl, isExternalUrl } = require("@/utils/imageUrl");
 
   const [committeeCount, setCommitteeCount] = useState(0);
   const [subCommitteeCount, setSubCommitteeCount] = useState(0);
@@ -170,11 +171,12 @@ const ProfileComponent = () => {
               <div className="relative drop-shadow-2">
                 {settings && settings.icon && (
                   <Image
-                    src={settings.icon}
+                    src={resolveImageUrl(settings.icon)}
                     width={160}
                     height={160}
                     className="h-full w-full rounded-tl-sm rounded-tr-sm object-cover object-center"
                     alt="profile"
+                    unoptimized={isExternalUrl(settings.icon)}
                     style={{
                       borderRadius: "50%",
                       objectFit: "cover",

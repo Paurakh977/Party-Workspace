@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import ImageFetchLoader from "../ImageFetchLoader";
 import axios from "axios";
-import { resolveImageUrl } from "@/utils/imageUrl";
+import { resolveImageUrl, isExternalUrl } from "@/utils/imageUrl";
 
 const PlaceholderImage = () => (
   <div className="w-full h-80 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -115,6 +115,7 @@ const Gallery: React.FC = () => {
               alt={images[currentSlide]?.alt || "Gallery image"}
               fill
               className="object-cover transition-opacity duration-500"
+              unoptimized={isExternalUrl(images[currentSlide]?.src)}
               priority={currentSlide === 0}
             />
             
@@ -184,6 +185,7 @@ const Gallery: React.FC = () => {
               alt="Full screen preview"
               fill
               className="object-contain"
+              unoptimized={isExternalUrl(previewSrc)}
               priority
             />
             <button

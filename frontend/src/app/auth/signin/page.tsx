@@ -6,7 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import ImageFetchLoader from "@/components/ImageFetchLoader";
-import { resolveImageUrl } from "@/utils/imageUrl";
+import { resolveImageUrl, isExternalUrl } from "@/utils/imageUrl";
 
 interface DecodedToken {
   userId: number;
@@ -72,6 +72,7 @@ const SignIn: React.FC = () => {
                     alt="Logo"
                     width={200}
                     height={60}
+                    unoptimized={isExternalUrl(settings.icon)}
                   />
                 )}
               </div>

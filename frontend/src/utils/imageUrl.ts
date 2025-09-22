@@ -33,4 +33,13 @@ export function resolveImageUrl(raw: string | null | undefined): string {
   }
 }
 
+export function isExternalUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    return /^https?:\/\//i.test(url);
+  } catch {
+    return false;
+  }
+}
+
 

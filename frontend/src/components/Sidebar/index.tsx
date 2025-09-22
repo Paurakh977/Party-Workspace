@@ -27,7 +27,7 @@ import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import RoleChecker from "../Role/role-checker";
 import ImageFetchLoader from "../ImageFetchLoader";
-import { resolveImageUrl } from "@/utils/imageUrl";
+import { resolveImageUrl, isExternalUrl } from "@/utils/imageUrl";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -253,6 +253,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   alt="Uploaded Icon"
                   width={32}
                   height={32}
+                  unoptimized={isExternalUrl(settings.icon)}
                   onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                     const target = e.target as HTMLImageElement;
                     target.src = "/images/logo/logo.svg";
